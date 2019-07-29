@@ -1,0 +1,49 @@
+<HTML>
+<HEAD>
+<TITLE>Add user</TITLE>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/sha256.js"></script>
+</HEAD>
+
+<BODY>
+<H2>Add user</H2>
+<form name="user" action="adduser.php" id="dump" method="post"
+   onsubmit="return validateForm()" >
+Username: <input type=text name=username required=true pattern="[a-zA-Z0-9]{3,}" />
+<br>
+Password: <input type=password name=password required=true pattern=".{8,}" />
+<font size=small color="8080F0"><i>at least eight characters</i></font>
+<input type=hidden name=password_sha />
+<br>
+Confirm password: <input type=password name=confirm required=true />
+<br>
+Real Name: <input type=text required=true name=realname />
+<br>
+Email: <input type=text required=true name=email pattern="[-a-zA-Z0-9,!._]{2,}@[-a-zA-Z0-9.]*[-a-zA-Z0-9]{3,}\.[a-zA-Z]{2,5}" />
+<br>
+Level: <input type=number required=true name=level min=1 max=3/><br>
+<font size=small color=8080FF>(0=guest)</font>
+<font size=small color=4040F0>1=free 2=premium 3=professional</font>
+<br>
+<input type="submit" value="Submit" id="xxx"/>
+
+<script>
+// Make sure the form is okay before we submit it for processing.
+function validateForm() {
+    var theForm = document.forms["user"];
+
+    if (theForm["confirm"].value != theForm["password"].value) {
+        alert("The two password entries must match.");
+	theForm["confirm"].focus();
+        return false;
+    }
+
+    // Don't send the user's password in plaintext, and get us off the responsibility of ever seeing it that way
+    theForm["password_sha"].value = CryptoJS.SHA256(theForm["password"].value + "\t" + theForm["username"].value.toLowerCase());
+    theForm["password"].value = '';
+    theForm["confirm"].value = '';
+    return true;
+}
+
+</script>
+</form>
+</BODY>

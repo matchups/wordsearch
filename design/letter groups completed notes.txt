@@ -1,0 +1,17 @@
+Current project: Letter Groups
+
+Allow it (done)
+Validate balancing (done)
+	Allow multiple ranges
+	Ensure range is in order
+Validate balancing and other stuff (letters, ?*@#&) in added criteria (done)
+Validate single one with any order (done)
+Validate subwords while we're here (done)
+Validate regex if possible (can't)
+Help (done)
+Do simple help too, while we're here (done)
+Regular search (done)
+Any order search (done)
+Not with Any Order (done)
+Vowel #, consonant @, and roman & shorthand (done)
+Minimum length with []s (done)

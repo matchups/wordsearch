@@ -1,0 +1,39 @@
+$page = file_get_contents($url);
+
+https://en.wikipedia.org/wiki/Special:AllPages?hideredirects=1
+
+https://en.wikipedia.org/w/index.php?title=Special:AllPages&from=%27Deed+I+Do&hideredirects=1
+
+
+
+</fieldset>
+</form><div class="mw-allpages-nav"><a 
+href="/w/index.php?title=Special:AllPages&amp;from=%21%21&amp;hideredirects=1" 
+title="Special:AllPages">Previous page (!!)</a> | <a 
+href="/w/index.php?title=Special:AllPages&amp;from=%28145453%29+2005+RR43&amp;hideredirects=1" 
+title="Special:AllPages">Next page ((145453) 2005 RR43)</a></div><div 
+class="mw-allpages-body"><ul class="mw-allpages-chunk"><li><a 
+href="/wiki/%27Deed_I_Do" title="'Deed I Do">'Deed I Do</a></li>
+<li><a href="/wiki/%27Deed_I_Do_(Matt_Dusk_and_Margaret_song)" 
+title="'Deed I Do (Matt Dusk and Margaret song)">'Deed I Do (Matt Dusk and 
+Margaret song)</a></li>
+<li><a href="/wiki/%27Disco%27_La_Passione" title="'Disco' La 
+Passione">'Disco' La Passione</a></li>
+<li><a href="/wiki/%27Elb_Jmel" title="'Elb Jmel">'Elb Jmel</a></li>
+
+
+
+<li><a href="/wiki/(145451)_2005_RM43" title="(145451) 2005 RM43">(145451) 
+2005 RM43</a></li>
+<li><a href="/wiki/(145452)_2005_RN43" title="(145452) 2005 RN43">(145452) 
+2005 RN43</a></li>
+</ul></div><hr/><div class="mw-allpages-nav"><a 
+href="/w/index.php?title=Special:AllPages&amp;from=%21%21&amp;hideredirects=1" 
+title="Special:AllPages">Previous page (!!)</a> | <a 
+href="/w/index.php?title=Special:AllPages&amp;from=%28145453%29+2005+RR43&amp;hideredirects=1" 
+title="Special:AllPages">Next page ((145453) 2005 RR43)</a></div></div>					
+<div class="printfooter">
+						Retrieved from "<a 
+dir="ltr" 
+href="https://en.wikipedia.org/wiki/Special:AllPages">https://en.wikipedia.org/wiki/Special:AllPages</a>"					
+</div>

@@ -1,0 +1,17 @@
+Save list (done)
+Upload (done)
+edit addlist and addone for a flag to echo only and not update DB [corpus=0] (done)
+Front end to addlist (done, but doesn't work well)
+Remove quotes (n/a)
+Handle foreign characters (done)
+Web page to show preview (done)
+	"Deja Vu"
+	1954 Guatemalan...
+	Áedán mac Gabráin
+	Ælfheah of Canterbury
+	Jørgen Jensen (soldier)
+	SMS Wörth
+	St Denys' Church, Sleaford
+edit addlist to also delete word_position, word_six, word_pair (word_id) (done)
+Delete zero corpus (done)
+Upload again (done)

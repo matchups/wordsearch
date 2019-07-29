@@ -1,0 +1,4 @@
+Guest: Restrictions on complexity; basic only
+Free: Restrictions on complexity; save 5 queries
+Premium: Modest restrictions; save 20 queries with 1000 results; join to results; access to beta and back; 2 custom word lists; share queries
+Professional: No restrictions; save 100 queries with 10K results; Access to dev; free-text WHERE clause; 10 custom word lists

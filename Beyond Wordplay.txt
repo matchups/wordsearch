@@ -1,0 +1,16 @@
+Definition should specify language
+Add quality/frequency somewhere
+pos =? char(1) [J=adjective, X=preposition]
+Source URL
+Suggest category table
+Parts of phrases
+
+https://drive.google.com/drive/folders/18Ak0SfrJUvo7S6AF7s7FCkGnOKzmIzOp
+
+Requirements doc does lean heavily on a cryptic notation.
+Source search
+pronunciation
+definitions
+banks
+
+Wikipedia has done a lot of work on scoring Popularity

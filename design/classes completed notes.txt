@@ -1,0 +1,27 @@
+Define base class (constraint) in new include file (done)
+Define subclasses (cons$button) (done)
+Create object in right class (done)
+  $field_type = 'checkbox';
+  $field = new $field_type();
+Call dummy methods (done)
+Move actual code to new classes
+* Subword (done)
+* Weight (done)
+* Others (done)
+Adjust indentation with Word (done)
+
+== Later ==
+Use constructor & properties instead of keep passing $spec and $num
+* Add constructor definition (done)
+* Modify calls (done)
+* Why isn't subword parse working (done)
+Event for post-retrieve filtering
+* Remove $regex from parse definitions (done)
+* Remove $regex from parse call (done)
+* Remove $query from parseQuery call (done)
+* Remove regex logic filtering (done)
+* Add localfilter call (done)
+* Add local $regex to two subclasses (done)
+* Create localfilter overrides on two subclasses (done)
+* Create array of objects and pass to showResults (done)
+* Change $sql to be the return value (done)

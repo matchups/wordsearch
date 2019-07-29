@@ -1,0 +1,27 @@
+<HTML>
+<HEAD>
+<TITLE>SHA test</TITLE>
+</HEAD>
+
+<BODY>
+top
+<script>
+alert ("Dummy JS");
+</script>
+
+middle
+
+<script>
+alert ("Top of JS");
+import sjcl from 'sjcl';
+
+myString = 'Hello';
+alert ("myString=" + myString);
+myBitArray = sjcl.hash.sha256.hash(myString);
+myHash = sjcl.codec.hex.fromBits(myBitArray);
+
+alert (myHash);
+</script>
+bottom
+</BODY>
+</HTML>

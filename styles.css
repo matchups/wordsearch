@@ -1,0 +1,81 @@
+body {
+  font-family: Cambria, Times, serif;
+}
+
+/* Code display (for development/debugging) */
+.code {
+  color: #c000c0;
+  font-family: verdana, sans-serif;
+}
+
+/* Disabled text */
+.disabled {
+  color: #808080;
+  font-size: small;
+}
+
+/* Error messages */
+.error {
+  color: red;
+}
+/* Hint text */
+.hint {
+  color: #1030F0;
+  font-style: italic;
+  font-size: small;
+}
+
+/* Search specifications */
+.specs {
+  color: #000080;
+}
+
+/* The wizard (background) */
+.wizard {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* wizard Content */
+.wizard-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* Autocomplete dropdown */
+        .tt-hint,
+        .category {
+            border: 2px solid #CCCCCC;
+            border-radius: 8px 8px 8px 8px;
+            font-size: 24px;
+            height: 45px;
+            line-height: 30px;
+            outline: medium none;
+            padding: 8px 12px;
+            width: 400px;
+        }
+
+        .tt-dropdown-menu {
+            width: 400px;
+            margin-top: 5px;
+            padding: 8px 12px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 8px 8px 8px 8px;
+            font-size: 18px;
+            color: #111;
+            background-color: #F1F1F1;
+        }

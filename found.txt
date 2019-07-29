@@ -1,0 +1,34 @@
+
+---------- CATSUGGESTDEV.PHP
+
+---------- CONSDEV.PHP
+
+---------- CORPUSDEV.PHP
+
+---------- FORMDEV.PHP
+
+---------- HELPDEV.HTML
+
+---------- INDEXDEV.PHP
+
+---------- PARSEDEV.PHP
+			$instances = count (explode ($char, $sortpat[$opt])) - 1;
+		$more = "PW.bank LIKE '" . patternToSQL ($like) . "' AND PW.bank < '" . explode ('*', $like)[1] . "zz'";
+	$pattern = (explode ('*', $pattern))[0];
+	$pattern = (explode ('+', $pattern))[0];
+
+---------- PHRASESDEV.PHP
+
+---------- RESULTSDEV.PHP
+
+---------- SEARCHDEV.PHP
+	foreach (explode (' ', $fieldlist) as $name) {
+	foreach (explode (' ', 'minlen maxlen pattern') as $name) {
+	$beginArray = explode (' ', $begin);
+	$endArray = explode (' ', $end);
+
+---------- UTILITYDEV.JS
+
+---------- UTILITYDEV.PHP
+
+---------- WIZARDDEV.JS

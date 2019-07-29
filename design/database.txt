@@ -1,0 +1,41 @@
+Write password: "d7cJxwYR";
+Admin password:
+
+words
+   id, text&, length&, bank!
+word_four
+   id, word_id, quartet
+word_pair
+   id, word_id, pair (if sum>3: BCDGMP=1  FHKVWY=2  JQXZ=3)
+word_position
+   id, word_id, position, length, letter (JQXZ)
+word_entry
+   id, word_id, entry_id, whole (Y/N), solid (Y/N), caps (Y/N)
+entry
+   id, name (could be *), word_id, corpus_id
+entry_cat
+   id, entry_id, cat_id
+spandex
+weights
+   id, name (SCR or ALF), letter, weight
+user
+   id, username, realname, email, password_SHA, level, resetkey, rk_expires
+session
+   id, user_id, status, started, last_active, ip_address, session_key
+corpus
+   id, name, url
+corpus_flag
+   id, corpus_id, letter, description
+category
+   id, title, corpus_id
+catparent
+   id, cat_id, parentcat
+
+question
+   id, query
+user_question
+   id, user_id, question_id, answer_SHA
+query
+   id, user_id, name, parms
+
+SELECT DISTINCT TABLE_NAME, INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS

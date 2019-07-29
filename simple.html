@@ -1,0 +1,62 @@
+<HTML>
+<HEAD>
+<TITLE>Word Search</TITLE>
+<script type='text/javascript'>
+var optionNumber = 1;
+
+function validateForm() {
+    var minlen = document.forms["search"]["minlen"].value;
+    var maxlen = document.forms["search"]["maxlen"].value;
+    var single = document.forms["search"]["single"].checked;
+    var phrase = document.forms["search"]["phrase"].checked;
+
+    if ((maxlen > 0) && (+maxlen < +minlen)) {
+        alert("Minimum is greater than maximum");
+        return false;
+   }
+
+    if (!single && !phrase) {
+	alert ("Must choose Single words and/or Phrases");
+	return false;
+    }
+}
+</script>
+</HEAD>
+
+<BODY>
+<H2>Word Search <font color="#000080">0.44 Simple</font></H2>
+<A href="index.html">Advanced search</A>
+<P>
+<form name="search" action="search.php" id="search"
+   onsubmit="return validateForm()" method="get">
+<input type="submit" value="Submit" id="yyy"/><BR>
+<B>Pattern</B><BR>
+<label>Pattern: </label>
+   <input type=text name=pattern placeholder="PRE?O*"
+   required=true pattern="[a-zA-Z\*\?]+"/>
+   <br>
+<label>Any order?</label>
+   <input name=anyorder type=checkbox onchange="mainChange();"/>
+<input type=hidden id="count" name="count" value="1" />
+<input type=hidden id="simple" name="simple" value="on" />
+
+<P>
+<B>Filters</B><BR>
+<label>Minumum length: <input type=number name=minlen min=3
+   step=1 /></label><br>
+<label>Maximum length: <input type=number name=maxlen min=3
+   step=1 /></label><br>
+<label>Single words? <input name=single type=checkbox
+   checked /></label><br>
+<label>Phrases? <input name=phrase type=checkbox checked /></label><br>
+
+<input name=wikipedia type=hidden value="on" />
+<input name=again type=hidden value="simple.html" />
+<P>
+<input type="submit" value="Submit" id="xxx"/>
+</form>
+
+<form action="helpsimple.html">
+<input type="submit" value="Help" />
+</form>
+</BODY>

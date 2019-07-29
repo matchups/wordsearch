@@ -1,0 +1,33 @@
+<HTML>
+<HEAD>
+<TITLE>
+Update database
+</TITLE>
+</HEAD>
+
+<BODY>
+<form name='update' action='addlist.php' onsubmit="return validateForm()" method="get">
+  <input type="submit" value="Submit" id="yyy" /><br>
+  <label>Filename <input type=text id=filename required=true /></label> <br>
+  <label>Corpus <input type=text id=corpus required=true /> (0=test, 1=Wikipedia, 87=Gettysburg)</label><br>
+  <label>Delete existing stuff?</label>
+    <input name=delete type=checkbox />
+</form>
+
+<script>
+function validateForm() {
+    var theForm = document.forms["update"];
+    var corpus = theForm["corpus"].value;
+    if (corpus == "0") {
+	return true;
+    } else {
+	msg = "Okay to update corpus " + corpus + " from " + theForm["filename"].value;
+	if (theForm["delete"].checked) {
+	    msg = msg + " and delete existing information";
+	}
+	return confirm (msg + "?");
+    }
+}
+</script>
+
+</BODY>

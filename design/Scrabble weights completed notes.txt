@@ -1,0 +1,11 @@
+Current project: Scrabble weights
+
+Add radio choice (done)
+Validate (done)
+Display choice in output (done)
+Create weight table (done)
+Create spandex (done)
+Generate SQL (done)
+Implement ...- [and +] (done)
+Implement -... (done)
+Implement ...-...

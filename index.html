@@ -1,0 +1,37 @@
+﻿<HTML>
+<HEAD>
+  <TITLE>Word Search</TITLE>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/sha256.js"></script>
+</HEAD>
+
+<BODY>
+<H1>Word Search</H1>
+<H2>Please sign in</H2>
+<form name='signon' id='signon' onsubmit="return validateForm()" method="get" action="signon.php">
+Username: <input type=text name=username required=true />
+<BR>
+Password: <input type=password name=password required=true />
+<input type=hidden name=password_sha />
+<BR>
+<input type="submit" value="Sign On" id="yyy"/>
+<BR>
+<font color=gray>
+(Forgot username)
+(Forgot password)
+</font>
+</form>
+<BR>
+<A HREF="signon.php?guest=on">Continue as Guest</A>
+</BODY>
+</HTML>
+
+<script>
+function validateForm() {
+    var theForm = document.forms["signon"];
+
+    // Don't send the user's password in plaintext, and get us off the responsibility of ever seeing it that way
+    theForm["password_sha"].value = CryptoJS.SHA256(theForm["password"].value + "\t" + theForm["username"].value.toLowerCase());
+    theForm["password"].value = '';
+    return true;
+}
+</script>

@@ -1,0 +1,16 @@
+Current project: Show previous query
+
+Modify indexbeta.php to use an include for the body (done)
+Add that include to the results (done)
+Build a function to update the DOM with the previous query (just the pattern) (done)
+Autorun that function (done)
+Add other static element values (done)
+Add filters (done)
+Header on weights should show Scrabble or alphabet (done)
+Handle missing filters (done)
+Change "New search" to "Reset"
+* In main script (done)
+* Move to Utility, clear cache, retry (done)
+* Get it working in indexbeta (done)
+Redo this for the simple one (nope)
+

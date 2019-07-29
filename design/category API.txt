@@ -1,0 +1,13 @@
+https://en.wikipedia.org/w/api.php?action=query&list=allcategories&acprop=size&format=json&acmin=1
+
+{"batchcomplete":"","continue":{"accontinue":"\"Deplorable\"_Wikipedians","continue":"-||"},"query":{"allcategories":[
+{"size":2,"pages":0,"files":2,"subcats":0,"*":"!!! album covers"},{"size":8,"pages":8,"files":0,"subcats":0,"*":"!!! albums"},{"size":4,"pages":4,"files":0,"subcats":0,"*":"!!! members"},{"size":3,"pages":3,"files":0,"subcats":0,"*":"!T.O.O.H.! albums"},{"size":0,"pages":0,"files":0,"subcats":0,"*":"!Userboxes about political sytems, partys and political causes"},
+{"size":0,"pages":0,"files":0,"subcats":0,"*":"!Userboxes for occupations"},
+{"size":155,"pages":155,"files":0,"subcats":0,"*":"\"A-Class\" Wikipedia books"},
+{"size":428,"pages":428,"files":0,"subcats":0,"*":"\"B-Class\" Wikipedia books"},
+{"size":1880,"pages":1880,"files":0,"subcats":0,"*":"\"C-Class\" Wikipedia books"},{"size":0,"pages":0,"files":0,"subcats":0,"*":"\"Deplorable\" Wikipedian"}]}}
+
+
+https://en.wikipedia.org/w/api.php?action=query&titles=flower&prop=categories&format=json&clshow=!hidden&cllimit=500
+
+{"batchcomplete":"","query":{"pages":{"4576465":{"pageid":4576465,"ns":0,"title":"Flower","categories":[{"ns":14,"title":"Category:Flowers"},{"ns":14,"title":"Category:Garden plants"},{"ns":14,"title":"Category:Periodic phenomena"},{"ns":14,"title":"Category:Plant morphology"},{"ns":14,"title":"Category:Plant reproductive system"},{"ns":14,"title":"Category:Plant sexuality"},{"ns":14,"title":"Category:Pollination"},{"ns":14,"title":"Category:Yonic symbols"}]}}}}

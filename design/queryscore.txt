@@ -1,0 +1,8 @@
+letter in unknown position=Scrabble value
+   +1 for each pair of adjacent
+   or known *= 2
+Known length *= ..9754333456789... (harmonic sum)
++1 if better secondary filter, .5 for second
++.5 for regex, .3 for second
++2 for subword, 1 for second
+Require 12 for most users or to avoid warning

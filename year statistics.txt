@@ -1,0 +1,1 @@
+http://8wheels.org/wordsearch/dumper.php?sql=select+substring%28name%2C+1%2C+4%29%2C+count%28id%29+from+entry+where+name+rlike+%22%5E%5B1-2%5D%5B0-9%5D%7B3%7D%22+group+by+substring%28name%2C+1%2C+4%29
