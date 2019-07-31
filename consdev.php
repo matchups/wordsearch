@@ -379,6 +379,16 @@ class consweights extends constraint {
 				wizInsert (newInput ('wtconst', 'number', 'R'));
 				wizRadioClicked();\n";
 	} // end getWizardOpenCode
+
+	public static function getMoreCode () {
+	return "	// When a radio button is selected, the right side multipliers are enabled only if the selection
+		// is compatible with that.
+		function wizRadioClicked() {
+		var allowEnd = (document.getElementById('wrwtend').checked || document.getElementById('wrwtmidend').checked);
+		document.getElementById('wnweightright').disabled = !allowEnd;
+		document.getElementById('wtweightright').style = 'color:' + (allowEnd ? 'black' : 'gray');
+		}\n";
+}
 } // end class consweights
 
 class consregex extends constraint {

@@ -63,7 +63,6 @@ Echo "<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
 	<script src='utility$type.js'></script>";
 include "cons$type.php";
 include "corpus$type.php";
-include "wizardjs$type.php";
 ?>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="styles.css">

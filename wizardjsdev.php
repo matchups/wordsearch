@@ -59,20 +59,5 @@ foreach (constraint::list () as $classname) {
 	}
 }
 
-/*
-// When a radio button is selected for Weights, the right side multipliers are enabled only if the selection
-// is compatible with that.
-function wizRadioClicked() {
-	var allowEnd = (document.getElementById('wrwtend').checked || document.getElementById('wrwtmidend').checked);
-	var textColor;
-	document.getElementById('wnweightright').disabled = !allowEnd;
-	if (allowEnd) {
-		textColor = 'black';
-	} else {
-		textColor = 'gray';
-	}
-	document.getElementById('wtweightright').style = 'color:' + textColor;
-}
-*/
 echo "</script>\n";
 ?>

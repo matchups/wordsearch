@@ -10,6 +10,7 @@
 ---------- HELPDEV.HTML
 
 ---------- INDEXDEV.PHP
+include "wizardjs$type.php";
 
 ---------- PARSEDEV.PHP
 
@@ -18,11 +19,10 @@
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
+include "wizardjs$type.php";
 
 ---------- UTILITYDEV.JS
-	newOption.setAttribute('onclick','openWizard(' + optionNumber + ')');
 
 ---------- UTILITYDEV.PHP
 
 ---------- WIZARDJSDEV.PHP
-function openWizard (thisOption) {
