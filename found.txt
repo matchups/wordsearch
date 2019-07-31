@@ -20,9 +20,9 @@
 ---------- SEARCHDEV.PHP
 
 ---------- UTILITYDEV.JS
+	newOption.setAttribute('onclick','openWizard(' + optionNumber + ')');
 
 ---------- UTILITYDEV.PHP
 
----------- WIZARDDEV.JS
-
 ---------- WIZARDJSDEV.PHP
+function openWizard (thisOption) {

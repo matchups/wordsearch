@@ -55,7 +55,7 @@ function openWizard (thisOption) {
 // Is there any other code that this constraint wants to dump into the page?
 foreach (constraint::list () as $classname) {
 	if ($classname::wizard()) {
-		echo $classname::moreCode () . "\n";
+		echo $classname::getMoreCode () . "\n";
 	}
 }
 

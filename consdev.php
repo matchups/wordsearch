@@ -355,25 +355,25 @@ class consweights extends constraint {
 				wizInsert (newBreak ('wizbr1'));
 				wizInsert (newSpan ('wtwtintro', 'What about the remaining characters in the word?'));
 				wizInsert (newBreak ('wizbr2'));
-				wizInsert (newRadio ('wrwtskip', 'wrwtrest', 'C', 'wizRadioClicked()');
+				wizInsert (newRadio ('wrwtskip', 'wrwtrest', 'C', 'wizRadioClicked()'));
 				wizInsert (newSpan ('wtwtskip', ' skip '));
-				wizInsert (newRadio ('wrwtone', 'wrwtrest', '', 'wizRadioClicked()');
+				wizInsert (newRadio ('wrwtone', 'wrwtrest', '', 'wizRadioClicked()'));
 				wizInsert (newSpan ('wtwtone', ' use base weights '));
-				wizInsert (newRadio ('wrwtend', 'wrwtrest', '', 'wizRadioClicked()');
+				wizInsert (newRadio ('wrwtend', 'wrwtrest', '', 'wizRadioClicked()'));
 				wizInsert (newSpan ('wtwtend', ' skip until specified characters at end '));
 				wizInsert (newBreak ('wizbr3'));
-				wizInsert (newRadio ('wrwtmidend', 'wrwtrest', '', 'wizRadioClicked()');
+				wizInsert (newRadio ('wrwtmidend', 'wrwtrest', '', 'wizRadioClicked()'));
 				wizInsert (newSpan ('wtmidend', ' use base weights until specified characters at end '));
 				wizInsert (newBreak ('wizbr4'));
 				wizInsert (newSpan ('wtweightright', 'Weight multipliers of letters at end of word: '));
 				wizInsert (newInput ('wnweightright', 'number', 'R'));
 				wizInsert (newSpan ('wttrel', '<BR>Should the total weight be...'));
 				wizInsert (newBreak ('wizbr5'));
-				wizInsert (newRadio ('wtrrell', 'wtrel', '', '');
+				wizInsert (newRadio ('wtrrell', 'wtrel', '', ''));
 				wizInsert (newSpan ('wttrell', ' less than '));
-				wizInsert (newRadio ('wtrrele', 'wtrel', 'C', '');
+				wizInsert (newRadio ('wtrrele', 'wtrel', 'C', ''));
 				wizInsert (newSpan ('wttrele', ' equal to '));
-				wizInsert (newRadio ('wtrrelg', 'wtrel', '', '');
+				wizInsert (newRadio ('wtrrelg', 'wtrel', '', ''));
 				wizInsert (newSpan ('wttrelg', ' greater than '));
 				wizInsert (newSpan ('wttconst', '<BR>Constant value for comparison: '));
 				wizInsert (newInput ('wtconst', 'number', 'R'));
@@ -501,9 +501,12 @@ class conscharmatch extends constraint {
 					} else if (document.getElementById('wrmatchgreater').checked) {
 						newValue = '>';
 					}
-					newValue = document.getElementById('wnmatchleft').value + newValue + document.getElementById('wnmatchr							if (offset < 0 || offset > 0offset) {
-			Span (, )
-					newValue += '^' + offset;
+					newValue = document.getElementById('wnmatchleft').value + newValue + document.getElementById('wnmatchright').value;
+					offset = document.getElementById('wnoffset').value;
+					if (offset > 0) {
+						newValue += '+^' + offset;
+					} else if (offset < 0) {
+						newValue += '-^' + -offset;
 					}\n";
 	}
 
@@ -515,7 +518,7 @@ class conscharmatch extends constraint {
 	wizInsert (newSpan ('wtless', ' < less than '));
 	wizInsert (newRadio ('wrmatchequal', 'wrmatchrel', 'C', ''));
 	wizInsert (newSpan ('wtequal', ' equals '));
-	wizInsert (newRadio ('wrmatchgreater', 'wrmatchrel', 'C', ''));
+	wizInsert (newRadio ('wrmatchgreater', 'wrmatchrel', '', ''));
 	wizInsert (newSpan ('wtgreater', ' > greater than '));
 	wizInsert (newBreak ('wizbr2'));
 	wizInsert (newSpan ('wtmatchright', 'Character position to compare against: '));
