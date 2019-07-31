@@ -6,11 +6,14 @@
 ---------- CORPUSDEV.PHP
 
 ---------- FORMDEV.PHP
+	<button type="button" id="popclose" onclick="closeWizard(true);">OK</button>
+	<button type="button" id="popcancel" onclick="closeWizard(false);">Cancel</button>
+function closeWizard (saveFlag) {
+		closeWizard ();
 
 ---------- HELPDEV.HTML
 
 ---------- INDEXDEV.PHP
-include "wizardjs$type.php";
 
 ---------- PARSEDEV.PHP
 
@@ -19,10 +22,7 @@ include "wizardjs$type.php";
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
-include "wizardjs$type.php";
 
 ---------- UTILITYDEV.JS
 
 ---------- UTILITYDEV.PHP
-
----------- WIZARDJSDEV.PHP
