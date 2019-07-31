@@ -101,7 +101,6 @@ catch (PDOException $e) {
   errorMessage ("SQL failed identifying sources: " . $e->getMessage());
 }
 unset ($conn);
-
 echo "<script>\n";
 echo "function resetCorporaMore () {\n";
 echo "var count;\n";

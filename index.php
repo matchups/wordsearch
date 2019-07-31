@@ -21,8 +21,9 @@ echo "<script src='wizard$type.js'></script>";
 $version = "0.72";
 echo "<H2>Word Search <span class='specs'>$version</span></H2>";
 include "utility$type.php";
-include "form$type.php";
+include "cons$type.php";
 include "corpus$type.php";
+include "form$type.php";
 echo "<P>\n";
 
 preserveInfo ($type, $version);

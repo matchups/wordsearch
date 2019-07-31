@@ -447,7 +447,7 @@ function validateForm() {
 	}
 }
 
-// Autocomplete stuff--first part still needed if bottom part works?
+// Autocomplete stuff
 $(document).ready(function() {
     $('input.category').typeahead({
         name: 'category',
@@ -455,22 +455,43 @@ $(document).ready(function() {
     });
 })
 
-/* May try this one again
-function typeahead_initialize() {
- var custom = new Bloodhound({
-    datumTokenizer: function(d) { return d.tokens; },
-    queryTokenizer: Bloodhound.tokenizers.whitespace,
-		remote: 'catsuggestdev.php?query=%QUERY'
-    });
-
-    custom.initialize();
-
-    $('.typeahead_option_items').typeahead(null, {
-					name: 'category',
-          displayKey: 'label',
-          source: custom.ttAdapter()
-    }).on('typeahead:selected', function (obj, value) {
-        console.log(value.label);
-    });
+// Various shortcuts to create certain types of HTML form controls
+function newSpan (id, text) {
+	var newOption = document.createElement('span');
+	newOption.id = id;
+	newOption.innerHTML = text;
+	return newOption;
 }
-*/
+
+function newBreak (id) {
+	var newOption = document.createElement ('br');
+	newOption.id = id;
+	return newOption;
+}
+
+function newInput (nameid, type, flags) {
+	var newOption = document.createElement('input');
+	newOption.type = type;
+	newOption.id = newOption.name = nameid;
+	newOption.required = /R/.test(flags);
+	return newOption;
+}
+
+function newRadio (id, name, flags, onclick) {
+	var newOption = document.createElement('input');
+	newOption.type = 'radio';
+	newOption.name = name;
+	newOption.id = id;
+	newOption.checked = /C/.test(flags);
+	newOption.setAttribute('onclick', onclick);
+	return newOption;
+}
+
+function wizInsert (newOption) {
+	var here = document.getElementById('wizfields');
+	here.parentNode.insertBefore (newOption, here);
+	if (fieldlist > '') {
+		fieldlist += ' ';
+	}
+	fieldlist += newOption.id;
+}

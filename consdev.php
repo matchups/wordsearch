@@ -94,6 +94,36 @@ class constraint {
 		return 'F'; // main form
 	}
 
+  // ** Begin Static functions **
+
+	// List of normal (not corpus-linked) constraint classes
+  public static function list () {
+		$classes = array ("conscharmatch", "conscrypto", "conspattern", "consregex", "conssubword", "consweights");
+		IF ($_GET['level'] == 3) {
+			array_push ($classes, "conscustomsql");
+		}
+		return $classes;
+	}
+
+  // Does this constraint support a wizard?
+	public static function wizard () {
+		return false;
+	}
+
+	public static function getWizardValue () {
+		// code to build newValue in wizard based on form fields
+		throw new Exception ("Must override getWizardValue");
+	}
+
+	public static function getWizardOpenCode () {
+		// code to set up wizard UI
+		throw new Exception ("Must override getWizardOpenCode");
+	}
+
+	public static function getMoreCode () {
+		return '';
+	}
+
 	public function debug () {return "[" . get_class() . "#$this->num=$this->spec]";}
 
 } // end class constraint
@@ -290,6 +320,65 @@ class consweights extends constraint {
 
 		return $this->parseWhere ($sql);
 	}
+
+	public static function wizard () {
+		return true;
+	}
+
+	public static function getWizardValue () {
+		return "newValue = document.getElementById('wnweightleft').value;
+		if (!document.getElementById('wrwtskip').checked) {
+			if (document.getElementById('wrwtone').checked) {
+				newValue += '+';
+			} else {
+				endthing = document.getElementById('wnweightright').value;
+				if (document.getElementById('wrwtend').checked) {
+					newValue += '-' + endthing;
+				} else {
+					newValue += '+' + endthing;
+				}
+			}
+		}
+		if (document.getElementById('wtrrell').checked) {
+			newValue += '<';
+		} else if (document.getElementById('wtrrele').checked) {
+			newValue += '=';
+		} else if (document.getElementById('wtrrelg').checked) {
+			newValue += '>';
+		}
+		newValue += document.getElementById('wtconst').value;";
+	}
+
+	public static function getWizardOpenCode () {
+		return "		wizInsert (newSpan ('wtweightleft', 'Weight multipliers of letters at beginning of word (e.g., 1133 for third and fourth to be multiplied by three): '));
+				wizInsert (newInput ('wnweightleft', 'number', 'R'));
+				wizInsert (newBreak ('wizbr1'));
+				wizInsert (newSpan ('wtwtintro', 'What about the remaining characters in the word?'));
+				wizInsert (newBreak ('wizbr2'));
+				wizInsert (newRadio ('wrwtskip', 'wrwtrest', 'C', 'wizRadioClicked()');
+				wizInsert (newSpan ('wtwtskip', ' skip '));
+				wizInsert (newRadio ('wrwtone', 'wrwtrest', '', 'wizRadioClicked()');
+				wizInsert (newSpan ('wtwtone', ' use base weights '));
+				wizInsert (newRadio ('wrwtend', 'wrwtrest', '', 'wizRadioClicked()');
+				wizInsert (newSpan ('wtwtend', ' skip until specified characters at end '));
+				wizInsert (newBreak ('wizbr3'));
+				wizInsert (newRadio ('wrwtmidend', 'wrwtrest', '', 'wizRadioClicked()');
+				wizInsert (newSpan ('wtmidend', ' use base weights until specified characters at end '));
+				wizInsert (newBreak ('wizbr4'));
+				wizInsert (newSpan ('wtweightright', 'Weight multipliers of letters at end of word: '));
+				wizInsert (newInput ('wnweightright', 'number', 'R'));
+				wizInsert (newSpan ('wttrel', '<BR>Should the total weight be...'));
+				wizInsert (newBreak ('wizbr5'));
+				wizInsert (newRadio ('wtrrell', 'wtrel', '', '');
+				wizInsert (newSpan ('wttrell', ' less than '));
+				wizInsert (newRadio ('wtrrele', 'wtrel', 'C', '');
+				wizInsert (newSpan ('wttrele', ' equal to '));
+				wizInsert (newRadio ('wtrrelg', 'wtrel', '', '');
+				wizInsert (newSpan ('wttrelg', ' greater than '));
+				wizInsert (newSpan ('wttconst', '<BR>Constant value for comparison: '));
+				wizInsert (newInput ('wtconst', 'number', 'R'));
+				wizRadioClicked();\n";
+	} // end getWizardOpenCode
 } // end class consweights
 
 class consregex extends constraint {
@@ -399,11 +488,47 @@ class conscharmatch extends constraint {
 
 		return $this->parseWhere ($sql);
 	}
-}
+
+	public static function wizard () {
+		return true;
+	}
+
+	public static function getWizardValue () {
+		return "if (document.getElementById('wrmatchless').checked) {
+						newValue = '<';
+					} else if (document.getElementById('wrmatchequal').checked) {
+						newValue = '=';
+					} else if (document.getElementById('wrmatchgreater').checked) {
+						newValue = '>';
+					}
+					newValue = document.getElementById('wnmatchleft').value + newValue + document.getElementById('wnmatchr							if (offset < 0 || offset > 0offset) {
+			Span (, )
+					newValue += '^' + offset;
+					}\n";
+	}
+
+	public static function getWizardOpenCode () {
+	return "		wizInsert (newSpan ('wtmatchleft', 'Character position to start with (positive to count from beginning or negative to count from end): '));
+	wizInsert (newInput ('wnmatchleft', 'number', 'R'));
+	wizInsert (newBreak ('wizbr1'));
+  wizInsert (newRadio ('wrmatchless', 'wrmatchrel', '', ''));
+	wizInsert (newSpan ('wtless', ' < less than '));
+	wizInsert (newRadio ('wrmatchequal', 'wrmatchrel', 'C', ''));
+	wizInsert (newSpan ('wtequal', ' equals '));
+	wizInsert (newRadio ('wrmatchgreater', 'wrmatchrel', 'C', ''));
+	wizInsert (newSpan ('wtgreater', ' > greater than '));
+	wizInsert (newBreak ('wizbr2'));
+	wizInsert (newSpan ('wtmatchright', 'Character position to compare against: '));
+	wizInsert (newInput ('wnmatchright', 'number', 'R'));
+	wizInsert (newBreak ('wizbr3'));
+	wizInsert (newSpan ('wtoffset', 'Offset (optional); for example, 2 if you want F to match D or -2 for R to match T: '));
+	wizInsert (newInput ('wnoffset', 'number', ''));\n";
+	} // end getWizardOpenCode
+} // end charmatch
 
 class conscrypto extends constraint {
 	protected function explainSub() {
-			return "cryptogram pattern " . $this->spec;
+		return "cryptogram pattern " . $this->spec;
 	}
 
 	public function parse() {
