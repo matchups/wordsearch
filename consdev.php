@@ -28,7 +28,7 @@ class constraint {
 	protected function explainSub() {
 		// Provides explanation of constraint, displayed on results screen, not including possible Not.
 		// Called only from explain
-		throw new Exception ("Base explainSub--needs to be overridden");
+		return $this::getLabel() . " $this->spec";
 	}
 
 	public function parse() {
@@ -98,7 +98,7 @@ class constraint {
 
 	// List of normal (not corpus-linked) constraint classes
   public static function list () {
-		$classes = array ("conscharmatch", "conscrypto", "conspattern", "consregex", "conssubword", "consweights");
+		$classes = array ("conspattern", "consregex", "conssubword", "consweights", "conscharmatch", "conscrypto");
 		IF ($_GET['level'] == 3) {
 			array_push ($classes, "conscustomsql");
 		}
@@ -120,8 +120,25 @@ class constraint {
 		throw new Exception ("Must override getWizardOpenCode");
 	}
 
-	public static function getMoreCode () {
+	public static function getLabel () {
+		// Label for radio button
+		throw new Exception ("Must override getLabel");
+	}
+
+	public static function getButtonCode () {
+		// Code to add and remove controls when button selected/deselected
+		// Should be array (add->stuff, del->stuff)
 		return '';
+	}
+
+	public static function getMoreCode () {
+		// any self-contained Javascript (such as functions called by code in other get...Code scripts) that doesn't belong anywhere else
+		return '';
+	}
+
+	public static function getValidateConstraintCode () {
+		// Code to validate specifications for constraint.  Can access thisSpec
+		throw new Exception ("Must override getValidateConstraintCode");
 	}
 
 	public function debug () {return "[" . get_class() . "#$this->num=$this->spec]";}
@@ -130,10 +147,6 @@ class constraint {
 
 class conspattern extends constraint {
 	// Simple pattern
-	protected function explainSub() {
-		return "pattern $this->spec";
-	}
-
 	public function parse() {
 		// Convert to regular expression
 		$spec = patternToRegex (expandSpecial ($this->spec), 'S');
@@ -163,13 +176,23 @@ class conspattern extends constraint {
 			return groupToWildcard ($this->spec);
 		}
 	}
-}
 
-class conssubword extends constraint {
-	protected function explainSub() {
-		return "subword $this->spec";
+	public static function getLabel () {
+		return 'pattern';
 	}
 
+	public static function getValidateConstraintCode () {
+		return "  // Same validation as with the main pattern
+			if (!/^[a-z?*@#&\[\-\]]+$/i.test (thisValue)) {
+				return 'Invalid character in pattern ' + thisOption;
+			}
+			if (badGroups (thisValue)) {
+				return 'Invalid letter group in pattern ' + thisOption;
+			}";
+	}
+} // end conspattern
+
+class conssubword extends constraint {
 	public function parse() {
 	// boilerplate to look for subword
 	$more = " AND " . $this->maybeNot() . " EXISTS (SELECT 1 FROM words SW INNER JOIN word_entry SWE ON SWE.word_id = SW.id " .
@@ -266,17 +289,21 @@ class conssubword extends constraint {
 	return $this->parseWhere ($more);
 } // end function
 
+	public static function getLabel () {
+		return 'subword';
+	}
+
+	public static function getValidateConstraintCode () {
+		return "	if (/[^-a-z0-9:,]/i.test(thisValue)) {
+			 return 'Invalid character in subword specification ' + thisOption;
+		 }";
+	 }
 } // end class conssubword
 
 class consweights extends constraint {
 	protected function explainSub() {
-		if ($_GET["wttype$this->num"] == "SCR") {
-			$which = 'Scrabble&reg;';
-		} else {
-			$which = "Alphabet";
-		}
-	return "$which weight $this->spec";
-}
+		return (($_GET["wttype$this->num"] == "SCR") ? 'Scrabble&reg;' : "Alphabet") . " weight $this->spec";
+	}
 
 	public function parse() {
 		preg_match ('/^([0-9]*)([-+]?)([0-9]*)([<=>][0-9]*)$/', $this->spec, $matches);
@@ -384,11 +411,69 @@ class consweights extends constraint {
 	return "	// When a radio button is selected, the right side multipliers are enabled only if the selection
 		// is compatible with that.
 		function wizRadioClicked() {
-		var allowEnd = (document.getElementById('wrwtend').checked || document.getElementById('wrwtmidend').checked);
-		document.getElementById('wnweightright').disabled = !allowEnd;
-		document.getElementById('wtweightright').style = 'color:' + (allowEnd ? 'black' : 'gray');
+			var allowEnd = (document.getElementById('wrwtend').checked || document.getElementById('wrwtmidend').checked);
+			document.getElementById('wnweightright').disabled = !allowEnd;
+			document.getElementById('wtweightright').style = 'color:' + (allowEnd ? 'black' : 'gray');
+		}
+
+		// remove subsidiary radio buttons for Weights, if present
+		function noWeightSub (thisOption) {
+			if (document.forms['search']['rscrabble' + thisOption] !== undefined) {
+				removeChildren (thisOption, 'twtob rscrabble tscrabble ralpha talpha');
+			}
 		}\n";
 }
+
+	public static function getLabel () {
+		return 'weight';
+	}
+
+	public static function getValidateConstraintCode () {
+		return "// Left multipliers, optional plus or minus, right multipliers, operator, comparison value
+			if (!(/^[0-9]*([-+][0-9]*)?[<=>][0-9]+$/.test(thisValue))) {
+				return 'Invalid weight specification ' + thisOption;
+			}";
+		}
+
+	public static function getButtonCode () {
+		$ret ['add'] = "		if (theForm['rscrabble' + thisOption] === undefined) {
+					var here = theForm['rcharmatch' + thisOption];
+					var myParent = here.parentNode;
+
+					newOption = document.createElement('span');
+					newOption.id = 'twtob' + thisOption;
+					newOption.innerHTML = ' [';
+					myParent.insertBefore (newOption, here);
+
+					newOption = document.createElement('input');
+					newOption.type = 'radio';
+					newOption.name = 'wttype' + thisOption;
+					newOption.value = 'SCR';
+					newOption.id = 'rscrabble' + thisOption;
+					newOption.checked = true;
+					myParent.insertBefore (newOption, here);
+
+					newOption = document.createElement('span');
+					newOption.id = 'tscrabble' + thisOption;
+					newOption.innerHTML = ' Scrabble&reg; ';
+					myParent.insertBefore (newOption, here);
+
+					newOption = document.createElement('input');
+					newOption.type = 'radio';
+					newOption.name = 'wttype' + thisOption;
+					newOption.value = 'ALF';
+					newOption.id = 'ralpha' + thisOption;
+					myParent.insertBefore (newOption, here);
+
+					newOption = document.createElement('span');
+					newOption.id = 'talpha' + thisOption;
+					newOption.innerHTML = ' alphabet] ';
+					myParent.insertBefore (newOption, here);
+				}\n";
+			$ret ['del'] = "		noWeightSub (thisOption);\n";
+			return $ret;
+	}
+
 } // end class consweights
 
 class consregex extends constraint {
@@ -400,10 +485,6 @@ class consregex extends constraint {
 		if (substr ($this->regex, 0, 1) != '/') {
 			$this->regex = '/' . $this->regex . '/';
 		}
-	}
-
-	protected function explainSub() {
-		return "regular expression $this->spec";
 	}
 
 	public function parse() {
@@ -459,13 +540,17 @@ class consregex extends constraint {
 			return groupToWildcard ($this->spec);
 		}
 	}
-}
 
-class conscharmatch extends constraint {
-	protected function explainSub() {
-		return "letter match $this->spec";
+	public static function getLabel () {
+		return 'regular expression';
 	}
 
+	public static function getValidateConstraintCode () {
+		return "// We'll let you put *anything* in a regular expression";
+	}
+} // end class consregex
+
+class conscharmatch extends constraint {
 	public function parse() {
 		// Extract from string like 5=-2+^8: {5, =, -2, +^8}
 		preg_match ('/^(-?[1-9][0-9]*)([<=>])(-?[1-9][0-9]*)([+\-]\^[1-9][0-9]*)?$/', $this->spec, $matches);
@@ -537,13 +622,20 @@ class conscharmatch extends constraint {
 	wizInsert (newSpan ('wtoffset', 'Offset (optional); for example, 2 if you want F to match D or -2 for R to match T: '));
 	wizInsert (newInput ('wnoffset', 'number', ''));\n";
 	} // end getWizardOpenCode
+
+	public static function getLabel () {
+		return 'letter match';
+	}
+
+	public static function getValidateConstraintCode () {
+		return "// First position, operator, second position, optional ^offset
+		if (!/^-?[1-9][0-9]*[<=>]-?[1-9][0-9]*([+\-]\^[1-9][0-9]*)?$/i.test(thisValue)) {
+			return 'Invalid letter match specification ' + thisOption;
+		}";
+	}
 } // end charmatch
 
 class conscrypto extends constraint {
-	protected function explainSub() {
-		return "cryptogram pattern " . $this->spec;
-	}
-
 	public function parse() {
 		$spec = $this->spec;
 		if ($spec == '*') {
@@ -590,15 +682,35 @@ class conscrypto extends constraint {
 			$consmax = $consmin;
 		}
 	}
+
+	public static function getLabel () {
+		return 'cryptogram pattern';
+	}
+
+	public static function getValidateConstraintCode () {
+		return " if (thisValue == '*') {
+			return '';
+		}
+		if (/[^a-z]/i.test(thisValue)) {
+			return 'Invalid cryptogram pattern ' + thisOption;
+		}
+		if ((maxlen > 0  &&  maxlen != thisValue.length) || (minlen > 0  &&  minlen != thisValue.length)) {
+			return 'Cryptogram length is inconsistent with requested word length';
+		}";
+	}
 } // end class conscrypto
 
 class conscustomsql extends constraint {
-	protected function explainSub() {
-		return "Custom SQL: $this->spec";
-	}
-
 	public function parse() {
 		return " AND $this->spec ";
+	}
+
+	public static function getLabel () {
+		return 'custom SQL';
+	}
+
+	public static function getValidateConstraintCode () {
+		return "// We'll let you put anything in SQL, at least for now";
 	}
 } // end class customsql
 ?>

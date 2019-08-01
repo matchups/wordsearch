@@ -2,14 +2,22 @@
 ---------- CATSUGGESTDEV.PHP
 
 ---------- CONSDEV.PHP
+	public static function getValidateConstraintCode () {
+		throw new Exception ("Must override getValidateConstraintCode");
+	public static function getValidateConstraintCode () {
+	public static function getValidateConstraintCode () {
+	public static function getValidateConstraintCode () {
+	public static function getValidateConstraintCode () {
+	public static function getValidateConstraintCode () {
+	public static function getValidateConstraintCode () {
+	public static function getValidateConstraintCode () {
 
 ---------- CORPUSDEV.PHP
 
 ---------- FORMDEV.PHP
-	<button type="button" id="popclose" onclick="closeWizard(true);">OK</button>
-	<button type="button" id="popcancel" onclick="closeWizard(false);">Cancel</button>
-function closeWizard (saveFlag) {
-		closeWizard ();
+function validateConstraint (thisOption) {
+        echo $classname::getValidateConstraintCode () . "
+  echo "} // end validateConstraint\n";
 
 ---------- HELPDEV.HTML
 
@@ -24,5 +32,6 @@ function closeWizard (saveFlag) {
 ---------- SEARCHDEV.PHP
 
 ---------- UTILITYDEV.JS
+		if (ret = validateConstraint (thisOption)) {
 
 ---------- UTILITYDEV.PHP

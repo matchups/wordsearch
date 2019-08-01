@@ -230,22 +230,18 @@ echo "function addOption (pro) {
 	newOption.type = 'text';
 	newOption.required = true;
 	newOption.id = 'query' + optionNumber;
-	myParent.insertBefore (newOption, here);
+	myParent.insertBefore (newOption, here);\n";
 
-	//!! From classes
 	// Radio buttons for constraint types
-	addRadio ('pattern', 'pattern');
-	addRadio ('regex', 'regular expression');
-	addRadio ('subword', 'subword');
-	addRadio ('weights', 'weight');
-	addRadio ('charmatch', 'letter match');
-	addRadio ('crypto', 'cryptogram');
-	if (pro > 0) {
-		addRadio ('customsql', 'custom SQL');
+  $counter = 0;
+  foreach (constraint::list () as $classname) {
+    echo "addRadio ('" . substr ($classname, 4) . "', '" . $classname::getLabel() . "');\n";
+    if ($counter++ == 0) {
+      echo "theForm['r" . substr ($classname, 4) . "' + optionNumber].checked = true;\n";
+    }
 	}
-	theForm['rpattern' + optionNumber].checked = true;
 
-	// Button to remove constraint
+echo "	// Button to remove constraint
 	newOption = document.createElement ('button');
 	newOption.type = 'button';
 	newOption.id = 'delcons' + optionNumber;
@@ -274,58 +270,24 @@ echo "function addOption (pro) {
 	radioClicked(optionNumber);
 }
 
-// remove subsidiary radio buttons for Weights, if present
-//!! move to MoreCode
-function noWeightSub (thisOption) {
-	if (document.forms['search']['rscrabble' + thisOption] !== undefined) {
-		removeChildren (thisOption, 'twtob rscrabble tscrabble ralpha talpha');
-	}
-}
-
 // Side effects when one of the main radio buttons is selected
 function radioClicked (thisOption) {
 	currentOption = thisOption;
 	var theForm = document.forms['search'];
 	var hint;
 	var wizard;
-	// If Weights, make subsidiary buttons available
-	//!! Another constraint function, with 'add' and 'del'
-	if (theForm['rweights' + thisOption].checked) {
-		if (theForm['rscrabble' + thisOption] === undefined) {
-			var here = theForm['rcharmatch' + thisOption];
-			var myParent = here.parentNode;
+	// If Weights, make subsidiary buttons available\n";
+  foreach (constraint::list () as $classname) {
+    if ($buttonCode = $classname::getButtonCode ()) {
+      echo "if (theForm['r" . substr ($classname, 4) . "' + thisOption].checked) {
+        {$buttonCode['add']}
+      } else {
+        {$buttonCode['del']}
+      }\n";
+    }
+  }
 
-			newOption = document.createElement('span');
-			newOption.id = 'twtob' + thisOption;
-			newOption.innerHTML = ' [';
-			myParent.insertBefore (newOption, here);
-
-			newOption = document.createElement('input');
-			newOption.type = 'radio';
-			newOption.name = 'wttype' + thisOption;
-			newOption.value = 'SCR';
-			newOption.id = 'rscrabble' + thisOption;
-			newOption.checked = true;
-			myParent.insertBefore (newOption, here);
-
-			newOption = document.createElement('span');
-			newOption.id = 'tscrabble' + thisOption;
-			newOption.innerHTML = ' Scrabble&reg; ';
-			myParent.insertBefore (newOption, here);
-
-			newOption = document.createElement('input');
-			newOption.type = 'radio';
-			newOption.name = 'wttype' + thisOption;
-			newOption.value = 'ALF';
-			newOption.id = 'ralpha' + thisOption;
-			myParent.insertBefore (newOption, here);
-
-			newOption = document.createElement('span');
-			newOption.id = 'talpha' + thisOption;
-			newOption.innerHTML = ' alphabet] ';
-			myParent.insertBefore (newOption, here);
-
-		}
+	echo "if (theForm['rweights' + thisOption].checked) {
 		hint = 'This option will look at the weight of each letter, which can either be its value in Scrabble (e.g., H=4) or its position ' +
 				'in the alphabet (e.g., H=8), possibly with a multiplier, added up over the whole word.  If the search field is left blank, ' +
 				'a multiplier of 1 will be used for each letter.  If a series of digits is entered (e.g., 3112), the multipliers will be ' +
@@ -336,8 +298,7 @@ function radioClicked (thisOption) {
 				'will be 112: 5 + 2x24 + 1 + 13 + 16 + 2x12 + 5.  After this specification, put either <, =, or > followed by a number. ' +
 				'+>50 will give all words with total weight greater than 50.';
 		wizard = true;
-	} else { // otherwise, hide them
-		noWeightSub (thisOption);
+	} else {
 		if (theForm['rcharmatch' + thisOption].checked) {
 			hint = 'The option allows you to specify that certain characters within the word must match or have another relationship.  ' +
 				'The simplest case is something like 3=8, which means that the third and eighth letters are the same.  A more complicated ' +
@@ -388,44 +349,17 @@ function radioClicked (thisOption) {
 }
 
 function validateConstraint (thisOption) {
-		thisItem = theForm['query' + thisOption];
+		var thisItem = theForm['query' + thisOption];
 		thisItem.focus();
-		thisPattern = thisItem.value;
-		// Same validation as with the main pattern
-		//!! Generate stuff from classes
-		if (theForm['rpattern' + thisOption].checked) {
-			if (!/^[a-z?*@#&\[\-\]]+$/i.test (thisPattern)) {
-				return 'Invalid character in pattern ' + thisOption;
-			}
-			if (badGroups (thisPattern)) {
-				return 'Invalid letter group in pattern ' + thisOption;
-			}
-		} else if (theForm['rsubword' + thisOption].checked) {
-			if (/[^-a-z0-9:,]/i.test(thisPattern)) {
-				return 'Invalid character in subword specification ' + thisOption;
-			}
-		} else if (theForm['rweights' + thisOption].checked) {
-			// Left multipliers, optional plus or minus, right multipliers, operator, comparison value
-			if (!(/^[0-9]*([-+][0-9]*)?[<=>][0-9]+$/.test(thisPattern))) {
-				return 'Invalid weight specification ' + thisOption;
-			}
-		} else if (theForm['rcharmatch' + thisOption].checked) {
-			// First position, operator, second position, optional ^offset
-			if (!/^-?[1-9][0-9]*[<=>]-?[1-9][0-9]*([+\-]\^[1-9][0-9]*)?$/i.test(thisPattern)) {
-				return 'Invalid letter match specification ' + thisOption;
-			}
-		} else if (theForm['rcrypto' + thisOption].checked) {
-			if (thisPattern == '*') {
-				continue;
-			}
-			if (/[^a-z]/i.test(thisPattern)) {
-				return 'Invalid cryptogram pattern ' + thisOption;
-			}
-			if ((maxlen > 0  &&  maxlen != thisPattern.length) || (minlen > 0  &&  minlen != thisPattern.length)) {
-				return 'Cryptogram length is inconsistent with requested word length';
-			}
+		var thisValue = thisItem.value;\n";
+
+    // Generate stuff from classes
+    foreach (constraint::list () as $classname) {
+      echo "if (theForm['r" . substr ($classname, 4) . "' + thisOption].checked) {\n";
+        echo $classname::getValidateConstraintCode () . "
+      }\n";
 		}
-}\n";
+  echo "} // end validateConstraint\n";
 ?>
 // This needs to be at the end, after the wizard has been created
 var modal = document.getElementById('wizard');
