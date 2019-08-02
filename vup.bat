@@ -2,7 +2,7 @@
 if x%1==xindex goto index
 if x%1==xedit goto edit
 if x%2==x goto help
-set command=rename
+set command=git mv
 if %1==dev set command=copy
 
 if not %1==base if not exist *%1* goto missing
@@ -67,3 +67,4 @@ goto done
 set from=
 set to=
 set archdir=
+if not exist wizard* echo Time to remove wizard

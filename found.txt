@@ -2,12 +2,73 @@
 ---------- CATSUGGESTDEV.PHP
 
 ---------- CONSDEV.PHP
+  // Does this constraint support a wizard?
+	public static function wizard () {
+	public static function getWizardValue () {
+		// code to build newValue in wizard based on form fields
+		throw new Exception ("Must override getWizardValue");
+	public static function getWizardOpenCode () {
+		// code to set up wizard UI
+		throw new Exception ("Must override getWizardOpenCode");
+	public static function wizard () {
+	public static function getWizardValue () {
+	public static function getWizardOpenCode () {
+	} // end getWizardOpenCode
+	public static function wizard () {
+	public static function getWizardValue () {
+	public static function getWizardOpenCode () {
+	} // end getWizardOpenCode
 
 ---------- CORPUSDEV.PHP
+  // Use wizard to allow user to look up category
+			function closeCatWizard (saveFlag) {
+				// Hide wizard
 
 ---------- FORMDEV.PHP
+<!-- Sketch out wizards, which CSS will make invisible until user asks for one of them -->
+<div id="wizard" class="wizard">
+  <div class="wizard-content">
+	<button type="button" id="popclose" onclick="closeWizard(true);">OK</button>
+	<button type="button" id="popcancel" onclick="closeWizard(false);">Cancel</button>
+<div id="catlookup" class="wizard">
+  <div class="wizard-content">
+	<button type="button" id="catclose" onclick="closeCatWizard(true);">OK</button>
+	<button type="button" id="catcancel" onclick="closeCatWizard(false);">Cancel</button>
+// Wizard stuff
+// Close the wizard.  If saveFlag, use the values to populate this constraint's query field.
+function closeWizard (saveFlag) {
+	if ($classname::wizard()) {
+		echo $classname::getWizardValue () . "\n";
+	// delete wizard fields
+	// finally, hide wizard
+// Open the wizard and populate its form
+function openWizard (thisOption) {
+	document.getElementById('wizoption').value = thisOption; // So the wizard knows where to put the answer when he closes
+		if ($classname::wizard()) {
+			echo $classname::getWizardOpenCode () . "\n";
+	// Tell browser to display the wizard in foreground
+	document.getElementById('wizard').style.display = 'block';
+	if ($classname::wizard()) {
+  myParent.insertBefore (newButton ('wizard' + optionNumber, 'Wizard', 'openWizard(' + optionNumber + ')'), here);
+	var wizard;\n";
+		wizard = true;
+			wizard = true;
+				wizard = false;
+				wizard = false;
+				wizard = false;
+				wizard = false;
+				wizard = false;
+	theForm['wizard' + thisOption].disabled = !wizard;
+	if (wizard) {
+		hint += '  You can also press the Wizard button to open a form which will help you enter the required pieces of the specification.';
+// This needs to be at the end, after the wizard has been created
+var modal = document.getElementById('wizard');
+// When the user clicks anywhere outside of the wizard, close it
+		closeWizard ();
 
 ---------- HELPDEV.HTML
+You can press the Wizard button to get a popup form to help you with this.
+You can press the Wizard button to get a popup form to help you with this.
 
 ---------- INDEXDEV.PHP
 
@@ -20,5 +81,6 @@
 ---------- SEARCHDEV.PHP
 
 ---------- UTILITYDEV.JS
+	removeChildren (thisOption, "label not query delcons butspace wizard br");
 
 ---------- UTILITYDEV.PHP
