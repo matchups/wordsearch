@@ -5,7 +5,7 @@ function addRadio (radioValue, labelText) {
 	var here = document.getElementById("count");
 	var myParent = here.parentNode;
 
-	myParent.insertBefore (newRadio ('r' + radioValue + optionNumber, 'radio' + optionNumber, '', 'radioClicked(' + optionNumber + ')'), here);
+	myParent.insertBefore (newRadio ('r' + radioValue + optionNumber, 'radio' + optionNumber, '', '', 'radioClicked(' + optionNumber + ')'), here);
 	myParent.insertBefore (newSpan ('t' + radioValue + optionNumber, ' ' + labelText + ' '), here);
 }
 
@@ -244,11 +244,12 @@ function newInput (nameid, type, flags) {
 	return newOption;
 }
 
-function newRadio (id, name, flags, onclick) {
+function newRadio (id, name, flags, value, onclick) {
 	var newOption = document.createElement('input');
 	newOption.type = 'radio';
 	newOption.name = name;
 	newOption.id = id;
+	newOption.value = value;
 	newOption.checked = /C/.test(flags);
 	newOption.setAttribute('onclick', onclick);
 	return newOption;

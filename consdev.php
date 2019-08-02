@@ -460,35 +460,12 @@ class consweights extends constraint {
 					var here = theForm['rcharmatch' + thisOption];
 					var myParent = here.parentNode;
 
-					newOption = document.createElement('span');
-					newOption.id = 'twtob' + thisOption;
-					newOption.innerHTML = ' [';
-					myParent.insertBefore (newOption, here);
+					myParent.insertBefore (newSpan ('twtob' + thisOption, ' ['), here);
+					myParent.insertBefore (newRadio ('rscrabble' + thisOption, 'wttype' + thisOption, 'C', 'SCR', ''), here);
+					myParent.insertBefore (newSpan ('tscrabble' + thisOption, ' Scrabble&reg; '), here);
 
-					newOption = document.createElement('input');
-					newOption.type = 'radio';
-					newOption.name = 'wttype' + thisOption;
-					newOption.value = 'SCR';
-					newOption.id = 'rscrabble' + thisOption;
-					newOption.checked = true;
-					myParent.insertBefore (newOption, here);
-
-					newOption = document.createElement('span');
-					newOption.id = 'tscrabble' + thisOption;
-					newOption.innerHTML = ' Scrabble&reg; ';
-					myParent.insertBefore (newOption, here);
-
-					newOption = document.createElement('input');
-					newOption.type = 'radio';
-					newOption.name = 'wttype' + thisOption;
-					newOption.value = 'ALF';
-					newOption.id = 'ralpha' + thisOption;
-					myParent.insertBefore (newOption, here);
-
-					newOption = document.createElement('span');
-					newOption.id = 'talpha' + thisOption;
-					newOption.innerHTML = ' alphabet] ';
-					myParent.insertBefore (newOption, here);
+					myParent.insertBefore (newRadio ('ralpha' + thisOption, 'wttype' + thisOption, '', 'ALF', ''), here);
+					myParent.insertBefore (newSpan ('talpha' + thisOption, ' alphabet] '), here);
 				}";
 			$ret ['del'] = "		noWeightSub (thisOption);";
 			return $ret;

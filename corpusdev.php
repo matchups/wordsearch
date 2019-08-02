@@ -105,70 +105,38 @@ class corpus {
 			var here = theForm['add$corpus'];
 			var myParent = here.parentNode;
 
-			// Label for constraint
-			var newOption = document.createElement('span');
-			newOption.id = 'label{$corpus}_' + corpusOptionNumber;
-			newOption.innerHTML = '&nbsp;&nbsp;$name#' + corpusOptionNumber + ': (not)';
-			myParent.insertBefore (newOption, here);
-
-			// Checkbox for NOT
-			newOption = document.createElement('input');
-			newOption.name = 'not{$corpus}_' + corpusOptionNumber;
-			newOption.type = 'checkbox';
-			newOption.id = 'not{$corpus}_' + corpusOptionNumber;
-			myParent.insertBefore (newOption, here);
-
-			newOption = document.createElement('input');
-			newOption.name = 'query{$corpus}_' + corpusOptionNumber;
-			newOption.type = 'text';
-			newOption.required = true;
-			newOption.id = 'query{$corpus}_' + corpusOptionNumber;
-			myParent.insertBefore (newOption, here);\n";
+			myParent.insertBefore (newSpan ('label{$corpus}_' + corpusOptionNumber, '&nbsp;&nbsp;$name#' + corpusOptionNumber + ': (not)'), here);
+			myParent.insertBefore (newInput ('not{$corpus}_' + corpusOptionNumber, 'checkbox', ''), here);
+			myParent.insertBefore (newInput ('query{$corpus}_' + corpusOptionNumber, 'text', 'R'), here);\n";
 
     $clickedCode = $this -> clickedCode ();
 
 		$first = true;
 		foreach ($this->optionButtonList() as $id => $description) {
-			echo "var newOption = document.createElement('input');\n";
+			echo "var newOption = newRadio ('r{$corpus}_$id' + corpusOptionNumber, 'radio{$corpus}_' + corpusOptionNumber, '', '$id', '');\n";
 			if (($lead = substr ($description, 0, 1)) == '!') {
 				echo "newOption.disabled = true;\n";
 				$description = substr ($description, 1);
 			}
-			echo "newOption.type = 'radio';\n";
-			echo "newOption.name = 'radio{$corpus}_' + corpusOptionNumber;\n";
-			echo "newOption.value = '$id';\n";
-			echo "newOption.id = 'r{$corpus}_$id' + corpusOptionNumber;\n";
 			if ($clickedCode) {
 				echo "newOption.setAttribute('onclick','radioClicked$corpus(' + corpusOptionNumber + ')')\n";
 			}
-
 			if ($first) {
 				echo "newOption.checked = true;\n";
 				$first = false;
 			}
 			echo "myParent.insertBefore (newOption, here);\n";
 
-			echo "newOption = document.createElement('span');\n";
+			echo "newOption = newSpan ('t{$corpus}_$id' + corpusOptionNumber, ' $description ');\n";
 			if ($lead == '!') {
 				echo "newOption.class = 'disabled';\n";
 			}
-			echo "newOption.id = 't{$corpus}_$id' + corpusOptionNumber;\n";
-			echo "newOption.innerHTML = ' $description ';\n";
-			echo "myParent.insertBefore (newOption, here);\n";
+			echo "myParent.insertBefore (, here);\n";
 		}
 
-		Echo "// Button to remove constraint
-			newOption = document.createElement ('button');
-			newOption.type = 'button';
-			newOption.id = 'delcons{$corpus}_' + corpusOptionNumber;
-			newOption.innerHTML = 'Remove';
-			newOption.setAttribute('onclick','removeConstraint$corpus(' + corpusOptionNumber + ')');
-			myParent.insertBefore (newOption, here);
-
-			newOption = document.createElement ('br');
-			newOption.id = 'br{$corpus}_' + corpusOptionNumber;
-			myParent.insertBefore (newOption, here);
-
+		// Button to remove constraint
+		Echo "		myParent.insertBefore (newButton ('delcons{$corpus}_' + corpusOptionNumber, 'Remove', 'removeConstraint$corpus(' + corpusOptionNumber + ')'), here);
+			myParent.insertBefore (newBreak ('br{$corpus}_' + corpusOptionNumber), here);
 			} // End addOption$corpus\n";
 
     if ($clickedCode) {
@@ -282,41 +250,22 @@ class corpusWikipedia extends corpus {
 				var here = theForm['r{$corpus}_size' + thisOption];
 				var myParent = here.parentNode;
 
-				newOption = document.createElement('span');
-				newOption.id = 't{$corpus}_ob' + thisOption;
-				newOption.innerHTML = ' [';
-				myParent.insertBefore (newOption, here);\n";
+				myParent.insertBefore (newSpan ('t{$corpus}_ob' + thisOption, ' ['), here);\n";
 
     $first = true;
 		foreach ($options as $key => $text) {
-			$code = $code . "	newOption = document.createElement('input');
-					newOption.type = 'radio';
-					newOption.name = 'wc{$corpus}_type' + thisOption;
-					newOption.value = '$key';
-					newOption.id = 'rc{$corpus}_$key' + thisOption;\n";
+			$code = $code . "	newOption = newRadio ('rc{$corpus}_$key' + thisOption, 'wc{$corpus}_type' + thisOption, '', '$key', '')\n";
 			if ($first) {
 				$code = $code . " newOption.checked = true;\n";
 				$first = false;
 			}
 			$code = $code . " myParent.insertBefore (newOption, here);
 
-			newOption = document.createElement('span');
-			newOption.id = 'tc{$corpus}_$key' + thisOption;
-			newOption.innerHTML = ' $text ';
-			myParent.insertBefore (newOption, here);\n";
+			myParent.insertBefore (newSpan ('tc{$corpus}_$key' + thisOption,  ' $text '), here);\n";
 		} // end foreach (hard to tell with all that quoted stuff!)
 
-		$code = $code . "newOption = document.createElement ('button');
-					newOption.type = 'button';
-					newOption.id = 'catlook{$corpus}_' + thisOption;
-					newOption.innerHTML = 'Lookup';
-					newOption.setAttribute('onclick','categoryLookup$corpus(' + thisOption + ')');
-					myParent.insertBefore (newOption, here);
-
-					newOption = document.createElement('span');
-					newOption.id = 'tclsp{$corpus}_' + thisOption;
-					newOption.innerHTML = ']&nbsp;&nbsp;';
-					myParent.insertBefore (newOption, here);
+		$code = $code . "				myParent.insertBefore (newButton ('catlook{$corpus}_' + thisOption, 'Lookup', 'categoryLookup$corpus(' + thisOption + ')')), here);
+					myParent.insertBefore (newSpan ('tclsp{$corpus}_' + thisOption, ']&nbsp;&nbsp;'), here);
 
 					if (notbox.checked) {
 						notbox.checked = false;

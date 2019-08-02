@@ -237,6 +237,7 @@ function radioClicked (thisOption) {
 	currentOption = thisOption;
 	var theForm = document.forms['search'];
 	var hint;
+  var newOption;
 	var wizard;\n";
   $delcode = '';
   foreach (constraint::list () as $classname) {
@@ -267,9 +268,7 @@ function radioClicked (thisOption) {
 	var here = document.getElementById('delcons' + thisOption);
 	var myParent = here.parentNode;
 
-	newOption = document.createElement('span');
-	newOption.id = 'hint';
-	newOption.innerHTML = '<br>' + hint + '<br>';
+	newOption = newSpan ('hint', '<br>' + hint + '<br>');
 	newOption.className = 'hint'; // see CSS
 	myParent.insertBefore (newOption, here);
 }
