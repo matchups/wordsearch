@@ -53,29 +53,25 @@ if (!$valid) {
 		// and provide a general indication of the error type for our use
 	exit();
 }
-?>
-<HTML>
+
+echo "<HTML>
 <HEAD>
-<?php
-Echo "<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
+<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
 	<script src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'></script>
 	<script src='//netsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>
 	<script src='utility$type.js'></script>";
 include "cons$type.php";
 include "corpus$type.php";
-?>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="styles.css">
-<TITLE>
-<?php
+
 $pattern = $_GET['pattern'];
 $version = $_GET['version'];
-Echo "$pattern - Word Search $type $version";
-?>
+echo "<meta name='viewport' content='width=device-width, initial-scale=1'>
+<link rel='stylesheet' href='styles.css'>
+<TITLE>
+$pattern - Word Search $type $version
 </TITLE>
-</HEAD>
+</HEAD>\n";
 
-<?php
 $time['top'] = microtime();
 include "results" . $type . ".php";
 include "parse" . $type . ".php";
@@ -85,7 +81,7 @@ $cache['body'] = '';
 
 try {
 	echo '<BODY onload="reloadQuery();">';
-	Echo "<H2>Word Search $type $version Results: <span class='specs'>$pattern";
+	echo "<H2>Word Search $type $version Results: <span class='specs'>$pattern";
 
 	// Connect briefly in write mode to update the session
 	openConnection (true)->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
@@ -113,7 +109,7 @@ try {
   	$result = $e->getMessage();
 	}
 
-	Echo "</span></H2>";
+	echo "</span></H2>";
 	$time['beforequery'] = microtime();
 	if ($result == '') {
 		$result = $conn->query($sql);
@@ -158,7 +154,7 @@ echo '</BODY>';
 // End of main script
 
 function buildReloadQuery ($consObjects) {
-	Echo "<script>\n";
+	echo "<script>\n";
 	echo "// This script is run on load of the results page to modify the skeleton form to match the\n";
 	echo "// original query.  It is built dynamically as part of the search process.\n";
 	echo "function reloadQuery() {\n";
@@ -188,18 +184,18 @@ function buildReloadQuery ($consObjects) {
 		} else {
 			$checked = 'false';
 		}
-		Echo "theForm['$name'].checked = $checked;\n";
+		echo "theForm['$name'].checked = $checked;\n";
 	}
 
 	// For fields where the user can type, copy the values across
 	foreach (explode (' ', 'minlen maxlen pattern') as $name) {
 		$value = $_GET[$name];
-		Echo "theForm['$name'].value = '$value';\n";
+		echo "theForm['$name'].value = '$value';\n";
 	}
 
 	// Initialize these values; addOption will modify them to what they should be.
-	Echo "theForm['count'].value = 1;\n";
-	Echo "optionNumber=1;\n";
+	echo "theForm['count'].value = 1;\n";
+	echo "optionNumber=1;\n";
 	// Loop through additional constraints and set those up
 	$newCount['F']=1; // because we have a '2' offset for some reason
 	foreach ($consObjects as $thisConsObj) {
