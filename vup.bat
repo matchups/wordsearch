@@ -19,7 +19,7 @@ if not %2==base set to=%2.
 if %2==base set to=.
 
 Echo on
-for %%i in (form index search cons corpus parse results phrases utility ) do %command% %%i%from%php %%i%to%php
+for %%i in (form index search cons conssubword consweights corpus parse results phrases utility ) do %command% %%i%from%php %%i%to%php
 for %%i in (utility wizard  )  do %command% %%i%from%js %%i%to%js
 @Echo Replace catsuggest%from% with catsuggest%to% in utility%to%js...
 @pause

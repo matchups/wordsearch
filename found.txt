@@ -6,25 +6,56 @@
 ---------- CORPUSDEV.PHP
 
 ---------- FORMDEV.PHP
-	newOption = document.createElement('span');
+function preserveInfo ($type, $version) {
+	echo "document.getElementById('type').value = '$type';\n";
+	echo "document.getElementById('search').action = 'search$type.php';\n";
+	echo "document.getElementById('help').action = 'help$type.html';\n";
+     echo "document.getElementById('basic').href = 'index$type.php?simple=on&$security';\n";
+      echo "document.getElementById('advanced').href = 'index$type.php?$security';\n";
+	if ($type <> 'dev') {
 
 ---------- HELPDEV.HTML
 
 ---------- INDEXDEV.PHP
+$type = "dev";
+	<script src='utility$type.js'></script>\n";
+include "utility$type.php";
+include "cons$type.php";
+include "corpus$type.php";
+include "form$type.php";
+preserveInfo ($type, $version);
+if ($type != "back"  &&  $level > 1) {
+if ($type != "") {
+if ($type != "beta"  &&  $level > 1) {
+if ($type != "dev"  &&  $level > 2) {
 
 ---------- PARSEDEV.PHP
 
 ---------- PHRASESDEV.PHP
+$type = $_GET['type'];
+include "utility$type.php";
+include "cons$type.php";
+include "corpus$type.php";
 
 ---------- RESULTSDEV.PHP
+	$type = $_GET['type'];
+						"HREF='phrases$type.php?base=$oneword&corpus=$corpus&type=$type&level=$level'>" .
 
 ---------- SEARCHDEV.PHP
+$type = $_GET['type']; // beta, dev, etc.
+include "utility" . $type . ".php";
+				if ($level < 2 && $type > '') {
+				} else if ($level < 3 && $type == 'dev') {
+	<script src='utility$type.js'></script>";
+include "cons$type.php";
+include "corpus$type.php";
+Echo "$pattern - Word Search $type $version";
+include "results" . $type . ".php";
+include "parse" . $type . ".php";
+	Echo "<H2>Word Search $type $version Results: <span class='specs'>$pattern";
+include "form$type.php";
+preserveInfo ($type, $version);
 
 ---------- UTILITYDEV.JS
-	var newOption = document.createElement('span');
-	var newOption = document.createElement ('br');
-	var newOption = document.createElement('input');
-	var newOption = document.createElement('input');
-	var newOption = document.createElement ('button');
 
 ---------- UTILITYDEV.PHP
