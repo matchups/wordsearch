@@ -61,7 +61,7 @@ if ($advanced) {
 }
 echo '<input type=hidden id="count" name="count" value="1" /><BR>';
 if ($advanced) {
-	echo '<button type="button" id="addbut" onclick="addOption(' . ($level / 3) . ');return false;">Add Constraint</button>' . "\n";
+	echo '<button type="button" id="addbut" onclick="addOption();return false;">Add Constraint</button>' . "\n";
 }
 echo "<input type=hidden id='sessionkey' name='sessionkey' value='$sessionkey' />";
 echo "<input type=hidden id='level' name='level' value='$level' />";
@@ -202,9 +202,7 @@ foreach (constraint::list () as $classname) {
 }
 
 // Dynamically create some Javascript functions
-echo "function addOption (pro) {
-  //!! Change Most of these to use Newxxx functions
-	//!! Can probably get rid of pro because constraint list does it right
+echo "function addOption () {
 	// add a new constraint when user presses that button
 	var theForm = document.getElementById('search');
 	optionNumber++;
@@ -212,25 +210,9 @@ echo "function addOption (pro) {
 	here.value = optionNumber;
 	var myParent = here.parentNode;
 
-	// Label for constraint
-	var newOption = document.createElement('span');
-	newOption.id = 'label' + optionNumber;
-	newOption.innerHTML = '#' + optionNumber + ': (not)';
-	myParent.insertBefore (newOption, here);
-
-	// Checkbox for NOT
-	newOption = document.createElement('input');
-	newOption.name = 'not' + optionNumber;
-	newOption.type = 'checkbox';
-	newOption.id = 'not' + optionNumber;
-	myParent.insertBefore (newOption, here);
-
-	newOption = document.createElement('input');
-	newOption.name = 'query' + optionNumber;
-	newOption.type = 'text';
-	newOption.required = true;
-	newOption.id = 'query' + optionNumber;
-	myParent.insertBefore (newOption, here);\n";
+	myParent.insertBefore (newSpan ('label' + optionNumber, '#' + optionNumber + ': (not)'), here); // Label for constraint
+  myParent.insertBefore (newInput ('not' + optionNumber, 'checkbox', ''), here);
+  myParent.insertBefore (newInput ('query' + optionNumber, 'text', 'R'), here);\n";
 
 	// Radio buttons for constraint types
   $counter = 0;
@@ -241,30 +223,10 @@ echo "function addOption (pro) {
     }
 	}
 
-echo "	// Button to remove constraint
-	newOption = document.createElement ('button');
-	newOption.type = 'button';
-	newOption.id = 'delcons' + optionNumber;
-	newOption.innerHTML = 'Remove';
-	newOption.setAttribute('onclick','removeConstraint(' + optionNumber + ')');
-	myParent.insertBefore (newOption, here);
-
-	newOption = document.createElement('span');
-	newOption.id = 'butspace' + optionNumber;
-	newOption.innerHTML = '&nbsp;&nbsp;';
-	myParent.insertBefore (newOption, here);
-
-	// Button to open wizard (for some types)
-	newOption = document.createElement ('button');
-	newOption.type = 'button';
-	newOption.id = 'wizard' + optionNumber;
-	newOption.innerHTML = 'Wizard';
-	newOption.setAttribute('onclick','openWizard(' + optionNumber + ')');
-	myParent.insertBefore (newOption, here);
-
-	newOption = document.createElement ('br');
-	newOption.id = 'br' + optionNumber;
-	myParent.insertBefore (newOption, here);
+echo "	myParent.insertBefore (newButton ('delcons' + optionNumber, 'Remove', 'removeConstraint(' + optionNumber + ')'), here);
+	myParent.insertBefore (newSpan ('butspace' + optionNumber, '&nbsp;&nbsp;'), here);
+  myParent.insertBefore (newButton ('wizard' + optionNumber, 'Wizard', 'openWizard(' + optionNumber + ')'), here);
+	myParent.insertBefore (newBreak ('br' + optionNumber), here);
 
 	// run side effects of selecting the first radio button
 	radioClicked(optionNumber);
@@ -275,17 +237,21 @@ function radioClicked (thisOption) {
 	currentOption = thisOption;
 	var theForm = document.forms['search'];
 	var hint;
-	var wizard;
-	// If Weights, make subsidiary buttons available\n";
+	var wizard;\n";
+  $delcode = '';
   foreach (constraint::list () as $classname) {
+    $suffix = substr ($classname, 4);
     if ($buttonCode = $classname::getButtonCode ()) {
-      echo "if (theForm['r" . substr ($classname, 4) . "' + thisOption].checked) {
+      echo "if (theForm['r$suffix' + thisOption].checked) {
         {$buttonCode['add']}
       } else {
         {$buttonCode['del']}
       }\n";
+      $delcode = "$delcode {$buttonCode['del']}\n";
     }
+    $fieldlist = "{$fieldlist} r$suffix t$suffix";
   }
+  $fieldlist = substr ($fieldlist, 1); // remove initial space
 
 	echo "if (theForm['rweights' + thisOption].checked) {
 		hint = 'This option will look at the weight of each letter, which can either be its value in Scrabble (e.g., H=4) or its position ' +
@@ -346,6 +312,11 @@ function radioClicked (thisOption) {
 	newOption.innerHTML = '<br>' + hint + '<br>';
 	newOption.className = 'hint'; // see CSS
 	myParent.insertBefore (newOption, here);
+}
+
+function removeConsMore (thisOption) {
+  $delcode
+  removeChildren (thisOption, '$fieldlist');
 }
 
 function validateConstraint (thisOption) {

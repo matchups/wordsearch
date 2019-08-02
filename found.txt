@@ -2,22 +2,10 @@
 ---------- CATSUGGESTDEV.PHP
 
 ---------- CONSDEV.PHP
-	public static function getValidateConstraintCode () {
-		throw new Exception ("Must override getValidateConstraintCode");
-	public static function getValidateConstraintCode () {
-	public static function getValidateConstraintCode () {
-	public static function getValidateConstraintCode () {
-	public static function getValidateConstraintCode () {
-	public static function getValidateConstraintCode () {
-	public static function getValidateConstraintCode () {
-	public static function getValidateConstraintCode () {
 
 ---------- CORPUSDEV.PHP
 
 ---------- FORMDEV.PHP
-function validateConstraint (thisOption) {
-        echo $classname::getValidateConstraintCode () . "
-  echo "} // end validateConstraint\n";
 
 ---------- HELPDEV.HTML
 
@@ -32,6 +20,5 @@ function validateConstraint (thisOption) {
 ---------- SEARCHDEV.PHP
 
 ---------- UTILITYDEV.JS
-		if (ret = validateConstraint (thisOption)) {
 
 ---------- UTILITYDEV.PHP

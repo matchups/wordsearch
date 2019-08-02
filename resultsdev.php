@@ -85,7 +85,8 @@ function showExplain ($result) {
 			if ($table == 'PW' || $table == 'SW') {
 				$table = 'words';
 			}
-			//!! sqlDump ("SHOW index FROM " . $table);
+			echo "<P>Sorry, currently unable to show possible indexes.  Please edit resultsdev.php.<P>";
+			// sqlDump ("SHOW index FROM " . $table);
 		}
 	}
 }

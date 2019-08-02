@@ -5,19 +5,8 @@ function addRadio (radioValue, labelText) {
 	var here = document.getElementById("count");
 	var myParent = here.parentNode;
 
-	//!! use functions for this
-	var newOption = document.createElement("input");
-	newOption.type = "radio";
-	newOption.name = "radio" + optionNumber;
-	newOption.value = radioValue;
-	newOption.id = "r" + radioValue + optionNumber;
-	newOption.setAttribute('onclick','radioClicked(' + optionNumber + ')');
-	myParent.insertBefore (newOption, here);
-
-	newOption = document.createElement("span");
-	newOption.id = "t" + radioValue + optionNumber;
-	newOption.innerHTML = " " + labelText + " ";
-	myParent.insertBefore (newOption, here);
+	myParent.insertBefore (newRadio ('r' + radioValue + optionNumber, 'radio' + optionNumber, '', 'radioClicked(' + optionNumber + ')'), here);
+	myParent.insertBefore (newSpan ('t' + radioValue + optionNumber, ' ' + labelText + ' '), here);
 }
 
 function badGroups (pattern) {
@@ -70,23 +59,18 @@ function mainChange ()
 
 	// Now that we know, update the GUI
 	theForm["repeat"].disabled = !letterBank;
-	//!! use ?:
-	if (letterBank) {
-		textColor = "black";
-	} else {
+	if (!letterBank) {
 		theForm["repeat"].checked = false;
-		textColor = "gray";
 	}
-	document.getElementById("trepeat").style = "color:" + textColor; // for some reason, theForm["trepeat"] doesn't work here
+	document.getElementById("trepeat").style = "color:" + (letterBank ? 'black' : 'gray'); // for some reason, theForm["trepeat"] doesn't work here
 }
 
 function removeConstraint(thisOption)
 // remove the chosen constraint
-//!! Needs to have control list parameterized
 {
-	noWeightSub (thisOption);
-	removeChildren (thisOption, "label not query rpattern rregex rsubword rweights rcharmatch rcrypto " +
-				"tpattern tregex tsubword tweights tcharmatch tcrypto delcons butspace wizard br rcustomsql tcustomsql");
+	// noWeightSub (thisOption);
+	removeConsMore (thisOption); // generated code
+	removeChildren (thisOption, "label not query delcons butspace wizard br");
 
 	// if it is the last one being removed, decrement the count
 	var here = theForm["count"];
@@ -269,6 +253,16 @@ function newRadio (id, name, flags, onclick) {
 	newOption.setAttribute('onclick', onclick);
 	return newOption;
 }
+
+function newButton (id, text, onclick) {
+	var newOption = document.createElement ('button');
+	newOption.type = 'button';
+	newOption.id = id;
+	newOption.innerHTML = text;
+	newOption.setAttribute('onclick', onclick);
+	return newOption;
+}
+
 
 function wizInsert (newOption) {
 	var here = document.getElementById('wizfields');

@@ -71,7 +71,7 @@ class constraint {
 	}
 
 	public function rebuildForm($realNumber) {
-		Echo "addOption(" . ($_GET["level"]/3) . ");\n";
+		Echo "addOption();\n";
 		if ($this->not) {
 			Echo "theForm['not$realNumber'].checked = true;\n";
 		}
@@ -436,7 +436,9 @@ class consweights extends constraint {
 		}
 
 	public static function getButtonCode () {
-		$ret ['add'] = "		if (theForm['rscrabble' + thisOption] === undefined) {
+		$ret ['add'] = "
+				// If Weights, make subsidiary buttons available
+				if (theForm['rscrabble' + thisOption] === undefined) {
 					var here = theForm['rcharmatch' + thisOption];
 					var myParent = here.parentNode;
 
@@ -469,8 +471,8 @@ class consweights extends constraint {
 					newOption.id = 'talpha' + thisOption;
 					newOption.innerHTML = ' alphabet] ';
 					myParent.insertBefore (newOption, here);
-				}\n";
-			$ret ['del'] = "		noWeightSub (thisOption);\n";
+				}";
+			$ret ['del'] = "		noWeightSub (thisOption);";
 			return $ret;
 	}
 
