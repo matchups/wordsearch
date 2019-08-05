@@ -16,7 +16,7 @@ try {
     // set the PDO error mode to exception
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $tname = "catparent";
+    $tname = "word_entry";
 /*
     runit ("CREATE TABLE $tname (
 	id int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -27,7 +27,7 @@ try {
     runit ("ALTER TABLE $tname
 	ADD flags char(12)");
 */
-    runit ("CREATE INDEX catparentidx ON $tname (parentcat)");
+    runit ("CREATE INDEX wordposwordidx ON word_position (word_id)");
     }
 catch(PDOException $e)
     {
@@ -43,4 +43,3 @@ function runit ($sql) {
 ?>
 <BR>
 bottom
-

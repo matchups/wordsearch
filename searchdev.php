@@ -214,6 +214,8 @@ function refineQuery ($sql, &$rows) {
 			$sql = str_replace ('words PW', 'words PW FORCE INDEX (wbankidx)', $sql);
 		}
 	}
+
+	$sql = "SELECT /*+ MAX_EXECUTION_TIME(2000) */ " . substr ($sql, 7); // set 30-second timeout
 	return $sql;
 }
 
