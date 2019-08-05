@@ -2,61 +2,38 @@
 ---------- CATSUGGESTDEV.PHP
 
 ---------- CONSDEV.PHP
-		Echo "addOption();\n";
-			Echo "theForm['not$realNumber'].checked = true;\n";
-		Echo "theForm['query$realNumber'].value = '" . addslashes ($this->spec) . "';\n";
-		Echo "theForm['r" . $_GET["radio$this->num"] . "$realNumber'].checked = true;\n";
-		Echo "radioClicked ($realNumber);\n";
-		Echo "radioClicked ($realNumber);\n"; // This will display the Scrabble and alphabetic radio buttons
-			Echo "theForm['ralpha$realNumber'].checked = true;\n";
+		return 'Dummy hint';
+
+---------- CONSSUBWORDDEV.PHP
+
+---------- CONSWEIGHTSDEV.PHP
 
 ---------- CORPUSDEV.PHP
-		Echo "&nbsp;&nbsp;<button type='button' id='add$corpus' onclick='addOption$corpus();return false;'>More</button><BR>
-		Echo "		myParent.insertBefore (newButton ('delcons{$corpus}_' + corpusOptionNumber, 'Remove', 'removeConstraint$corpus(' + corpusOptionNumber + ')'), here);
-		Echo "radioClicked$corpus ($realNumber);\n"; // This will display the secondary radio buttons
-		Echo "theForm['rc{$corpus}_$range$realNumber'].checked = true;\n";
 
 ---------- FORMDEV.PHP
-	Echo "<H3>Control</H3>";
-	Echo "<A id=basic>Basic search</A>\n";
-Echo "<BR>\n";
-Echo "<form name='search' id='search' onsubmit='return validateForm()' method='get'>\n";
-Echo "<input type=hidden id='simple' name='simple' value='" . ($advanced ? 'off' : 'on') . "' />\n";
-	Echo "<input type='submit' value='Submit' id='yyy'/>\n";
-Echo "<script>
+<span id=hint></span>
+	var hint;
+      hint = '" . $classname::getHint() . "'
+	// Get rid of old hint and display new one.
+		hint += '  You can also press the Wizard button to open a form which will help you enter the required pieces of the specification.';
+	theForm.removeChild(document.getElementById('hint'));
+	newOption = newSpan ('hint', '<br>' + hint + '<br>');
+	newOption.className = 'hint'; // see CSS
 
 ---------- HELPDEV.HTML
 
 ---------- INDEXDEV.PHP
-Echo "<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
-	Echo "<A HREF='indexback.html$security&type=back'>Previous</A><BR>";
-	Echo "<A HREF='index.php$security'>Current</A><BR>";
-	Echo "<A HREF='indexbeta.php$security&type=beta'>Beta</A><BR>";
-	Echo "<A HREF='indexdev.php$security&type=dev'>Development</A><BR>";
 
 ---------- PARSEDEV.PHP
 
 ---------- PHRASESDEV.PHP
-Echo "$base Phrases";
-Echo "Phrases containing <span class='specs'>$base</span></H2>";
 
 ---------- RESULTSDEV.PHP
-					Echo "$oneword  ";
-					Echo "<A target='_blank' " .
-		Echo "No matches found.<BR>";
 
 ---------- SEARCHDEV.PHP
-Echo "<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
-Echo "$pattern - Word Search $type $version";
-	Echo "<H2>Word Search $type $version Results: <span class='specs'>$pattern";
-	Echo "</span></H2>";
-	Echo "<script>\n";
-		Echo "theForm['$name'].checked = $checked;\n";
-		Echo "theForm['$name'].value = '$value';\n";
-	Echo "theForm['count'].value = 1;\n";
-	Echo "optionNumber=1;\n";
 
 ---------- UTILITYDEV.JS
+	// if it is the one with a hint displayed, blank out the hint (don't delete it, because code elsewhere assumes it exists)
+		document.getElementById("hint").innerHTML = "";
 
 ---------- UTILITYDEV.PHP
-	Echo "<!-- $text -->";

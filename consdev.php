@@ -464,6 +464,6 @@ class conscustomsql extends constraint {
 
 // A couple of big ones get their own source files
 $type = $_GET['type'];
-include "consweights$type.dev";
-include "conssubword$type.dev";
+include "consweights$type.php";
+include "conssubword$type.php";
 ?>

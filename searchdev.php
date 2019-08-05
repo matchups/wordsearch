@@ -163,13 +163,7 @@ function buildReloadQuery ($consObjects) {
 	// If the checkbox is set in the query, set it in the form
 	$fieldlist = 'anyorder single phrase';
 	if ( $_GET['level'] > 0) {
-		$advanced = true;
-		if (isset($_GET['simple'])) {
-			if ($_GET['simple'] == 'on') {
-				$advanced = false;
-			}
-		}
-		if ($advanced) {
+		if ($advanced = (($_GET['simple'] ?? '') != 'on')) {
 			$fieldlist = $fieldlist . ' repeat whole' . $_GET["morecbx"];
 		}
 	}
@@ -214,8 +208,7 @@ function buildReloadQuery ($consObjects) {
 function refineQuery ($sql, &$rows) {
 	if (strpos ($sql, 'PW.bank') !== false) {
 		$result = $GLOBALS['conn']->query("EXPLAIN $sql")->fetch(PDO::FETCH_ASSOC);
-		$key = $result['key']; // key used by SQL for outer loop
-		if (isset ($key)) {
+		if (isset ($result['key'])) {// key used by SQL for outer loop
 			$rows = $result['rows'];
 		} else {
 			$sql = str_replace ('words PW', 'words PW FORCE INDEX (wbankidx)', $sql);

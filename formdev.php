@@ -28,16 +28,14 @@ $level = $_GET['level'];
 if ($level == 0) {
 	$advanced = false;
 } else {
-	if (isset($_GET['simple'])) {
-		if ($_GET[simple] == 'on') {
-			$advanced = false;
-			echo "<A id=advanced>Advanced search</A>\n";
-		}
+	if (($_GET[simple] ?? '') == 'on') {
+		$advanced = false;
+		echo "<A id=advanced>Advanced search</A>\n";
 	}
 }
 if ($advanced) {
 	Echo "<H3>Control</H3>";
-	Echo "<A id=basic>Basic search</A>\n";
+	Echo "<A id=basic HREF='http://alfwords.com'>Basic search</A>\n";
 }
 Echo "<BR>\n";
 Echo "<form name='search' id='search' onsubmit='return validateForm()' method='get'>\n";
@@ -252,7 +250,7 @@ function radioClicked (thisOption) {
     }
     $fieldlist = "{$fieldlist} r$suffix t$suffix";
     echo "if (theForm['r$suffix' + thisOption].checked) {
-      hint = '" . $classname::getHint() . "'
+      hint = '" . str_replace ("\n", "", $classname::getHint()) . "';
       wizard = " . ($classname::wizard() ? 'true' : 'false'). ";
     }\n";
   }
@@ -312,7 +310,7 @@ function preserveInfo ($type, $version) {
 	echo "document.getElementById('search').action = 'search$type.php';\n";
 	echo "document.getElementById('help').action = 'help$type.html';\n";
   $level = $_GET['level'];
-  $security = 'sessionkey=' . $_GET['sessionkey'] . "&level=$level";
+  $security = "sessionkey={$_GET['sessionkey']}&level=$level&type=$type";
   if ($GLOBALS['advanced']) {
      echo "document.getElementById('basic').href = 'index$type.php?simple=on&$security';\n";
 	} else {

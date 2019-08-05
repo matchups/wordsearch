@@ -16,13 +16,13 @@ Echo "<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
 include "utility$type.php";
 include "cons$type.php";
 include "corpus$type.php";
-?>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="styles.css">
+
+echo "<meta name='viewport' content='width=device-width, initial-scale=1'>
+<link rel='stylesheet' href='styles.css'>
 </HEAD>
 
-<BODY>
-<?php
+<BODY>\n";
+
 $version = "0.73b";
 echo "<H2>Word Search <span class='specs'>$version</span></H2>";
 include "form$type.php";

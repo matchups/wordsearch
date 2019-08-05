@@ -77,13 +77,11 @@ class corpus {
 	public function builder (&$consObjects) {
 		// Allows corpus to set up filtering, either via SQL or client processing
 		// Base implementation calls a function on the corpus object for each row
-		if (isset ($_GET["count$this->corpus"])) {
-			$count = $_GET["count$this->corpus"];
-			for ($num = 1; $num <= $count; $num++) {
-				$key = "{$this->corpus}_$num";
-				if (($ccobject = $this -> buildOne ($_GET["query$key"], $_GET["radio$key"], getCheckbox ("not$key"), $num)) !== null) {
-					$consObjects [$key] = $ccobject;
-				}
+		$count = $_GET["count$this->corpus"] ?? 0;
+		for ($num = 1; $num <= $count; $num++) {
+			$key = "{$this->corpus}_$num";
+			if (($ccobject = $this -> buildOne ($_GET["query$key"], $_GET["radio$key"], getCheckbox ("not$key"), $num)) !== null) {
+				$consObjects [$key] = $ccobject;
 			}
 		}
 	}
@@ -131,7 +129,7 @@ class corpus {
 			if ($lead == '!') {
 				echo "newOption.class = 'disabled';\n";
 			}
-			echo "myParent.insertBefore (, here);\n";
+			echo "myParent.insertBefore (newOption, here);\n";
 		}
 
 		// Button to remove constraint
@@ -174,12 +172,7 @@ class corpus {
 
 	public function requireWhole () {
 		// Do we need to restrict to whole entries because we need to look at the linked pages?
-		if (isset ($_GET["count$this->corpus"])) {
-			if ($_GET["count$this->corpus"] > 0) {
-				return true; // By default, if there are any special considerations, the answer is yes
-			}
-		}
-		return false;
+		return ($_GET["count$this->corpus"] ?? 0) > 0;
 	}
 
 	function clickedCode () {
@@ -264,7 +257,7 @@ class corpusWikipedia extends corpus {
 			myParent.insertBefore (newSpan ('tc{$corpus}_$key' + thisOption,  ' $text '), here);\n";
 		} // end foreach (hard to tell with all that quoted stuff!)
 
-		$code = $code . "				myParent.insertBefore (newButton ('catlook{$corpus}_' + thisOption, 'Lookup', 'categoryLookup$corpus(' + thisOption + ')')), here);
+		$code = $code . "				myParent.insertBefore (newButton ('catlook{$corpus}_' + thisOption, 'Lookup', 'categoryLookup$corpus(' + thisOption + ')'), here);
 					myParent.insertBefore (newSpan ('tclsp{$corpus}_' + thisOption, ']&nbsp;&nbsp;'), here);
 
 					if (notbox.checked) {
