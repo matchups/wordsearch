@@ -37,11 +37,14 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 		$position = array ();
 	} else { // Not anyorder
 		if (strpos ($pattern, ']') > 0) {
-				// Unlike Sybase, MSSQL doesn't support groups in a simple LIKE, but it does support (limited) regular expressions
-				// with the special RLIKE operator
-				$sql = $sql . " AND PW.text RLIKE '" . patternToRegex ($pattern, 'S') . "'";
+			// Unlike Sybase, MSSQL doesn't support groups in a simple LIKE, but it does support (limited) regular expressions
+			// with the special RLIKE operator
+			$sql = $sql . " AND PW.text RLIKE '" . patternToRegex ($pattern, 'S') . "'";
 		} else {
-				$sql = $sql . " AND PW.text LIKE '" . patternToSQL ($pattern) . "'";
+			$sql = $sql . " AND PW.text LIKE '" . patternToSQL ($pattern) . "'";
+			if (preg_match ('/^[a-z]*/', $pattern, $matches)) {
+				$sql = $sql . " AND PW.text BETWEEN '$matches[0]' AND '$matches[0]zzz'";
+			}
 		}
 		$position = patternPosition ($pattern);
 		// if there's not a strong leading subset, the rest of the letters may help

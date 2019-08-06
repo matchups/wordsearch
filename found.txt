@@ -1,88 +1,28 @@
 
 ---------- CATSUGGESTDEV.PHP
-} catch (PDOException $e) {
-  echo " ((err " . $e->getMessage() . "))";
 
 ---------- CONSDEV.PHP
-	public function localFilter($oneword, $entry, $entry_id) {
-		// $entry = external name; useful for literal or source checks
-	public function localFilter($oneword, $entry, $entry_id) {
-				$expr = $matches [$side];
-				if ($expr < 0) {
-				if ($expr == -1) {
-						$expr = '';
-						$expr = $expr + 1;
-				$expr = "char_length (PW.text) " . $expr;
-				$expra [$side] = "substring(PW.text, $expr, 1)";
-				$expra [$side] = "ASCII (" . $expra [$side] . ")";
-		$sql = " AND $expra[1] $rel $expra[3]";
 
 ---------- CONSSUBWORDDEV.PHP
 
 ---------- CONSWEIGHTSDEV.PHP
 
 ---------- CORPUSDEV.PHP
-	public function answerLink ($entry) {
-			return "<A target='_blank' HREF='" . $this->getURL ($entry) . "'>$entry</A>";
-			return $entry;
-	protected function getURL ($entry) {
-	  return str_replace ('@', urlencode ($entry), $this->urlpattern);
-	function getURL ($entry) {
-		return parent::getURL ($this->titleFix ($entry));
-	function titleFix ($entry) {
-		return str_replace (array (' ', '"'), array ('_', ''), $entry);  // Space to underscore and remove quotes, per Wikipedia's private rules
-  protected function getAPI ($entry, $action, $keyname, $prop) {
-		$entry = urlencode ($this->corpusObject->titleFix ($entry));
-		$url = "https://en.wikipedia.org/w/api.php?action=$action&$keyname=$entry&prop=$prop&format=json";
-  protected function getText ($entry) {
-		$text = $this->getAPI ($entry, 'parse', 'page', 'wikitext')['parse']['wikitext']['*'];
-	function localFilter($oneword, $entry, $entry_id) {
-		return (preg_match ($this->regex, $this->getText($entry))) XOR ($this -> not);
-	function localFilter($oneword, $entry, $entry_id) {
-		$ret = (preg_match ($this->regex, $this->getText($entry), $matches)) XOR ($this -> not);
-	function localFilter($oneword, $entry, $entry_id) {
-		 		WHERE entry_cat.entry_id = $entry_id AND category.corpus_id = $corpus";
-	function localFilter($oneword, $entry, $entry_id) {
-		foreach ($this->getAPI ($entry, 'query', 'titles', 'info')['query']['pages'] as $page) { // should be only one, but we don't know the ID
 
 ---------- FORMDEV.PHP
-catch (PDOException $e) {
-  errorMessage ("SQL failed identifying sources: " . $e->getMessage());
 
 ---------- HELPDEV.HTML
 
 ---------- INDEXDEV.PHP
 
 ---------- PARSEDEV.PHP
-function doLength ($table, $minlen, $maxlen, $echo) {
-	if ($echo) {
 
 ---------- PHRASESDEV.PHP
-catch(PDOException $e) {
-  errorMessage ("SQL failed: $sql... " . $e->getMessage());
 
 ---------- RESULTSDEV.PHP
-		$entry = $row['entry'];
-		$entry_id = $row['entry_id'];
-			if (!$thisConsObject->localFilter ($oneword, $entry, $entry_id)) {
-				echo $corpusObjects[$corpus]->answerLink ($entry);
 
 ---------- SEARCHDEV.PHP
-			$end = '';
-			$end = " AND session.user_id = 0";
-		$sql = "SELECT $start, ip_address FROM session $middle WHERE session_key = '$session' AND status = 'A' $end";
-	catch(PDOException $e) {
-		$code = $e->getCode ();
-		$explain = getCheckbox ('explain');
-		if ($explain) {
-	catch(Exception $e) {
-  	$result = $e->getMessage();
-	if ($explain) {
-catch(PDOException $e) {
-	errorMessage ("SQL failed: $sql... " . $e->getMessage());
-function timeDiff ($begin, $end) {
-	$endArray = explode (' ', $end);
-	return intval ((($endArray[1] - $beginArray[1]) + ($endArray[0] - $beginArray[0])) * 1000 + 0.5);
+	$sql = "SELECT /*+ MAX_EXECUTION_TIME(2000) */ " . substr ($sql, 7); // set 30-second timeout
 
 ---------- UTILITYDEV.JS
 

@@ -215,7 +215,6 @@ function refineQuery ($sql, &$rows) {
 		}
 	}
 
-	$sql = "SELECT /*+ MAX_EXECUTION_TIME(2000) */ " . substr ($sql, 7); // set 30-second timeout
 	return $sql;
 }
 
