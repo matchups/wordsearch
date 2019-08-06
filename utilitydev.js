@@ -5,7 +5,7 @@ function addRadio (radioValue, labelText) {
 	var here = document.getElementById("count");
 	var myParent = here.parentNode;
 
-	myParent.insertBefore (newRadio ('r' + radioValue + optionNumber, 'radio' + optionNumber, '', '', 'radioClicked(' + optionNumber + ')'), here);
+	myParent.insertBefore (newRadio ('r' + radioValue + optionNumber, 'radio' + optionNumber, '', radioValue, 'radioClicked(' + optionNumber + ')'), here);
 	myParent.insertBefore (newSpan ('t' + radioValue + optionNumber, ' ' + labelText + ' '), here);
 }
 

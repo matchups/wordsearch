@@ -50,9 +50,11 @@
     <LI>Use ?? to replace some issets (done)
     <LI><strike>SQL timeout https://stackoverflow.com/questions/415905/how-to-set-a-maximum-execution-time-for-a-mysql-query/23319195</strike> Oh well, doesn't work
     <LI>Github (done)
-    <LI><font color=blue>Add reverse indexes to word/entry and to category</font>
+    <LI>Add reverse indexes to word/entry and to category (done)
+    <LI>Show most popular categories in lookup (done)
+    <LI>Failure: <A HREF="http://www.8wheels.org/wordsearch/searchdev.php?simple=off&pattern=chriscole*&anyorder=on&query2=%2F%5Bchrisole%5D%7B9%7D%2F&radio2=&count=2&sessionkey=tvjc9pyym%2C*b&level=3&minlen=11&maxlen=21&single=on&phrase=on&corpus1=on&corpus2=on&count2=0&corpus87=on&morecbx=+corpus1+corpus2+c2flagR+corpus87&type=dev&version=0.73b">Words with CHRIS COLE scrambled</A>
     <LI>Look at performance changing some LIKEs to BETWEENs*+
-    <LI>Show most popular categories in lookup
+    <LI>See what is actually a reasonable limit on the number of rows
   </OL>
   <LI>0.74 Wiktionary
     <OL type=a>
@@ -167,13 +169,14 @@
 <LI>1.3 Test mode for constraints
 <LI>1.4 Search for anagrams and banks
 </UL>
-<H2>Bugs</H2>
+<H2>Bugs, misfeatures</H2>
 <LL>
 <LI>Multiple out-of-order constraint deletions followed by an insert
 <LI>Required fields in wizard
 <LI>Text search on disambiguation pages
 <LI>Validating corpus criteria
 <LI>Custom SQL with PW. (converted to lowercase)
+<LI>Signon to display message based on code
 </LL>
 <H2>Ideas</H2>
 <LL>
