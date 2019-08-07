@@ -3,7 +3,7 @@ function cleanSQL ($text) {
     return str_replace ('\'', '\\\'', str_replace ('\\', '\\\\', $text));
 }
 
-function newEntry ($conn, $entry, $flags, $corpus) {
+function newEntry ($conn, $entry, $flags, $corpus, $helper) {
   Echo "<BR>newEntry ('$entry', '$flags', $corpus)";
   if (isset ($_GET["debug"])) {
     echo ' {';
@@ -76,12 +76,17 @@ function newEntry ($conn, $entry, $flags, $corpus) {
      }
    }
 
+  $ret = array ('id' => $entry_id);
   if (strpos ($flags, 'R') === false) {
     foreach (getCategories ($conn, $entry) as $category) {
       $cat_id = getCatID ($conn, $category, $corpus, 0);
       sqlInsert ($conn, "INSERT entry_cat (entry_id, cat_id) VALUES ($entry_id, $cat_id)");
+      $helper->category ($category, $ret);
     }
   }
+
+  $helper->postProcess ($conn, $ret);
+  return $ret;
 }
 
 function newWord ($conn, $entry_id, $word, $full) {
@@ -220,7 +225,7 @@ class dummyConnection extends PDO {
   }
 
   public function fetch ($ignored) {
-    return false;
+    return rand(0,6) == 3;
   }
 } // end class
 
@@ -258,28 +263,30 @@ function asciitize ($rawword) {
                  [195,170]e [195,171]e [195,172]i [195,173]i [195,174]i [195,175]i [195,176]o [195,177]n [195,178]o [195,179]o -
                  [195,180]o [195,181]o [195,182]o [195,184]o [195,185]u [195,186]u [195,187]u [195,188]u [195,189]y [195,190] [195,191]y -
                [196,128]A [196,129]a [196,131]a [196,132]A [196,133]a [196,134]C [196,135]c [196,136]C [196,137]c [196,138]C [196,139]C -
-                 [196,140]C [196,141]c [196,143]d [196,144]D [196,145]d [196,146]E [196,147]e [196,149]e -
-                 [196,151]e [196,153]e [196,155]e [196,158]G [196,159]g -
+                 [196,140]C [196,141]c [196,142]D [196,143]d [196,144]D [196,145]d [196,146]E [196,147]e [196,149]e -
+                 [196,151]e [196,153]e [196,155]e [196,157]g [196,158]G [196,159]g -
                  [196,160]G [196,161]g [196,163]g [196,165]h [196,166]H [196,167]h [196,169]i -
                  [196,170]I [196,171]i [196,173]i [196,175]i [196,176]I [196,177]i [196,178]IJ [196,179]ij -
                  [196,182]K [196,183]k [196,184]k [196,186]I [196,188]l [196,189]' [196,190]' [196,191]L -
                [197,129]L [197,130]l [197,132]n [197,133]N [197,134]n [197,135]N [197,136]n [197,138]NG [197,139]n -
-                 [197,140]O [197,141]o [197,142]O [197,143]o [197,144]O [197,145]o [197,146]OE [197,147]oe -
+                 [197,140]O [197,141]o [197,142]O [197,143]o [197,144]O [197,145]o [197,146]OE [197,147]oe [197,149]r -
                  [197,151]r [197,152]R [197,153]r [197,154]S [197,155]s [197,157]s [197,158]S [197,159]s -
                  [197,160]S [197,161]s [197,162]T [197,163]t [197,164]T [197,165]' [197,166]T [197,169]u -
                  [197,170]U [197,171]u [197,173]u [197,175]u [197,177]u [197,179]u -
                  [197,180]W [197,181]w [197,183]y [197,184]Y [197,186]z [197,187]Z [197,188]a [197,189]Z [197,190]z [197,191]s -
-               [198,142]. [198,143]. [198,146]f [198,161]o [198,168]? [198,176]u [198,182]z -
-               [199,128]| [199,129] [199,131]! [199,137]lj [199,140]nj [199,142]a [199,144]i [199,146]o [199,147]U [199,148]u -
+               [198,142]. [198,143]. [198,146]f [198,153]k [198,161]o [198,168]? [198,176]u [198,182]z [198,191]? -
+               [199,128]| [199,129] [199,130]? [199,131]! [199,137]lj [199,140]nj [199,142]a [199,144]i [199,146]o [199,147]U [199,148]u -
                  [199,152]u [199,156]u [199,157]a [199,165]g [199,167]g [199,171]o [199,180]G [199,181]g [199,189]ae -
                [200,152]S [200,153]s [200,154]T [200,155]t [200,157]. [200,159]h [200,167]a [200,179]y -
-               [201,144]a [201,145]a [201,148]a [201,153]a [201,155]a [201,161]g [201,163]gh [201,168]i [201,169]i [201,170]i [201,184]r [201,185]r [201,190]r -
-               [202,128]? [202,129]? [202,131]ch [202,135]t [202,137]u [202,142]? [202,148]? [202,162]? -
+               [201,144]a [201,145]a [201,148]a [201,153]a [201,155]a [201,161]g [201,163]gh [201,168]i [201,169]i -
+                 [201,170]i [201,178]? [201,184]r [201,185]r [201,190]r -
+               [202,128]? [202,129]? [202,131]ch [202,135]t [202,137]u [202,142]? [202,148]? [202,152]O [202,162]? -
                  [202,176]h [202,184]y [202,185]' [202,186]'' [202,187]` [202,188]' [202,189]' [202,190]' [202,191]' -
                [203,129] [203,136]' [203,144]: [203,152]' [203,153]' [203,155]. [203,164]' -
                [204,129]e [204,130]e [204,131]a [204,132]u [204,134]e [204,136] [204,138] [204,140]B [204,141]i [204,147]l -
-                 [204,157] [204,163]x [204,164]B [204,165]r [204,167]B [204,168]d [204,170]B [204,177]o [204,178] [204,181] [204,182]B [204,184]/ [204,186] -
-               [205,152] [205,160]n [205,161]v -
+                 [204,157] [204,163]x [204,164]B [204,165]r [204,167]B [204,168]d -
+                 [204,170]B [204,176] [204,177]o [204,178] [204,181] [204,182]B [204,184]/ [204,186] -
+               [205,152] [205,160]n [205,161]v [205,187]? -
                [206]+2 -
                [207,128] [207,130]c [207,131] [207,134] [207,135]. [207,137]? [207,140]o -
                [208,132]C [208,134]I [208,144]A [208,145] [208,148] [208,149]E [208,152] [208,154]K [208,156]M [208,157]H -
@@ -373,7 +380,8 @@ function asciitize ($rawword) {
 
 function getCategories ($conn, $title) {
   $titleUrl = urlencode (str_replace (' ', '_', $title));
-  $catUrl = "https://en.wikipedia.org/w/api.php?action=query&titles=$titleUrl&prop=categories&format=json&clshow=!hidden&cllimit=500";
+  $apipage = explode ('?', $GLOBALS['baseurl'])[0];
+  $catUrl = "$apipage?action=query&titles=$titleUrl&prop=categories&format=json&clshow=!hidden&cllimit=500";
   $parentCounter = 0;
   foreach (json_decode(fetchUrl($catUrl), true)["query"]["pages"] as $catinfo) {
     foreach ($catinfo["categories"] as $category) {
@@ -389,8 +397,8 @@ function getCatID ($conn, $title, $corpus, $depth) {
     echo "<!--$title too deep-->";
     return ''; // Maybe it's an infinite loop, or maybe just a useless very deep one.  Either way, it's time to bail
   }
-  $stmt = $conn->prepare('SELECT id FROM category WHERE title = ?');
-  $stmt->execute(array ($title));
+  $stmt = $conn->prepare('SELECT id FROM category WHERE title = ? AND corpus_id = ?');
+  $stmt->execute(array ($title, $corpus));
   if (($result = $stmt->fetch (PDO::FETCH_ASSOC)) !== false) {
     $id = $result['id']; // already there
   } else {

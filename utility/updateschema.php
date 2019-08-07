@@ -27,7 +27,8 @@ try {
     runit ("ALTER TABLE $tname
 	ADD flags char(12)");
 */
-    runit ("CREATE INDEX wordposwordidx ON word_position (word_id)");
+
+    runit ("UPDATE corpus SET id=3 WHERE id=88");
     }
 catch(PDOException $e)
     {

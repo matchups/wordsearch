@@ -23,12 +23,12 @@
     <LI>Limit number of pages searched and allow restart/continue
     <LI>Category search
     </OL>
-  <LI>0.73 Miscellaneous internal
+  <LI>0.73 Miscellaneous internal  (<B>all done</B>)
     <OL type=a>
     <LI>Dumper security (done)
     <LI>Validate same IP address (done)
     <LI>Git (done)
-    <LI>Refactor class-related JS stuff to PHP (<B>all done</B>)
+    <LI>Refactor class-related JS stuff to PHP
 	<UL>
 	<LI>Wizarddev.js to big echo'ed PHP
 	<LI>Remove include w.js
@@ -46,29 +46,36 @@
 	<LI>Always use createElement shortcuts and add radio values+
 	<LI>Pull out stuff from consdev.php to get it under 20K+ & update vup
 	</UL>
-    <LI>Convert small non-PHP stuff near top of searchdev.php to echos (done)
-    <LI>Use ?? to replace some issets (done)
+    <LI>Convert small non-PHP stuff near top of searchdev.php to echos
+    <LI>Use ?? to replace some issets
     <LI><strike>SQL timeout https://stackoverflow.com/questions/415905/how-to-set-a-maximum-execution-time-for-a-mysql-query/23319195</strike> Oh well, doesn't work
-    <LI>Github (done)
-    <LI>Add reverse indexes to word/entry and to category (done)
-    <LI>Show most popular categories in lookup (done)
-    <LI>Look at performance changing some LIKEs to BETWEENs*+ (pre*s is 14.227 with LIKE; 58714 rows via word_four)
-    <LI>See what is actually a reasonable limit on the number of rows
+    <LI>Github
+    <LI>Add reverse indexes to word/entry and to category
+    <LI>Show most popular categories in lookup
+    <LI>Look at performance changing some LIKEs to BETWEENs (done, but may not help)
+    <LI>See what is actually a reasonable limit on the number of rows: 4K/second, so 80K, 1M
+    <LI>Modify script to use $type, not hard-coded DEV when calling catsuggest; also update vup
   </OL>
   <LI>0.74 Wiktionary
     <OL type=a>
-    <LI>Create loader
+    <LI>Loader
       <UL>
-      <LI>Load categories
-      <LI>Flag foreign-only words
+      <LI>Create loader (done)
+      <LI>Load categories (done)
+      <LI>Flag foreign-only words (done)
+      <LI>Combine with wikipedia to one PHP (done)
+      <LI>Don't flag redirects as foreign [and update existing ones]
+      <LI>testing--jump to Alan (in progress), then restart from !ah?u once we get to Am
       </UL>
-    <LI>Run loader to 500K words
-    <LI>Enable searches, with foreign checkbox
-    <LI>Link to results
+    <LI>Run loader to 500K words, then resume <A HREF="http://www.8wheels.org/wordsearch/addwikipedia.php?limit=500&from=Sir_John_Meade%2C_1st_Baronet&corpus=2">Wikipedia load</A>
+    <LI>Add to corpus table and flag table (done)
+    <LI><strike>Enable searches, with foreign checkbox </strike> (not needed)
+    <LI><strike>Link to results</strike> (not needed)
+    <LI>Remove Gettysburg & Featured
     <LI>Filter by content (text & regex)
     <LI>Filter by category (update autosuggest to pass in corpus)
-    <LI>Filter by language
-    <LI>Handle hits in both word lists
+    <LI><strike>Filter by language</strike> (use category)
+    <LI><strike>Handle hits in both word lists</strike> (not needed)
     <LI><font color=blue>Release</font>
     </OL>
   <LI>0.75 User-specific word lists
@@ -96,6 +103,8 @@
   <LI>0.82 Recall query
   <LI>0.83 Delete query
   <LI>0.84 Share query
+  <LI>0.85 Access shared query
+  <LI>0.86 rename query
   </UL>
 <LI>0.9 Output options
   <UL>
@@ -191,4 +200,8 @@
 <LI>Anagram substring (e.g., *{MORRIS}*)
 <LI>Cache multiple pages
 </LL>
+<!-- Release process
+* Test
+* vup
+-->
 </BODY>

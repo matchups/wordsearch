@@ -100,7 +100,7 @@ try {
 			if ($rows == 0) {
 				$rows = getWidth ($sql);
 			}
-			if (($level < 2 && $rows > 10000) || $rows > 100000) {
+			if (($level < 2 && $rows > 80000) || $rows > 1000000) {
 				$result = "Your query may take too long to run.  Please add more letters.";
 			}
 		}

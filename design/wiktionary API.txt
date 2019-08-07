@@ -1,0 +1,5 @@
+
+
+https://en.wiktionary.org/w/api.php?action=query&generator=allpages&prop=info&format=json
+
+Load categories and see if any start with English

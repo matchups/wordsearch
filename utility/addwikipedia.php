@@ -1,10 +1,14 @@
 ﻿<HTML>
 <HEAD>
-<TITLE>Articles: Wikipedia API read</TITLE>
+<?php
+$classname = $_GET["classname"];
+$helper = new $classname;
+echo "
+<TITLE>Articles: " . $helper->getTitle() . " API read</TITLE>
 </HEAD>
 <BODY>
-<H1>Articles</H1>
-<?php
+<H1>Articles</H1>\n";
+
 include 'addmain.php';
 // How many tries?
 if (isset ($_GET["limit"])) {
@@ -21,7 +25,7 @@ if (isset ($_GET["corpus"])) {
 }
 
 // Where do we start?
-$baseurl='https://en.wikipedia.org/w/api.php?action=query&generator=allpages&prop=info&format=json';
+$baseurl='https://en.' . $helper->getDomain() . '/w/api.php?action=query&generator=allpages&prop=info&format=json';
 $url = $baseurl;
 if (isset ($_GET["from"])) {
   $continue['continue'] = "gapcontinue||";
@@ -31,6 +35,7 @@ if (isset ($_GET["from"])) {
 }
 
 $counter = 0;
+$more = true; // default if we fail
 try {
   $conn = openConn ($corpus);
   for ($looper = 0; $looper < $limit; $looper++) {
@@ -49,14 +54,14 @@ try {
         $flags = 'R';
       }
       echo '</B>';
-      newEntry ($conn, $page['title'], $flags, $corpus);
+      $ret = newEntry ($conn, $page['title'], $flags, $corpus, $helper);
       echo '<BR>';
     }
     if (isset ($json["continue"])) {
       $continue = $json["continue"];
       $more = true;
       $from = urlencode ($continue['gapcontinue']);
-      echo "<P><A HREF='addwikipedia.php?limit=$limit&from=$from&corpus=$corpus'>Continue<A>";
+      echo "<P><A HREF='addwikipedia.php?limit=$limit&classname=$classname&from=$from&corpus=$corpus'>Continue<A>";
     } else {
       $more = false;
       break;
@@ -91,3 +96,50 @@ function fetchUrl($uri) {
 
     return $body;
 }
+
+class loadHelper {
+  public function getTitle () {
+  	return "No class";
+  }
+
+  public function getDomain () {
+  	return "www.aprilfools.com";
+  }
+
+  public function postProcess ($conn, $ret) {
+  }
+
+  public function category ($category, &$ret) {
+  }
+} // end class loadHelper
+
+class wikipedia extends loadHelper {
+  public function getTitle () {
+  	return "Wikipedia";
+  }
+  public function getDomain () {
+  	return "wikipedia.org";
+  }
+} // end class wikipedia
+
+class wiktionary extends loadHelper {
+  public function getTitle () {
+  	return "Wiktionary";
+  }
+
+  public function getDomain () {
+  	return "wiktionary.org";
+  }
+
+  public function postProcess ($conn, $ret) {
+    if (!isset ($ret['english'])) {
+      $conn->exec ("UPDATE entry SET flags = 'F' WHERE id = {$ret['id']} AND flags != 'R'");
+    }
+  }
+
+  public function category ($category, &$ret) {
+    if (substr ($category, 0, 7) == "English") {
+      $ret ['english'] = true;
+    }
+  }
+} // end class wiktionary

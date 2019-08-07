@@ -523,7 +523,7 @@ class ccWikipediasize extends ccWikipediaText {
 
 class corpusWikiFeatured extends corpusWikipedia {
 	function allowed () {
-		return $GLOBALS['level']==3;
+		return false;
 	}
 
 	function form () {
@@ -533,7 +533,7 @@ class corpusWikiFeatured extends corpusWikipedia {
 
 class corpusDev extends corpus {
 	public function allowed () {
-		return $GLOBALS['level']==3;
+		return false;
 	}
 } // end Dev
 

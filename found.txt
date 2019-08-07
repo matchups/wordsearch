@@ -8,6 +8,7 @@
 ---------- CONSWEIGHTSDEV.PHP
 
 ---------- CORPUSDEV.PHP
+class corpusDev extends corpus {
 
 ---------- FORMDEV.PHP
 
@@ -22,7 +23,6 @@
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
-	$sql = "SELECT /*+ MAX_EXECUTION_TIME(2000) */ " . substr ($sql, 7); // set 30-second timeout
 
 ---------- UTILITYDEV.JS
 

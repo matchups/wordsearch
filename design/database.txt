@@ -12,7 +12,7 @@ word_position
 word_entry
    id, word_id, entry_id, whole (Y/N), solid (Y/N), caps (Y/N)
 entry
-   id, name (could be *), word_id, corpus_id
+   id, name (could be *), corpus_id, flags
 entry_cat
    id, entry_id, cat_id
 spandex

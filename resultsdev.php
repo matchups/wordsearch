@@ -43,7 +43,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 			}
 			if ($row['whole'] == 'Y') {
 				// If this is the whole entry, set up a link
-				echo $corpusObjects[$corpus]->answerLink ($entry);
+				echo $corpusObjects[$corpus]->answerLink ($entry) . ' ';
 			} else {
 				// Else if part of an entry name, set up a link to our page to list phrases
 				if (!$same) {
