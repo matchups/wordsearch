@@ -115,11 +115,6 @@ foreach ($corpusObjects as $corpusObject) {
 echo "} // end resetCorporaMore\n";
 echo "</script>\n";
 ?>
-<span class='disabled'>
-<label>Wiktionary (English): <input name=wiktionary type=checkbox
-   /></label><br>
-<label>Wiktionary (foreign): <input name=foreign disabled=true type=checkbox /></label><br>
-</span>
 </div>
 <!-- Put the type (Beta, Dev, Back, or nil) in the form so subsequent scripts can access it -->
 <input type=hidden id='type' name='type' />
