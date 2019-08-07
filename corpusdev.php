@@ -221,6 +221,17 @@ class corpusWikipedia extends corpus {
 		$checklist = parent::form();
 		$this->formAddRepeat ();
 		$this->formCatLookup();
+
+		// Autocomplete stuff
+		echo "<script>
+		$(document).ready(function() {
+		  $('input.category').typeahead({
+		    name: 'category',
+		    remote: 'catsuggest{$_GET['type']}.php?query=%QUERY'
+		  });
+		})
+		</script>\n";
+
 		return $checklist;
 	}
 

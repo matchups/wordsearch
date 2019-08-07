@@ -214,14 +214,6 @@ function validateForm() {
 	}
 }
 
-// Autocomplete stuff
-$(document).ready(function() {
-    $('input.category').typeahead({
-        name: 'category',
-        remote: 'catsuggestdev.php?query=%QUERY'
-    });
-})
-
 // Various shortcuts to create certain types of HTML form controls
 function newSpan (id, text) {
 	var newOption = document.createElement('span');
