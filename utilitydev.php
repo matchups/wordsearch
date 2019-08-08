@@ -61,4 +61,13 @@ function fetchUrl($url) {
 
   return $body;
 }
+
+// Display a string if we haven't done so previously
+function echoUnique ($text) {
+	$hash = hash('ripemd160', $text);
+	if (!isset ($GLOBALS['cache'][$hash])) {
+		echo $text;
+		$GLOBALS['cache'][$hash] = true;
+	}
+}
 ?>

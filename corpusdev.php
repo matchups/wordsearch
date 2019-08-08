@@ -1,6 +1,6 @@
 <?php
 class corpus {
-	public $corpus; // needs to be accessed from corpusConstraint, which is logically an inner class
+	protected $corpus;
 	protected $urlpattern;
 	protected $name;
   protected $flags;
@@ -25,8 +25,8 @@ class corpus {
 		// Alas, PHP does not support ranges in switches
 		if ($corpus == 1) {
 			$name = "WikiFeatured";
-		} else if ($corpus == 2) {
-			$name = "Wikipedia";
+		} else if ($corpus == 2 || $corpus == 3) {
+			$name = "Wikipedia"; // include Wiktionary
 		} else if ($corpus == 87) {
 			$name = "Dev";
 		} else if ($corpus > 100) {
@@ -166,7 +166,7 @@ class corpus {
 		echo "<input type=hidden id='$key' name='$key' value='0' />";
 	}
 
-	protected function optionButtonList () {
+	function optionButtonList () {
 		return array ();
 	}
 
@@ -221,17 +221,6 @@ class corpusWikipedia extends corpus {
 		$checklist = parent::form();
 		$this->formAddRepeat ();
 		$this->formCatLookup();
-
-		// Autocomplete stuff
-		echo "<script>
-		$(document).ready(function() {
-		  $('input.category').typeahead({
-		    name: 'category',
-		    remote: 'catsuggest{$_GET['type']}.php?query=%QUERY'
-		  });
-		})
-		</script>\n";
-
 		return $checklist;
 	}
 
@@ -268,7 +257,8 @@ class corpusWikipedia extends corpus {
 			myParent.insertBefore (newSpan ('tc{$corpus}_$key' + thisOption,  ' $text '), here);\n";
 		} // end foreach (hard to tell with all that quoted stuff!)
 
-		$code = $code . "				myParent.insertBefore (newButton ('catlook{$corpus}_' + thisOption, 'Lookup', 'categoryLookup$corpus(' + thisOption + ')'), here);
+		$code = $code . "				myParent.insertBefore (newButton ('catlook{$corpus}_' + thisOption, 'Lookup',
+			'categoryLookup(' + thisOption + ', $corpus)'), here);
 					myParent.insertBefore (newSpan ('tclsp{$corpus}_' + thisOption, ']&nbsp;&nbsp;'), here);
 
 					if (notbox.checked) {
@@ -294,19 +284,30 @@ class corpusWikipedia extends corpus {
 
   // Use wizard to allow user to look up category
 	protected function formCatLookup() {
-		echo "\n<script>
-			function categoryLookup{$this->corpus} (thisOption) {
+		$corpus = $this -> corpus;
+		echoUnique ("\n<script>
+			function categoryLookup (thisOption, thisCorpus) {
 				categoryOption = thisOption; // global
+				currentCorpus = thisCorpus; // global
 				document.getElementById('catlookup').style.display = 'block';
-			};
+				document.getElementById('category' + currentCorpus).style.display = 'block';
+			}
 			function closeCatWizard (saveFlag) {
 				if (saveFlag) {
-					document.getElementById('query{$this->corpus}_' + categoryOption).value = document.getElementById('category').value;
+					document.getElementById('query' + currentCorpus + '_' + categoryOption).value = document.getElementById('category' + currentCorpus).value;
 				}
 				// Hide wizard
 				document.getElementById('catlookup').style.display = 'none';
+				document.getElementById('category' + currentCorpus).style.display = 'none';
 			}
-
+			</script>\n");
+		echo "<script>
+			$(document).ready(function() {
+				$('input.category$corpus').typeahead({
+					name: 'category$corpus',
+					remote: 'catsuggest{$_GET['type']}.php?query=%QUERY&corpus=$corpus'
+				});
+			})
 			</script>\n";
 	}
 } // end Wikipedia
@@ -412,7 +413,7 @@ class ccWikipediacategory extends ccWikipediaText {
 	function parse () {
 		$this -> style = 'D'; // by default, do things with database-side filtering
 		if ($this->range == 'contains') {
-			$suffix = "{$this -> corpusObject -> corpus}_{$this->num}";
+			$suffix = $this -> corpusObject -> getCorpusNum() . "_{$this->num}";
 			$more ['pre'] = " INNER JOIN entry_cat EC$suffix ON EC$suffix.entry_id = entry.id
 			 		INNER JOIN category C$suffix ON C$suffix.id = EC$suffix.cat_id";
 			$spec = str_replace ("'", "\'", $this -> spec);
@@ -459,7 +460,7 @@ class ccWikipediacategory extends ccWikipediaText {
 	function localFilter($oneword, $entry, $entry_id) {
 		if ($this -> style == 'D') {return true;} // already dealt with on database side
 		$searchCount = 0;
-		$corpus = $this->corpusObject->corpus;
+		$corpus = $this->corpusObject->getCorpusNum();
 		$conn = openConnection (false);
 		$sql = "SELECT entry_cat.cat_id FROM entry_cat INNER JOIN category ON category.id = entry_cat.cat_id
 		 		WHERE entry_cat.entry_id = $entry_id AND category.corpus_id = $corpus";
@@ -492,7 +493,7 @@ class ccWikipediacategory extends ccWikipediaText {
 
 	function rebuildForm($realNumber) {
 		parent::rebuildForm($realNumber);
-		$corpus = $this->corpusObject->corpus;
+		$corpus = $this->corpusObject->getCorpusNum();
 		Echo "radioClicked$corpus ($realNumber);\n"; // This will display the secondary radio buttons
 		$range = $_GET["wc{$corpus}_type{$this->num}"];
 		Echo "theForm['rc{$corpus}_$range$realNumber'].checked = true;\n";

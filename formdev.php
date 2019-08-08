@@ -1,3 +1,19 @@
+<?php
+try {
+  $conn = openConnection (false);
+  $result = $conn->query("SELECT id FROM corpus ORDER BY corpus.id");
+  while($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    $corpusObject = corpus::factory ($corpus = $row['id']);
+    if ($corpusObject->allowed()) {
+      $corpusObjects[$corpus] = $corpusObject;
+    }
+  }
+}
+catch (PDOException $e) {
+  errorMessage ("SQL failed identifying sources: " . $e->getMessage());
+}
+unset ($conn);
+?>
 <!-- Sketch out wizards, which CSS will make invisible until user asks for one of them -->
 <div id="wizard" class="wizard">
   <div class="wizard-content">
@@ -10,18 +26,23 @@
   </div>
 </div>
 
-<div id="catlookup" class="wizard">
-  <div class="wizard-content">
-	<form name="catwiz" id="catwiz">
-		<input type="text" name=category id=category class=category />
-	</form>
-  <P><P>
-	<button type="button" id="catclose" onclick="closeCatWizard(true);">OK</button>
-	<button type="button" id="catcancel" onclick="closeCatWizard(false);">Cancel</button>
-  </div>
-</div>
-
 <?php
+// Set up lookups for any corpus which supports categories
+echo "<div id='catlookup' class='wizard'>
+  <div class='wizard-content'>
+	<form name='catwiz' id='catwiz'>\n";
+foreach ($corpusObjects as $corpusObject) {
+  if (isset ($corpusObject->optionButtonList ()['category'])) {
+    $corpus = $corpusObject->getCorpusNum();
+    echo "    <input type='text' name=category$corpus id=category$corpus class=category$corpus style='display: none'/>\n";
+  }
+}
+echo "</form>
+  <font color=white><P>.<P>.</font><!-- Invisible spacing so that buttons are not hidden-->
+	<button type='button' id='catclose' onclick='closeCatWizard(true);'>OK</button>
+	<button type='button' id='catcancel' onclick='closeCatWizard(false);'>Cancel</button>
+  </div>
+</div>\n";
 $advanced = true;
 $sessionkey = $_GET['sessionkey'];
 $level = $_GET['level'];
@@ -63,45 +84,32 @@ if ($advanced) {
 }
 echo "<input type=hidden id='sessionkey' name='sessionkey' value='$sessionkey' />";
 echo "<input type=hidden id='level' name='level' value='$level' />";
-?>
-<H3>Filters</H3>
+
+echo "<H3>Filters</H3>
 <label>Minimum length: <input type=number name=minlen min=3
    step=1 /></label><br>
 <label>Maximum length: <input type=number name=maxlen min=3
-   step=1 /></label><br>
-<?php
+   step=1 /></label><br>\n";
+
 if ($advanced) {
 	echo "<span id=twhole>Whole entry only? <input name=whole type=checkbox /></span><br>\n";
 }
-?>
-<label>Single words? <input name=single type=checkbox
+echo "<label>Single words? <input name=single type=checkbox
    checked /></label><br>
 <label>Phrases? <input name=phrase type=checkbox checked /></label><br>
 <span id=hint></span>
 
-<div id="source">
-<H3>Source</H3>
-<?php
-try {
-  $conn = openConnection (false);
-  $checklist = '';
-  $result = $conn->query("SELECT id FROM corpus ORDER BY corpus.id");
-  while($row = $result->fetch(PDO::FETCH_ASSOC)) {
-    $corpusObject = corpus::factory ($corpus = $row['id']);
-    if ($corpusObject->allowed()) {
-      $checklist = $checklist . $corpusObject->form();
-      $corpusObjects[$corpus] = $corpusObject;
-    }
-  }
-  echo "<input type=hidden name=morecbx value='$checklist' />\n";
+<div id='source'>
+<H3>Source</H3>\n";
+$checklist = '';
+foreach ($corpusObjects as $corpusObject) {
+  $checklist = $checklist . $corpusObject->form();
 }
-catch (PDOException $e) {
-  errorMessage ("SQL failed identifying sources: " . $e->getMessage());
-}
-unset ($conn);
-echo "<script>\n";
-echo "function resetCorporaMore () {\n";
-echo "var count;\n";
+echo "<input type=hidden name=morecbx value='$checklist' />\n";
+
+echo "<script>
+function resetCorporaMore () {
+var count;\n";
 foreach ($corpusObjects as $corpusObject) {
   $corpus = $corpusObject->getCorpusNum();
   $key = "count$corpus";

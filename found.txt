@@ -1,29 +1,8 @@
-
----------- CATSUGGESTDEV.PHP
-
----------- CONSDEV.PHP
-
----------- CONSSUBWORDDEV.PHP
-
----------- CONSWEIGHTSDEV.PHP
-
 ---------- CORPUSDEV.PHP
-class corpusDev extends corpus {
+			$suffix = "{$$thisObject ->corpus}_{$this->num}";
+		$corpus = $$thisObject->corpus;
+		$corpus = $$thisObject->corpus;
 
 ---------- FORMDEV.PHP
-
----------- HELPDEV.HTML
-
----------- INDEXDEV.PHP
-
----------- PARSEDEV.PHP
-
----------- PHRASESDEV.PHP
-
----------- RESULTSDEV.PHP
-
----------- SEARCHDEV.PHP
-
----------- UTILITYDEV.JS
-
----------- UTILITYDEV.PHP
+    $corpus = $corpusObject->corpus;
+  $corpus = $corpusObject->getCorpusNum();

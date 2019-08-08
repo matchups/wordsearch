@@ -23,7 +23,7 @@ echo "<meta name='viewport' content='width=device-width, initial-scale=1'>
 
 <BODY>\n";
 
-$version = "0.73b";
+$version = "0.74";
 echo "<H2>Word Search <span class='specs'>$version</span></H2>";
 include "form$type.php";
 echo "<P>\n";
