@@ -130,8 +130,16 @@ function resetForm() {
 	optionNumber = 1;
 
 	// Reset stuff relating to word lists
+	var answer;
 	theForm['morecbx'].value.substring (1).split(' ').forEach(function (fieldName) {
-		document.getElementById(fieldName).checked=(fieldName.substring (0, 6)=='corpus');
+		if (fieldName.substring (0, 6)=='corpus') {
+			answer = true;
+		} else if (/_dc$/.test(fieldName)) { // DC = default checked
+			answer = true;
+		} else {
+			answer = false;
+		}
+		document.getElementById(fieldName).checked=answer;
 	});
 
 	resetCorporaMore(); // generated dynamically
@@ -185,10 +193,12 @@ function validateForm() {
 	var anysubs = 0;
 	var item;
 	var count;
+	var corpus;
 	for (elnum = 0; elnum < theForm.elements.length; elnum++) {
 		item = theForm.elements[elnum];
 		if (item.id.substring (0, 6) == 'corpus') {
-			var countField = "count" + item.id.substring (6);
+			corpus = item.id.substring (6);
+			var countField = "count" + corpus;
 			if (theForm[countField] === undefined) {
 				count = 0;
 			} else {
@@ -197,6 +207,11 @@ function validateForm() {
 			if (item.checked) {
 		  	anycorpus++;
 				anysubs += count;
+				var ret = validateCorpus (corpus);
+				if (ret > '') {
+					alert (ret);
+					return false;
+				}
 			} else if (count > 0) {
 				alert ("Can't have additional criteria on an unchecked source");
 				return false;

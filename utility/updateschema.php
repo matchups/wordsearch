@@ -28,7 +28,7 @@ try {
 	ADD flags char(12)");
 */
 
-    runit ("UPDATE corpus SET id=3 WHERE id=88");
+    runit ("UPDATE entry SET flags = concat (entry.flags, 'C') where entry.corpus_id = 3 and entry.flags NOT like '%C%' and (id between 6250000 and 6254937 or id between 6262942 and 6331000 or id between 6331582 and 6331656)");
     }
 catch(PDOException $e)
     {

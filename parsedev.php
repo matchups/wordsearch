@@ -8,12 +8,13 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 	$required = '';
 
 	// Prepare for anagram search
-	$prewhere = '/* main */';
+	$prewhere = '/* premain */';
+	$postwhere = '/* postmain */';
 	$sql = "SELECT PW.text AS word, Min(entry.name) AS entry, entry.id as entry_id," .
 			   " word_entry.whole AS whole, entry.corpus_id AS corpus FROM words PW" .
 			   " INNER JOIN word_entry ON word_entry.word_id = PW.id " .
 			   " INNER JOIN entry ON entry.id = word_entry.entry_id " .
-			   " $prewhere WHERE " . corpusInfo('entry', 'W');
+			   " $prewhere WHERE $postwhere ";
 
 	regexBounds (patternToRegex ($pattern, 'P'), $minlen, $maxlen);
 
@@ -52,7 +53,6 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 			$sql = $sql . doAnyOrder (groupToWildcard ($pattern), $maxlen, $required);
 		}
 	}
-
 	foreach (corpusInfo ('', 'L') as $thisCorpus) {
 		$corpusObjects [$thisCorpus] = corpus::factory ($thisCorpus);
 		$corpusObjects [$thisCorpus]->builder ($consObjects);
@@ -61,14 +61,18 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 		}
 	}
 
-  $counter = 0;
+  // WHERE clause for corpus and flags
+	$sql = str_replace ($postwhere, $postwhere . corpusInfo('entry', 'W'), $sql);
+
+	$counter = 0;
 	// Handle additional constraints
 	foreach ($consObjects as $thisConsObject) {
 		if (++$counter % 2 == 0) { // Display constraint info, two per line
 				echo "<BR>";
 		}
-		echo " </span>and<span class='specs'> ";
-		echo $thisConsObject->explain () . ' ';
+		if ($explain = $thisConsObject->explain ()) {
+			echo " </span>and<span class='specs'> $explain ";
+		}
 		$more = $thisConsObject->parse ();
 		if (isset ($more['pre'])) {
 			$sql = str_replace ($prewhere, "{$more['pre']} $prewhere", $sql);
@@ -336,16 +340,23 @@ function bankSQL ($pattern, $main, $wild) {
 function corpusInfo ($table, $option) {
 	// $option is either L for a list of corpora ($table is ignored)
 	// or W for a WHERE clause relating to $table.
-	$flags = '';
+	$moreSQL = '';
 	foreach ($_GET as $key => $parm) {
     if (substr ($key, 0, 6) == 'corpus') {
       if ($parm == 'on') {
         $number = substr ($key, 6);
         $corpus [$number] = $number;
+				if (!isset($flags [$number])) {
+					$flags [$number] = '';
+					$nonflags [$number] = '';
+				}
       }
-    } else if (preg_match ('/c([0-9])+flag(.)/', $key, $matches)) {
-			/* For now, ignore corpus numbers ($matches[1]) because potential flags are discrete across corpora */
-			$flags = $flags . $matches [2];
+    } else if (preg_match ('/^c([0-9])+flag(.)(.*)$/', $key, $matches)) {
+			if ($matches [2] == '@') { // fake item set in code
+				$moreSQL = $moreSQL . $GLOBALS['corpusObjects'][$matches[1]] -> moreSQL ($table, $matches[3], $parm);
+			} else {
+				$flags[$matches[1]] = ($flags[$matches[1]] ?? '') . $matches [2];
+			}
 		}
   }
 
@@ -360,13 +371,28 @@ function corpusInfo ($table, $option) {
 		$clause = " IN ($list)";
 	}
 
-  if ($flags == '') {
-		$flagClause = " AND $table.flags = ''";
-	} else {
-		$flagClause = " AND $table.flags RLIKE '^[$flags]*$'";
+	preg_match_all ('/c([0-9]+)flag(.)/', $_GET['morecbx'], $matches);
+	foreach ($matches[1] as $counter => $thisCorpus) {
+		if (strpos ($flags[$thisCorpus], $matches[2][$counter]) === false) {
+			$nonflags [$thisCorpus] = $nonflags [$thisCorpus] . $matches[2][$counter];
+		}
 	}
 
-	return "$table.corpus_id $clause $flagClause ";
+  comment ("count(C)=" . count($corpus));
+	$flagClause = ''; // for now
+	foreach ($corpus as $thisCorpus) {
+		comment ("$thisCorpus Y={$flags[$thisCorpus]} N={$nonflags[$thisCorpus]}");
+		if ($nonflags[$thisCorpus]) {
+			$rlike = "$table.flags NOT RLIKE '[{$nonflags[$thisCorpus]}]' ";
+			if (count ($corpus) == 1) {
+				$flagClause = " AND $rlike";
+			} else {
+				$flagClause = $flagClause . " AND ($table.corpus_id <> $thisCorpus OR $rlike) ";
+			}
+		}
+	}
+
+	return "$table.corpus_id $clause $flagClause $moreSQL ";
 }
 
 // Convert special characters to letter groups

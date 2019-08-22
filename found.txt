@@ -1,8 +1,47 @@
+
+---------- CATSUGGESTDEV.PHP
+
+---------- CONSDEV.PHP
+		if (strpos ($this->regex, '(') !== false) { // MySQL doesn't support this
+				if (strpos (substr ($spec, 0, $first), $fchar) !== false) { // If we have already compared to an identical letter
+
+---------- CONSSUBWORDDEV.PHP
+
+---------- CONSWEIGHTSDEV.PHP
+
 ---------- CORPUSDEV.PHP
-			$suffix = "{$$thisObject ->corpus}_{$this->num}";
-		$corpus = $$thisObject->corpus;
-		$corpus = $$thisObject->corpus;
 
 ---------- FORMDEV.PHP
-    $corpus = $corpusObject->corpus;
-  $corpus = $corpusObject->getCorpusNum();
+
+---------- HELPDEV.HTML
+
+---------- INDEXDEV.PHP
+
+---------- PARSEDEV.PHP
+		if (strpos ($pattern, ']') > 0) {
+	if (strpos ($pattern, '?') !== false) {
+	if (strpos ($pattern, '*') !== false) {
+	if (($rbrack = strpos ($patternStripped, ']')) > 0) {
+		$lbrack = strpos ($patternStripped, '[');
+		if (strpos ('jqxz', $letter) !== false) {
+		if (strpos ($flags[$thisCorpus], $matches[2][$counter]) === false) {
+	while (($left = strpos ($pattern, '[')) !== false) {
+		$right = strpos ($pattern, ']');
+			if (strpos ($match, ',') !== false) {
+	if (strpos ($lang, 'U') === false) {
+	if (strpos ($lang, 'P') !== false) {
+		if (strpos ($pattern, '|') !== false  ||  strpos ($pattern, '!') !== false  ||  substr ($pattern, 1, 1) != '^') {
+	if (strpos ($pattern, '|') !== false || strpos ($pattern, '!') !== false) {
+	while (($left = strpos ($pattern, '[')) !== false) {
+		$right = strpos ($pattern, ']');
+
+---------- PHRASESDEV.PHP
+
+---------- RESULTSDEV.PHP
+
+---------- SEARCHDEV.PHP
+	if (strpos ($sql, 'PW.bank') !== false) {
+
+---------- UTILITYDEV.JS
+
+---------- UTILITYDEV.PHP

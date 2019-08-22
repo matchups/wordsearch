@@ -112,7 +112,7 @@ try {
 	echo "</span></H2>";
 	$time['beforequery'] = microtime();
 	if ($result == '') {
-		$result = $conn->query($sql);
+		$result = SQLQuery ($conn, $sql);
 		comment ("Got " . $result->rowCount() . " rows");
 	}
 	$time['afterquery'] = microtime();
@@ -139,7 +139,7 @@ try {
 	}
 }
 catch(PDOException $e) {
-	errorMessage ("SQL failed: $sql... " . $e->getMessage());
+	errorMessage ("SQL failed: {$GLOBALS['lastSQL']}... " . $e->getMessage());
 } // end main code block
 
 // Some stuff outside try/catch block so the rest of the page won't suffer.
@@ -173,7 +173,9 @@ function buildReloadQuery ($consObjects) {
 	}
 
 	foreach (explode (' ', $fieldlist) as $name) {
-		if ($_GET[$name] == 'on') {
+		if (strpos ($name, '_dc') !== false) {
+			$checked = 'true';
+		} else	if (getCheckbox ($name)) {
 			$checked = 'true';
 		} else {
 			$checked = 'false';

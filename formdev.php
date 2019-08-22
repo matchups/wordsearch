@@ -12,7 +12,6 @@ try {
 catch (PDOException $e) {
   errorMessage ("SQL failed identifying sources: " . $e->getMessage());
 }
-unset ($conn);
 ?>
 <!-- Sketch out wizards, which CSS will make invisible until user asks for one of them -->
 <div id="wizard" class="wizard">
@@ -104,6 +103,7 @@ echo "<label>Single words? <input name=single type=checkbox
 $checklist = '';
 foreach ($corpusObjects as $corpusObject) {
   $checklist = $checklist . $corpusObject->form();
+  echo "<BR>\n";
 }
 echo "<input type=hidden name=morecbx value='$checklist' />\n";
 
@@ -290,9 +290,21 @@ function validateConstraint (thisOption) {
         echo $classname::getValidateConstraintCode () . "
       }\n";
 		}
-  echo "} // end validateConstraint\n";
+  echo "} // end validateConstraint
+
+  function validateCorpus (thisCorpus) {\n";
+    // Generate stuff from classes @@
+    foreach ($corpusObjects as $thisCorpus => $corpusObject) {
+      if ($code = $corpusObject->getValidateCorpusCode ()) {
+        echo "if (thisCorpus == $thisCorpus) {
+          $code
+        }\n";
+      }
+		}
+  echo "} // end validateCorpus\n";
 ?>
 // This needs to be at the end, after the wizard has been created
+
 var modal = document.getElementById('wizard');
 
 // When the user clicks anywhere outside of the wizard, close it

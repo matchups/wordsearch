@@ -62,6 +62,12 @@ function fetchUrl($url) {
   return $body;
 }
 
+// Do a SQL query and remember the code so we can display it with error messages
+function SQLQuery ($conn, $sql) {
+	$GLOBALS['lastSQL'] = $sql;
+	return $conn->query($sql);
+}
+
 // Display a string if we haven't done so previously
 function echoUnique ($text) {
 	$hash = hash('ripemd160', $text);

@@ -10,12 +10,12 @@ class corpus {
 		$conn = openConnection (false);
 
 		// get name, URL
-		$row = $conn->query("SELECT name, url FROM corpus WHERE id = $corpus")->fetch(PDO::FETCH_ASSOC);
+		$row = SQLQuery ($conn, "SELECT name, url FROM corpus WHERE id = $corpus")->fetch(PDO::FETCH_ASSOC);
 		$this->urlpattern = $row['url'];
 		$this->name = $row['name'];
 
 		// get flags
-		$result = $conn->query("SELECT letter, description FROM corpus_flag WHERE corpus_id = $corpus");
+		$result = SQLQuery ($conn, "SELECT letter, description FROM corpus_flag WHERE corpus_id = $corpus");
 		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 			$this->flags [$row['letter']]=$row['description'];
 		}
@@ -25,8 +25,10 @@ class corpus {
 		// Alas, PHP does not support ranges in switches
 		if ($corpus == 1) {
 			$name = "WikiFeatured";
-		} else if ($corpus == 2 || $corpus == 3) {
-			$name = "Wikipedia"; // include Wiktionary
+		} else if ($corpus == 2) {
+			$name = "Wikipedia";
+		} else if ($corpus == 3) {
+			$name = "Wiktionary";
 		} else if ($corpus == 87) {
 			$name = "Dev";
 		} else if ($corpus > 100) {
@@ -70,8 +72,11 @@ class corpus {
 			echo "   &nbsp; &nbsp; <label>$flagname okay? <input name=$xname id=$xname type=checkbox /></label>\n";
 			$checklist = $checklist . ' ' . $xname;
 		}
-		echo "<br>";
-		return $checklist;
+		return $checklist . $this -> formExtra();
+	}
+
+  protected function formExtra () {
+		return '';
 	}
 
 	public function builder (&$consObjects) {
@@ -178,6 +183,10 @@ class corpus {
 	function clickedCode () {
 		return '';
 	}
+
+	public function getValidateCorpusCode () {
+		return '';
+	}
 } // end base corpus class
 
 class corpusConstraint extends constraint {
@@ -194,7 +203,7 @@ class corpusConstraint extends constraint {
 
 	function rebuildForm($realNumber) {
 		$corpusNum = $this->corpusObject->getCorpusNum();
-		echo "addOption$corpusNum(); // 927\n";
+		echo "addOption$corpusNum();";
 		if ($this->not) {
 			echo "theForm['not{$corpusNum}_$realNumber'].checked = true;\n";
 		}
@@ -217,11 +226,10 @@ class corpusWikipedia extends corpus {
 		return true;
 	}
 
-	function form () {
-		$checklist = parent::form();
+	function formExtra () {
 		$this->formAddRepeat ();
-		$this->formCatLookup();
-		return $checklist;
+		$this->formCatLookup ();
+		return '';
 	}
 
 	function optionButtonList () {
@@ -312,6 +320,41 @@ class corpusWikipedia extends corpus {
 	}
 } // end Wikipedia
 
+class corpusWiktionary extends corpusWikipedia {
+	public function formExtra () {
+		$checklist = '';
+		foreach (array ('', 'un') as $mid) {
+			$xname = "c{$this->corpus}{$mid}cap";
+			echo "   &nbsp; &nbsp; <label>{$mid}capitalized <input name=$xname id={$xname}_dc type=checkbox checked=yes /></label>\n";
+			$checklist = "$checklist {$xname}_dc";
+		}
+		return parent :: formExtra() . $checklist;
+	}
+
+	public function builder (&$consObjects) {
+		parent::builder ($consObjects);
+		$corpus = $this->corpus;
+		$cap = getCheckbox ("c{$corpus}cap");
+		$uncap = getCheckbox ("c{$corpus}uncap");
+		if (!$cap || !$uncap) {
+			$_GET["c{$corpus}flag@cap"] = $cap ? 'C' : 'U';
+		}
+	}
+
+	public function moreSQL ($table, $type, $value) {
+		// $type always 'cap' for now
+		$not = ($value == 'C' ? '' : 'NOT');
+		return (" AND ($table.corpus_id <> {$this->corpus} OR $table.flags $not LIKE '%C%') ");
+	}
+
+	public function getValidateCorpusCode () {
+		$corpus = $this->corpus;
+		return "if (!theForm['c{$corpus}cap'].checked && !theForm['c{$corpus}uncap'].checked) {
+		 return 'Must selected either Capitalized or Uncapitalized for Wiktionary';
+	 }";
+	}
+} // end Wiktionary
+
 class ccWikipediaText extends corpusConstraint {
 	// Intermediate class; never instantiated directly
 	function parse () {
@@ -388,7 +431,7 @@ class ccWikipediacategory extends ccWikipediaText {
 
 	function explainSub () {
 		$a = $b = '';
-		if ($this->range = 'contains') {
+		if ($this->range == 'contains') {
 			$a = 'contains ';
 		} else if ($this->range = 'desc') {
 			$b = ' and descendants';
@@ -402,7 +445,7 @@ class ccWikipediacategory extends ccWikipediaText {
 		if ($this->range != 'contains') {
 			$conn = openConnection (false);
 			$specFix = str_replace ("'", "\\'", $this -> spec);
-			$row = $conn->query("SELECT id FROM category WHERE title = '$specFix' and corpus_id = 2")->fetch(PDO::FETCH_ASSOC);
+			$row = SQLQuery ($conn, "SELECT id FROM category WHERE title = '$specFix' and corpus_id = $corpus")->fetch(PDO::FETCH_ASSOC);
 			if ($row === false) {
 				throw new Exception("Unable to find category {$this->spec}");
 	    }
@@ -428,7 +471,7 @@ class ccWikipediacategory extends ccWikipediaText {
 				$sql = "select C.id from category M
 						inner join catparent J on J.parentcat = M.title
 						inner join category C on C.id = J.cat_id where M.id = {$catList[$searchCount]}";
-				$result = $conn->query($sql);
+				$result = SQLQuery ($conn, $sql);
 				if (($depth = ($catDepth[$searchCount] + 1)) > 4) {
 					continue; // categories get silly beyond this point
 				}
@@ -459,37 +502,44 @@ class ccWikipediacategory extends ccWikipediaText {
 
 	function localFilter($oneword, $entry, $entry_id) {
 		if ($this -> style == 'D') {return true;} // already dealt with on database side
-		$searchCount = 0;
+		$searchCount = 1;
 		$corpus = $this->corpusObject->getCorpusNum();
 		$conn = openConnection (false);
 		$sql = "SELECT entry_cat.cat_id FROM entry_cat INNER JOIN category ON category.id = entry_cat.cat_id
 		 		WHERE entry_cat.entry_id = $entry_id AND category.corpus_id = $corpus";
-		$result = $conn->query($sql);
+		$result = SQLQuery ($conn, $sql);
 		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 			// Make a list to seed the tree walk
 			$catID = $row ["cat_id"];
 			if (!isset ($catIndex [$catID])) {
-				$catList [$buildCount++] = array ('id' => catID, 'depth' => 0);
+				$catList [$buildCount++] = array ('id' => $catID, 'depth' => 0);
 				$catIndex [$catID] = true;
 			}
 		}
 		// Walk the tree of ancestors from the entry
 		while ($searchCount < $buildCount) {
 			$oneCat = $catList [$searchCount]['id'];
+			$depth = $catList [$searchCount]['depth'];
 			if ($oneCat == $this -> categoryID) {
 				return true;
 			}
-			$sql = "SELECT category.id FROM catparent
-					INNER JOIN category ON category.title = catparent.parentcat
-					WHERE catparent.cat_id = $oneCat AND corpus_id = $corpus";
-			$result = $conn->query($sql);
-			while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-				$catList [++$buildCount] = $row ['id'];
+			if (++$depth < 6) {
+				$sql = "SELECT category.id FROM catparent
+						INNER JOIN category ON category.title = catparent.parentcat
+						WHERE catparent.cat_id = $oneCat AND corpus_id = $corpus";
+				$result = SQLQuery ($conn, $sql);
+				while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+					$catID = $row ['id'];
+					if (!isset ($catIndex [$catID])) {
+						$catList [$buildCount++] = array ('id' => $catID, 'depth' => $depth);
+						$catIndex [$catID] = true;
+					}
+				}
 			}
 			$searchCount++;
 		}
 		return false; // all done searching and didn't find it
-	} // end ocalFilter
+	} // end localFilter
 
 	function rebuildForm($realNumber) {
 		parent::rebuildForm($realNumber);

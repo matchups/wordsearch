@@ -3,26 +3,18 @@
 <?php
 $classname = $_GET["classname"];
 $helper = new $classname;
+$corpus = $_GET["corpus"] ?? 'x3';
+$title = "Articles: " . $helper->getTitle() . (substr ($corpus, 0, 1) == 'x' ? ' Dummy' : '') . " API read";
 echo "
-<TITLE>Articles: " . $helper->getTitle() . " API read</TITLE>
+<TITLE>$title</TITLE>
 </HEAD>
 <BODY>
-<H1>Articles</H1>\n";
+<H1>$title</H1>\n";
 
 include 'addmain.php';
 // How many tries?
-if (isset ($_GET["limit"])) {
-  $limit = $_GET["limit"];
-} else {
-  $limit = 100;
-}
+$limit = $_GET["limit"] ?? 100;
 
-// Which corpus
-if (isset ($_GET["corpus"])) {
-  $corpus = $_GET["corpus"];
-} else {
-  $corpus = 'x0';
-}
 
 // Where do we start?
 $baseurl='https://en.' . $helper->getDomain() . '/w/api.php?action=query&generator=allpages&prop=info&format=json';
@@ -48,13 +40,8 @@ try {
     $json = json_decode($ret, true);
     foreach ($json["query"]["pages"] as $page) {
       echo '<BR><B>' . ++$counter . ' ' . $page['title'];
-      $flags = '';
-      if (isset ($page['redirect'])) {
-        echo ' <i>redirect</i>';
-        $flags = 'R';
-      }
       echo '</B>';
-      $ret = newEntry ($conn, $page['title'], $flags, $corpus, $helper);
+      $ret = newEntry ($conn, $page['title'], $helper -> getFlags ($page), $corpus, $helper);
       echo '<BR>';
     }
     if (isset ($json["continue"])) {
@@ -113,12 +100,25 @@ class loadHelper {
   }
 } // end class loadHelper
 
+function checkRedirect ($page) {
+  if (isset ($page['redirect'])) {
+    echo ' <i>redirect</i>';
+    return 'R';
+  } else {
+    return '';
+  }
+}
+
 class wikipedia extends loadHelper {
   public function getTitle () {
   	return "Wikipedia";
   }
   public function getDomain () {
   	return "wikipedia.org";
+  }
+
+  public function getFlags ($page) {
+    return checkRedirect ($page);
   }
 } // end class wikipedia
 
@@ -133,7 +133,7 @@ class wiktionary extends loadHelper {
 
   public function postProcess ($conn, $ret) {
     if (!isset ($ret['english'])) {
-      $conn->exec ("UPDATE entry SET flags = 'F' WHERE id = {$ret['id']} AND flags != 'R'");
+      $conn->exec ("UPDATE entry SET flags = concat (flags, 'F') WHERE id = {$ret['id']} AND flags NOT LIKE '%R%'");
     }
   }
 
@@ -141,5 +141,9 @@ class wiktionary extends loadHelper {
     if (substr ($category, 0, 7) == "English") {
       $ret ['english'] = true;
     }
+  }
+
+  public function getFlags ($page) {
+    return checkRedirect ($page) . (preg_match ('/[A-Z]/', $page['title']) ? 'C' : '');
   }
 } // end class wiktionary
