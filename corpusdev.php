@@ -85,7 +85,8 @@ class corpus {
 		$count = $_GET["count$this->corpus"] ?? 0;
 		for ($num = 1; $num <= $count; $num++) {
 			$key = "{$this->corpus}_$num";
-			if (($ccobject = $this -> buildOne ($_GET["query$key"], $_GET["radio$key"], getCheckbox ("not$key"), $num)) !== null) {
+			if (isset ($_GET["query$key"])  &&
+					($ccobject = $this -> buildOne ($_GET["query$key"], $_GET["radio$key"], getCheckbox ("not$key"), $num)) !== null) {
 				$consObjects [$key] = $ccobject;
 			}
 		}
