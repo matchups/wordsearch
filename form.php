@@ -1,4 +1,4 @@
-<!-- Sketch out wizard, which CSS will make invisible until user asks for it -->
+<!-- Sketch out wizards, which CSS will make invisible until user asks for one of them -->
 <div id="wizard" class="wizard">
   <div class="wizard-content">
 	<form name="popwiz" id="popwiz">
@@ -7,6 +7,17 @@
 	</form>
 	<button type="button" id="popclose" onclick="closeWizard(true);">OK</button>
 	<button type="button" id="popcancel" onclick="closeWizard(false);">Cancel</button>
+  </div>
+</div>
+
+<div id="catlookup" class="wizard">
+  <div class="wizard-content">
+	<form name="catwiz" id="catwiz">
+		<input type="text" name=category id=category class=category />
+	</form>
+  <P><P>
+	<button type="button" id="catclose" onclick="closeCatWizard(true);">OK</button>
+	<button type="button" id="catcancel" onclick="closeCatWizard(false);">Cancel</button>
   </div>
 </div>
 
@@ -38,7 +49,7 @@ if ($advanced) {
 
 <H3>Pattern</H3>
 <label>Basic Pattern: </label>
-   <input type=text name=pattern placeholder="PRE?O*" onchange="mainChange();"
+   <input type=text name=pattern placeholder="PRE?O*" onchange="mainChange();" category
    required=true pattern="[-a-zA-Z\*\?[\]@#&]*"> <!-- Allow letters, wildcards *?, specials @#&, and groups [-] -->
    <br>
 <label>Any order?</label>
@@ -116,6 +127,7 @@ echo "</script>\n";
 <input type=hidden id='type' name='type' />
 <input type=hidden id='version' name='version' /><!-- Filled in by index.php -->
 <input type="submit" value="Submit" id="xxx"/>
+
 </form>
 
 <form id=help action="help.html">

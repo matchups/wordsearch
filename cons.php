@@ -28,13 +28,17 @@ class constraint {
 	protected function explainSub() {
 		// Provides explanation of constraint, displayed on results screen, not including possible Not.
 		// Called only from explain
-		return "Base explain--needs to be overridden";
+		throw new Exception ("Base explainSub--needs to be overridden");
 	}
 
 	public function parse() {
-		// Parse specification and create SQL and/or regular expression
-		// returns AND stuff for WHERE clause
-		return "Base parse--needs to be overridden";
+		// Parse specification and create SQL
+		// returns AND stuff for WHERE clause and/or an inner join
+		throw new Exception ("Base parse--needs to be overridden");
+	}
+
+	protected function parseWhere ($more) {
+		return array ('where' => $more);
 	}
 
 	public function setlengths(&$consmin, &$consmax) {
@@ -43,7 +47,7 @@ class constraint {
 		// Do nothing by default
 	}
 
-	public function localFilter($oneword, $entry) {
+	public function localFilter($oneword, $entry, $entry_id) {
 		// Do any additional filtering that can't be done in SQL
 		// $oneword = the word to check
 		// $entry = external name; useful for literal or source checks
@@ -103,7 +107,7 @@ class conspattern extends constraint {
 	public function parse() {
 		// Convert to regular expression
 		$spec = patternToRegex (expandSpecial ($this->spec), 'S');
-		return "AND PW.text " . $this->maybeNot() . " RLIKE '$spec' ";
+		return $this->parseWhere ("AND PW.text " . $this->maybeNot() . " RLIKE '$spec' ");
 	}
 
 	public function position() {
@@ -215,7 +219,7 @@ class conssubword extends constraint {
 				$newmode = '';
 			}
 		} else {
-			$more = "** Bad character $ch in substring spec**"; // Should have been prevented on front end
+			throw new Exception ("Bad character $ch in substring spec"); // Should have been prevented on front end
 		}
 
 		if ($newmode <> $mode) { // Mode has changed, so capture the last piece and get going on new one.
@@ -229,7 +233,7 @@ class conssubword extends constraint {
 	} // end while
 	$more = $more . ' concat(' . substr ($substr, 2) . ')'; // Combine all the pieces on the database side.
 	$more = $more . ' AND ' . corpusInfo('SE', 'W') . ')'; // subword has to be in same corpus as main word
-	return $more;
+	return $this->parseWhere ($more);
 } // end function
 
 } // end class conssubword
@@ -284,7 +288,7 @@ class consweights extends constraint {
 			"WHERE weights.name = '$wttype' AND weights.letter = substr(PW.text, spandex.value, 1) ".
 			"AND spandex.value <= char_length(PW.text)) $compare ";
 
-		return $sql;
+		return $this->parseWhere ($sql);
 	}
 } // end class consweights
 
@@ -309,11 +313,11 @@ class consregex extends constraint {
 			return "";
 		} else {// good, we can do it on the database side
 			$this->local = false;
-			return " AND PW.text " . $this->maybeNot() . " RLIKE '" . substr ($this->regex, 1, strlen ($this->regex) - 2) . "' ";
+			return $this->parseWhere (" AND PW.text " . $this->maybeNot() . " RLIKE '" . substr ($this->regex, 1, strlen ($this->regex) - 2) . "' ");
 		}
 	}
 
-	public function localFilter($oneword, $entry) {
+	public function localFilter($oneword, $entry, $entry_id) {
 		if ($this->local) {
 			$matched = preg_match ($this->regex, $oneword);
 			if ($this->not) {
@@ -393,7 +397,7 @@ class conscharmatch extends constraint {
 			$sql = $sql . str_replace ('^', '', $matches [4]);
 		}
 
-		return $sql;
+		return $this->parseWhere ($sql);
 	}
 }
 
@@ -438,7 +442,7 @@ class conscrypto extends constraint {
 				$sql = $sql . " ) ";
 			}
 		}
-		return $sql;
+		return $this->parseWhere ($sql);
 	} // end parse
 
 	public function setlengths(&$consmin, &$consmax) {

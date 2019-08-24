@@ -284,11 +284,19 @@ function removeConstraint(thisOption)
 
 // remove a list of children associated with a specific numbered constraint
 function removeChildren (thisOption, nameList) {
-	var theForm = document.getElementById("search");
+	removeChildrenGeneric ('search', thisOption, nameList);
+}
+
+function removeChildrenCorpus (corpusOptionNumber, nameList) {
+	removeChildrenGeneric ('source', corpusOptionNumber, nameList);
+}
+
+function removeChildrenGeneric (containerField, thisOption, nameList) {
+	var container = document.getElementById(containerField);
 	var oneChild;
 	nameList.split (" ").forEach(function (baseName) {
 		if ((oneChild = document.getElementById(baseName + thisOption)) !== null) {
-			theForm.removeChild(oneChild);
+			container.removeChild(oneChild);
 		}
 	});
 }
@@ -406,20 +414,63 @@ function validateForm() {
 		return false;
 	}
   // Are any corpus items checked?
-	var anycorpus = false;
+	var anycorpus = 0;
+	var anysubs = 0;
 	var item;
+	var count;
 	for (elnum = 0; elnum < theForm.elements.length; elnum++) {
 		item = theForm.elements[elnum];
 		if (item.id.substring (0, 6) == 'corpus') {
+			var countField = "count" + item.id.substring (6);
+			if (theForm[countField] === undefined) {
+				count = 0;
+			} else {
+				count = theForm[countField].value;
+			}
 			if (item.checked) {
-		  	anycorpus = true;
-				break;
+		  	anycorpus++;
+				anysubs += count;
+			} else if (count > 0) {
+				alert ("Can't have additional criteria on an unchecked source");
+				return false;
 			}
 		}
 	}
-	if (!anycorpus) {
+	if (anycorpus > 1  &&  anysubs > 0) {
+		alert ("Can't select multiple sources when additional criteria are specified for one");
+		return false;
+	}
+	if (anycorpus == 0) {
 		alert ("Must choose at least one source");
 		// Don't bother setting focus--no visual feedback anyhow
 		return false;
 	}
 }
+
+// Autocomplete stuff--first part still needed if bottom part works?
+$(document).ready(function() {
+    $('input.category').typeahead({
+        name: 'category',
+        remote: 'catsuggestbeta.php?query=%QUERY'
+    });
+})
+
+/* May try this one again
+function typeahead_initialize() {
+ var custom = new Bloodhound({
+    datumTokenizer: function(d) { return d.tokens; },
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
+		remote: 'catsuggestdev.php?query=%QUERY'
+    });
+
+    custom.initialize();
+
+    $('.typeahead_option_items').typeahead(null, {
+					name: 'category',
+          displayKey: 'label',
+          source: custom.ttAdapter()
+    }).on('typeahead:selected', function (obj, value) {
+        console.log(value.label);
+    });
+}
+*/

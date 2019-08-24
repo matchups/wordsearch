@@ -1,34 +1,36 @@
 <?php
 // Display results (in $result)
-function showResults ($result, $consobj) {
-	$corpusinfo = $GLOBALS['conn']->query("SELECT id, url FROM corpus");
-	while($row = $corpusinfo->fetch(PDO::FETCH_ASSOC)) {
-		$url[$row['id']] = $row['url'];
-	}
-
+function showResults ($result, $consObjects, $corpusObjects) {
 	$type = $_GET['type'];
 	$level = $_GET['level'];
+	if ($level == 3) {
+		$timeout = 200;
+	} else {
+		$timeout = 30;
+	}
+	$timeout = $timeout + microtime (true);
 
 	if (get_class ($result) <> "PDOStatement") {
 		echo "<span class='error'>$result</span>"; // Error message
 		return;
 	}
 
-	$count = count ($consobj) + 1;
-
-	// Loop through results from database
+		// Loop through results from database
 	$found = false;
 	while($row = $result->fetch(PDO::FETCH_ASSOC)) {
 		$oneword = $row['word'];
+		$corpus = $row['corpus'];
+		$entry = $row['entry'];
 		$matched = true;
-		// Check any additional regexes
-		for ($num = 2; ($num <= $count) && $matched; $num++) {
-			$matched = $consobj[$num]->localFilter ($oneword);
+		// Check any constraints that require client-side work
+		foreach ($consObjects as $thisConsObject) {
+			if (!$thisConsObject->localFilter ($oneword, $entry)) {
+				$matched = false;
+				break;
+			}
 		}
+
 		if ($matched) {
-			$corpus = $row['corpus'];
-			$entry = $row['entry'];
-			$debug = "corpus=$corpus ow=$oneword prev=$previous";
 			if ($oneword == $previous) {
 				$same = true;
 			} else {
@@ -38,27 +40,34 @@ function showResults ($result, $consobj) {
 				$previous = $oneword;
 				$same = false;
 			}
-			if ($url[$corpus] == '') {
-				Echo "$entry  ";
-			} elseif ($row['whole'] == 'Y') {
+			if ($row['whole'] == 'Y') {
 				// If this is the whole entry, set up a link
-				echo answerLink ($entry, $corpus, $url[$corpus]);
+				echo $corpusObjects[$corpus]->answerLink ($entry);
 			} else {
 				// Else if part of an entry name, set up a link to our page to list phrases
 				if (!$same) {
 					Echo "$oneword  ";
 				}
-				Echo "<A target='_blank' " .
-					"HREF='phrases$type.php?base=$oneword&corpus=$corpus&type=$type&level=$level'>" .
-					"<i>phrases</i></A>";
+				if ($corpusObjects[$corpus]->phrases()) {
+					Echo "<A target='_blank' " .
+						"HREF='phrases$type.php?base=$oneword&corpus=$corpus&type=$type&level=$level'>" .
+						"<i>phrases</i></A>";
+				}
 			}
 			$prevword = strtolower ($oneword);
 			$found = true; // We found something, so don't tell them later that we didn't
 		}
+		if (microtime (true) > $timeout) {
+			return "time^$oneword";
+			break;
+		}
 	} // end while
 
-  if (!$found) {
+  if ($found) {
+		return 'ok';
+	} else {
 		Echo "No matches found.<BR>";
+		return 'none';
   }
 } // end showResults
 

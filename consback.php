@@ -43,9 +43,10 @@ class constraint {
 		// Do nothing by default
 	}
 
-	public function localFilter($oneword) {
+	public function localFilter($oneword, $entry) {
 		// Do any additional filtering that can't be done in SQL
 		// $oneword = the word to check
+		// $entry = external name; useful for literal or source checks
 		// returns true if okay or false if bad
 		return true;
 	}
@@ -82,6 +83,11 @@ class constraint {
 		} else {
 			return '';
 		}
+	}
+
+  // This value is used to segregate counters
+  public function parentID () {
+		return 'F'; // main form
 	}
 
 	public function debug () {return "[" . get_class() . "#$this->num=$this->spec]";}
@@ -222,7 +228,7 @@ class conssubword extends constraint {
 		}
 	} // end while
 	$more = $more . ' concat(' . substr ($substr, 2) . ')'; // Combine all the pieces on the database side.
-	$more = $more . ' AND ' . corpusWhere('SE') . ')'; // subword has to be in same corpus as main word
+	$more = $more . ' AND ' . corpusInfo('SE', 'W') . ')'; // subword has to be in same corpus as main word
 	return $more;
 } // end function
 
@@ -276,7 +282,7 @@ class consweights extends constraint {
 		$wttype = $_GET["wttype$this->num"];
 		$sql = "AND (SELECT sum(weights.weight $times) FROM weights INNER JOIN spandex " .
 			"WHERE weights.name = '$wttype' AND weights.letter = substr(PW.text, spandex.value, 1) ".
-			"AND spandex.value <= char_length(PW.text)) $compare";
+			"AND spandex.value <= char_length(PW.text)) $compare ";
 
 		return $sql;
 	}
@@ -307,7 +313,7 @@ class consregex extends constraint {
 		}
 	}
 
-	public function localFilter($oneword) {
+	public function localFilter($oneword, $entry) {
 		if ($this->local) {
 			$matched = preg_match ($this->regex, $oneword);
 			if ($this->not) {

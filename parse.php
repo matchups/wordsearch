@@ -9,7 +9,7 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 
 	// Prepare for anagram search
 	$prewhere = '/* main */';
-	$sql = "SELECT PW.text AS word, Min(entry.name) AS entry, " .
+	$sql = "SELECT PW.text AS word, Min(entry.name) AS entry, entry.id as entry_id," .
 			   " word_entry.whole AS whole, entry.corpus_id AS corpus FROM words PW" .
 			   " INNER JOIN word_entry ON word_entry.word_id = PW.id " .
 			   " INNER JOIN entry ON entry.id = word_entry.entry_id " .
@@ -66,7 +66,13 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 		}
 		echo " </span>and<span class='specs'> ";
 		echo $thisConsObject->explain () . ' ';
-		$sql = $sql . $thisConsObject->parse ();
+		$more = $thisConsObject->parse ();
+		if (isset ($more['pre'])) {
+			$sql = str_replace ($prewhere, "{$more['pre']} $prewhere", $sql);
+		}
+		if (isset ($more['where'])) {
+			$sql = $sql . $more['where'];
+		}
 		$thisConsObject->setlengths ($minlen, $maxlen);
 		$position += $thisConsObject->position();
 		// keep object around for post-filtering and for rebuilding form
@@ -84,11 +90,11 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 	}
 	if (!$filtered) {
 		if (!$anyorder) {
-			$fourjoin = doFour ($pattern);
+			$fourjoin = doFour ($pattern, '');
 			$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
 		}
 		foreach ($consObjects as $thisConsObject) {
-			$fourjoin = doFour ($thisConsObject->fourPattern());
+			$fourjoin = doFour ($thisConsObject->fourPattern(), ++$counter);
 			$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
 		} // end foreach
 	} // end filtered
@@ -246,7 +252,7 @@ function doPosition ($position, $minlen, $maxlen) {
 }
 
 // Filter on a tetragram or trigram, if possible
-function doFour ($pattern) {
+function doFour ($pattern, $suffix) {
 	$pattern = groupToWildcard ($pattern);
 	foreach (array (4, 3) as $length) {
 		if (preg_match ('/[a-z]{' . $length . '}/', $pattern, $matches)) {
@@ -257,7 +263,7 @@ function doFour ($pattern) {
 				$verb = 'LIKE';
 				$substring = $substring . '_';
 			}
-			return "INNER JOIN word_four ON word_four.word_id = word_entry.word_id AND word_four.quartet $verb '$substring'";
+			return "INNER JOIN word_four WF$suffix ON WF$suffix.word_id = word_entry.word_id AND WF$suffix.quartet $verb '$substring'";
 		}
 	}
 	return '';

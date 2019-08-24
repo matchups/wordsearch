@@ -43,10 +43,12 @@ if ($advanced) {
    <br>
 <label>Any order?</label>
    <input name=anyorder type=checkbox onchange="mainChange();"/>
-<input type=hidden id="count" name="count" value="1" />
 <?php
 if ($advanced) {
-	echo "<span id=trepeat style='disabled'>Repeat letters? <input name=repeat type=checkbox disabled=true /></span><br>\n";
+	echo "<span id=trepeat style='disabled'>Repeat letters? <input name=repeat type=checkbox disabled=true /></span>\n";
+}
+echo '<input type=hidden id="count" name="count" value="1" /><BR>';
+if ($advanced) {
 	echo '<button type="button" id="addbut" onclick="addOption(' . ($level / 3) . ');return false;">Add Constraint</button>' . "\n";
 }
 echo "<input type=hidden id='sessionkey' name='sessionkey' value='$sessionkey' />";
@@ -73,25 +75,12 @@ if ($advanced) {
 try {
   $conn = openConnection (false);
   $checklist = '';
-  $result = $conn->query("SELECT corpus.id, corpus.name, corpus_flag.letter, corpus_flag.description FROM corpus
-      LEFT OUTER JOIN corpus_flag ON corpus_flag.corpus_id = corpus.id ORDER BY corpus.id");
-  $prev = '';
+  $result = $conn->query("SELECT id FROM corpus ORDER BY corpus.id");
   while($row = $result->fetch(PDO::FETCH_ASSOC)) {
-		$name = $row['name'];
-    $id = $row['id'];
-    if (($id == 1 || $id == 87) && $type != 'dev') {
-      continue; // word lists for testing only
-    }
-    if ($name != $prev) {
-      echo "<label>$name: <input name=corpus$id id=corpus$id type=checkbox checked /></label><br>\n";
-      $checklist = $checklist . ' corpus' . $id;
-      $prev = $name;
-    }
-    if ($flagname = $row['description']) {
-      $flag = $row['letter'];
-      $xname = "c{$id}flag$flag";
-      echo "   &nbsp; &nbsp; <label>$flagname okay? <input name=$xname type=checkbox /></label><br>\n";
-      $checklist = $checklist . ' ' . $xname;
+    $corpusObject = corpus::factory ($corpus = $row['id']);
+    if ($corpusObject->allowed()) {
+      $checklist = $checklist . $corpusObject->form();
+      $corpusObjects[$corpus] = $corpusObject;
     }
   }
   echo "<input type=hidden name=morecbx value='$checklist' />\n";
@@ -100,6 +89,22 @@ catch (PDOException $e) {
   errorMessage ("SQL failed identifying sources: " . $e->getMessage());
 }
 unset ($conn);
+
+echo "<script>\n";
+echo "function resetCorporaMore () {\n";
+echo "var count;\n";
+foreach ($corpusObjects as $corpusObject) {
+  $corpus = $corpusObject->getCorpusNum();
+  $key = "count$corpus";
+  echo "if (theForm['$key'] !== undefined) {\n";
+  echo "for (count = theForm['$key'].value; count > 0; --count) {\n";
+  echo "removeConstraint$corpus(count);\n";
+  echo "}\n";
+  echo "theForm['$key'].value=0;\n";
+  echo "}\n";
+}
+echo "} // end resetCorporaMore\n";
+echo "</script>\n";
 ?>
 <span class='disabled'>
 <label>Wiktionary (English): <input name=wiktionary type=checkbox

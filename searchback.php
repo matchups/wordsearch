@@ -23,13 +23,13 @@ if (isset ($_GET['sessionkey'])  &&  isset ($_GET['level'])) { // make sure sess
 		$result = $conn->query($sql);
 		if ($result->rowCount() > 0) { // make sure it is an active session
 			$row = $result->fetch(PDO::FETCH_ASSOC);
-			$userLevel = $row['level'];
-			if ($userLevel == $getLevel) {
-				if ($userLevel < 2 && $type > '') {
+			$level = $row['level'];
+			if ($level == $getLevel) {
+				if ($level < 2 && $type > '') {
 					$code = '4'; // basic not authorized for anything other than base
-				} else if ($userLevel < 3 && $type == 'dev') {
+				} else if ($level < 3 && $type == 'dev') {
 					$code = '5'; // only pro authorized for dev
-				} else if ($userLevel == 0 && isset($_GET['query2'])) {
+				} else if ($level == 0 && isset($_GET['query2'])) {
 					$code = '6'; // guest can't use additional criteria
 				} else {
 					$valid = true;
@@ -74,6 +74,11 @@ $time['top'] = microtime();
 include "results" . $type . ".php";
 include "parse" . $type . ".php";
 include "cons" . $type . ".php";
+include "corpus" . $type . ".php";
+
+// Initialize cache (used in fetchUrl)
+$cache['url'] = '';
+$cache['body'] = '';
 
 try {
 	echo '<BODY onload="reloadQuery();">';
@@ -82,8 +87,8 @@ try {
 	// Connect briefly in write mode to update the session
 	openConnection (true)->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
 
-	$sql = parseQuery ($pattern, $consobj);
-	Echo "</span></H2>";
+	$sql = parseQuery ($pattern, $consObjects, $corpusObjects);
+  Echo "</span></H2>";
 
 	// Optimize and run query
 	$rows = 0;
@@ -92,11 +97,11 @@ try {
 	$overload = false;
 	if ($explain) {
 		$sql = 'EXPLAIN ' . $sql;
-	} else if ($userLevel < 3) {
+	} else if ($level < 3) {
 		if ($rows == 0) {
 			$rows = getWidth ($sql);
 		}
-		if (($userLevel < 2 && $rows > 10000) || $rows > 100000) {
+		if (($level < 2 && $rows > 10000) || $rows > 100000) {
 			$overload = true;
 		}
 	}
@@ -115,7 +120,12 @@ try {
 	} else {
 		// Loop through words and display results
 		comment ($sql);
-		showResults ($result, $consobj);
+		$ret = showResults ($result, $consObjects, $corpusObjects);
+		if (preg_match ("/^time\^(.*)$/", $ret, $matches)) {
+			$url = preg_replace ('/&from=.*$/', '', $_SERVER['REQUEST_URI']) . "&from={$matches[1]}";
+			$url = substr ($url, 12); // remove /wordsearch/
+			echo "<P>Request timed out.  Select <A HREF=http://www.alfwords.com/$url>more</A> to see additional results.<BR>";
+		}
 		$time['end'] = microtime();
 		foreach ($time as $key => $value) {
 			if ($key <> 'top') {
@@ -136,11 +146,11 @@ echo "<P>";
 // Display form to allow user to edit and resubmit query
 include "form$type.php";
 preserveInfo ($type, $version);
-buildReloadQuery ($consobj);
+buildReloadQuery ($consObjects);
 echo '</BODY>';
 // End of main script
 
-function buildReloadQuery ($consobj) {
+function buildReloadQuery ($consObjects) {
 	Echo "<script>\n";
 	echo "// This script is run on load of the results page to modify the skeleton form to match the\n";
 	echo "// original query.  It is built dynamically as part of the search process.\n";
@@ -164,6 +174,7 @@ function buildReloadQuery ($consobj) {
 	if ($_GET['type'] == 'dev') {
 		$fieldlist = $fieldlist . ' explain';
 	}
+
 	foreach (explode (' ', $fieldlist) as $name) {
 		if ($_GET[$name] == 'on') {
 			$checked = 'true';
@@ -183,11 +194,13 @@ function buildReloadQuery ($consobj) {
 	Echo "theForm['count'].value = 1;\n";
 	Echo "optionNumber=1;\n";
 	// Loop through additional constraints and set those up
-	$realNumber = 1; // We are going to skip unused numbers; this is the new constraint number
-	for ($thisOption = 2; $thisOption <= $_GET[count]; $thisOption++) {
-		if (isset($_GET["query$thisOption"])) {
-			$consobj[$thisOption]->rebuildForm(++$realNumber);
+	$newCount['F']=1; // because we have a '2' offset for some reason
+	foreach ($consObjects as $thisConsObj) {
+		$parentID = $thisConsObj->parentID();
+		if (!isset ($newCount[$parentID])) {
+			$newCount[$parentID] = 0;
 		}
+		$thisConsObj->rebuildForm(++$newCount[$parentID]);
 	}
 	echo "mainChange();\n";
 	echo "}\n";
@@ -197,9 +210,9 @@ function buildReloadQuery ($consobj) {
 // Force an index on bank if possible and no other index is being used
 function refineQuery ($sql, &$rows) {
 	if (strpos ($sql, 'PW.bank') !== false) {
-		if (!isset ($GLOBALS['conn'])) {echo " no connection ";}
 		$result = $GLOBALS['conn']->query("EXPLAIN $sql")->fetch(PDO::FETCH_ASSOC);
-		if (isset ($result['key'])) { // key used by SQL for outer loop
+		$key = $result['key']; // key used by SQL for outer loop
+		if (isset ($key)) {
 			$rows = $result['rows'];
 		} else {
 			$sql = str_replace ('words PW', 'words PW FORCE INDEX (wbankidx)', $sql);

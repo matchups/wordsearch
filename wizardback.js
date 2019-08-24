@@ -1,6 +1,10 @@
 // Close the wizard.  If saveFlag, use the values to populate this constraint's query field.
 function closeWizard (saveFlag) {
-	thisOption = document.getElementById("wizoption").value;
+	var thisOption = document.getElementById("wizoption").value;
+	var newValue;
+	var offset;
+	var endthing;
+
 	if (saveFlag) {
 		// logic depends on type
 		if (document.getElementById("rcharmatch" + thisOption).checked) {
@@ -46,7 +50,7 @@ function closeWizard (saveFlag) {
 	}
 
 	// delete wizard fields
-	wizForm = document.forms["popwiz"];
+	var wizForm = document.forms["popwiz"];
 	document.getElementById("wizfields").value.split(" ").forEach(function (fieldName) {
 			wizForm.removeChild(document.getElementById(fieldName));
 	});
@@ -68,6 +72,7 @@ function wizInsert (newOption) {
 function openWizard (thisOption) {
 	document.getElementById("wizoption").value = thisOption; // So the wizard knows where to put the answer when he closes
 
+  var newOption;
 	if (theForm["rweights" + thisOption].checked) {
 		fieldlist = "";
 		// Set up wizard for Weights
@@ -312,12 +317,13 @@ function openWizard (thisOption) {
 // When a radio button is selected for Weights, the right side multipliers are enabled only if the selection
 // is compatible with that.
 function wizRadioClicked() {
-		allowEnd = (document.getElementById("wrwtend").checked || document.getElementById("wrwtmidend").checked);
-		document.getElementById("wnweightright").disabled = !allowEnd;
-		if (allowEnd) {
-			textColor = "black";
-		} else {
-			textColor = "gray";
-		}
-		document.getElementById("wtweightright").style = "color:" + textColor;
+	var allowEnd = (document.getElementById("wrwtend").checked || document.getElementById("wrwtmidend").checked);
+	var textColor;
+	document.getElementById("wnweightright").disabled = !allowEnd;
+	if (allowEnd) {
+		textColor = "black";
+	} else {
+		textColor = "gray";
+	}
+	document.getElementById("wtweightright").style = "color:" + textColor;
 }

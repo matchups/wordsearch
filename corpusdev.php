@@ -158,17 +158,16 @@ class corpus {
 		foreach ($this->optionButtonList() as $id => $description) {
 			$fieldlist = $fieldlist . " r{$corpus}_$id t{$corpus}_$id";
 		}
-		echo "removeChildrenCorpus (corpusOptionNumber, '$fieldlist');\n";
-		echo "if (corpusOptionNumber == theForm['$key'].value) {\n";
-		echo "  document.forms['search']['$key'].value--;\n";
-		echo "}\n";
+		echo "removeChildrenCorpus (corpusOptionNumber, '$fieldlist');
+			if (corpusOptionNumber == document.forms['search']['$key'].value) {
+			  document.forms['search']['$key'].value--;
+			}\n";
 		if ($clickedCode) {
 			echo "noSub$corpus (corpusOptionNumber);\n";
 		}
-		echo "} // end removeConstraint$corpus\n";
-
-		echo "</script>\n";
-		echo "<input type=hidden id='$key' name='$key' value='0' />";
+		echo "} // end removeConstraint$corpus
+		</script>
+		<input type=hidden id='$key' name='$key' value='0' />\n";
 	}
 
 	function optionButtonList () {

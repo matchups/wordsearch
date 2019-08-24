@@ -115,37 +115,36 @@ function badGroups (pattern) {
 // Side effects when the user changes the form
 function mainChange ()
 {
+	var letterBank = false;
 	var theForm = document.forms["search"];
-	if (theForm["repeat"] !== undefined) {
-		var letterBank = false;
-		// If Any Order is checked and there are no repeated letters or wildcards, allow them to specify that
-		// letter banks are okay; that is "allow repeats" is enabled.
-		if (theForm["anyorder"].checked) {
-			var pattern = document.forms["search"]["pattern"].value.toLowerCase();
-			// expand groups and ranges
-			while ((here = pattern.indexOf ("-")) > 0) {
-				var startChar = pattern.substring (here - 1, here);
-				var endChar = pattern.substring (here + 1, here + 2);
-				var aCode = 'a'.charCodeAt(0);
-				var middleChars = "abcdefghijklmnopqrstuvwxyz".substring (startChar.charCodeAt(0)-aCode+1, endChar.charCodeAt(0)-aCode-1);
-				pattern = pattern.substring (0, here) + middleChars + pattern.substring (here + 1);
-			}
-			pattern = pattern.replace ("@", "aeiou").replace("#", "bcdfghjklmnpqrstvwxyz").replace("&","ivxlcdm");
-			// check for any duplicate letter
-			letterBank = !/(.).*\1/i.test(pattern) &&
-				pattern.indexOf ("*") < 0 && pattern.indexOf ("?") < 0; // and no wildcard
+	var textColor;
+	// If Any Order is checked and there are no repeated letters or wildcards, allow them to specify that
+	// letter banks are okay; that is "allow repeats" is enabled.
+	if (theForm["anyorder"].checked) {
+		var pattern = document.forms["search"]["pattern"].value.toLowerCase();
+		// expand groups and ranges
+		while ((here = pattern.indexOf ("-")) > 0) {
+			var startChar = pattern.substring (here - 1, here);
+			var endChar = pattern.substring (here + 1, here + 2);
+			var aCode = 'a'.charCodeAt(0);
+			var middleChars = "abcdefghijklmnopqrstuvwxyz".substring (startChar.charCodeAt(0)-aCode+1, endChar.charCodeAt(0)-aCode-1);
+			pattern = pattern.substring (0, here) + middleChars + pattern.substring (here + 1);
 		}
-
-		// Now that we know, update the GUI
-		theForm["repeat"].disabled = !letterBank;
-		if (letterBank) {
-			textColor = "black";
-		} else {
-			theForm["repeat"].checked = false;
-			textColor = "gray";
-		}
-		document.getElementById("trepeat").style = "color:" + textColor; // for some reason, theForm["trepeat"] doesn't work here
+		pattern = pattern.replace ("@", "aeiou").replace("#", "bcdfghjklmnpqrstvwxyz").replace("&","ivxlcdm");
+		// check for any duplicate letter
+		letterBank = !/(.).*\1/i.test(pattern) &&
+			pattern.indexOf ("*") < 0 && pattern.indexOf ("?") < 0; // and no wildcard
 	}
+
+	// Now that we know, update the GUI
+	theForm["repeat"].disabled = !letterBank;
+	if (letterBank) {
+		textColor = "black";
+	} else {
+		theForm["repeat"].checked = false;
+		textColor = "gray";
+	}
+	document.getElementById("trepeat").style = "color:" + textColor; // for some reason, theForm["trepeat"] doesn't work here
 }
 
 // remove subsidiary radio buttons for Weights, if present
@@ -159,11 +158,13 @@ function noWeightSub (thisOption) {
 function radioClicked (thisOption) {
 	currentOption = thisOption;
 	var theForm = document.forms["search"];
+	var hint;
+	var wizard;
 	// If Weights, make subsidiary buttons available
 	if (theForm["rweights" + thisOption].checked) {
 		if (theForm["rscrabble" + thisOption] === undefined) {
-			here = theForm["rcharmatch" + thisOption];
-			myParent = here.parentNode;
+			var here = theForm["rcharmatch" + thisOption];
+			var myParent = here.parentNode;
 
 			newOption = document.createElement("span");
 			newOption.id = "twtob" + thisOption;
@@ -249,8 +250,8 @@ function radioClicked (thisOption) {
 	}
 
 	theForm.removeChild(document.getElementById("hint"));
-	here = document.getElementById("delcons" + thisOption);
-	myParent = here.parentNode;
+	var here = document.getElementById("delcons" + thisOption);
+	var myParent = here.parentNode;
 
 	newOption = document.createElement("span");
 	newOption.id = "hint";
@@ -264,7 +265,7 @@ function removeConstraint(thisOption)
 {
 	noWeightSub (thisOption);
 	removeChildren (thisOption, "label not query rpattern rregex rsubword rweights rcharmatch rcrypto " +
-				"tpattern tregex tsubword tweights tcharmatch tcrypto delcons butspace wizard br");
+				"tpattern tregex tsubword tweights tcharmatch tcrypto delcons butspace wizard br rcustomsql tcustomsql");
 
 	// if it is the last one being removed, decrement the count
 	var here = theForm["count"];
@@ -283,15 +284,18 @@ function removeConstraint(thisOption)
 
 // remove a list of children associated with a specific numbered constraint
 function removeChildren (thisOption, nameList) {
-	theForm = document.getElementById("search");
+	var theForm = document.getElementById("search");
+	var oneChild;
 	nameList.split (" ").forEach(function (baseName) {
-			theForm.removeChild(document.getElementById(baseName + thisOption));
+		if ((oneChild = document.getElementById(baseName + thisOption)) !== null) {
+			theForm.removeChild(oneChild);
+		}
 	});
 }
 
 // Zap the form back to its original state
 function resetForm() {
-	theForm = document.forms["search"];
+	var theForm = document.forms["search"];
 	// clear simple fields
 	theForm["pattern"].value = "";
 	theForm["anyorder"].checked = false;
@@ -299,8 +303,6 @@ function resetForm() {
 	theForm["whole"].checked = false;
 	theForm["single"].checked = true;
 	theForm["phrase"].checked = true;
-	theForm["wikipedia"].checked = true;
-	theForm["gettysburg"].checked = true;
 	theForm["minlen"].value = "";
 	theForm["maxlen"].value = "";
 
@@ -313,6 +315,13 @@ function resetForm() {
 	// Make sure we know there are no extra constraints.
 	theForm["count"].value = "1";
 	optionNumber = 1;
+
+	// Reset stuff relating to word lists
+	theForm['morecbx'].value.substring (1).split(' ').forEach(function (fieldName) {
+		document.getElementById(fieldName).checked=(fieldName.substring (0, 6)=='corpus');
+	});
+
+	resetCorporaMore(); // generated dynamically
 }
 
 // Make sure the form is okay before we submit it for processing.
@@ -323,6 +332,9 @@ function validateForm() {
 	var maxlen = theForm["maxlen"].value;
 	var single = theForm["single"].checked;
 	var phrase = theForm["phrase"].checked;
+	var thisOption;
+	var thisItem;
+	var thisPattern;
 
 	// Check if the primary pattern has mismatched brackets or similar issues
 	var pattern = theForm["pattern"].value;
@@ -338,45 +350,45 @@ function validateForm() {
 
 	// Loop through additional constraints and validate them in a way suitable for the chosen type
 	for (thisOption = 2; thisOption <= optionNumber; thisOption++) {
-		thisitem = theForm["query" + thisOption];
-		thisitem.focus();
-		thispattern = thisitem.value;
+		thisItem = theForm["query" + thisOption];
+		thisItem.focus();
+		thisPattern = thisItem.value;
 		// Same validation as with the main pattern
 		if (theForm["rpattern" + thisOption].checked) {
-			if (!/^[a-z?*@#&\[\-\]]+$/i.test (thispattern)) {
+			if (!/^[a-z?*@#&\[\-\]]+$/i.test (thisPattern)) {
 				alert("Invalid character in pattern " + thisOption);
 				return false;
 			}
-			if (badGroups (thispattern)) {
+			if (badGroups (thisPattern)) {
 				alert("Invalid letter group in pattern " + thisOption);
 				return false;
 			}
 		} else if (theForm["rsubword" + thisOption].checked) {
-			if (/[^-a-z0-9:,]/i.test(thispattern)) {
+			if (/[^-a-z0-9:,]/i.test(thisPattern)) {
 				alert("Invalid character in subword specification " + thisOption);
 				return false;
 			}
 		} else if (theForm["rweights" + thisOption].checked) {
 			// Left multipliers, optional plus or minus, right multipliers, operator, comparison value
-			if (!(/^[0-9]*([-+][0-9]*)?[<=>][0-9]+$/.test(thispattern))) {
+			if (!(/^[0-9]*([-+][0-9]*)?[<=>][0-9]+$/.test(thisPattern))) {
 				alert("Invalid weight specification " + thisOption);
 				return false;
 			}
 		} else if (theForm["rcharmatch" + thisOption].checked) {
 			// First position, operator, second position, optional ^offset
-			if (!/^-?[1-9][0-9]*[<=>]-?[1-9][0-9]*([+\-]\^[1-9][0-9]*)?$/i.test(thispattern)) {
+			if (!/^-?[1-9][0-9]*[<=>]-?[1-9][0-9]*([+\-]\^[1-9][0-9]*)?$/i.test(thisPattern)) {
 				alert("Invalid letter match specification " + thisOption);
 				return false;
 			}
 		} else if (theForm["rcrypto" + thisOption].checked) {
-			if (thispattern == "*") {
+			if (thisPattern == "*") {
 				continue;
 			}
-			if (/[^a-z]/i.test(thispattern)) {
+			if (/[^a-z]/i.test(thisPattern)) {
 				alert("Invalid cryptogram pattern " + thisOption);
 				return false;
 			}
-			if ((maxlen > 0  &&  maxlen != thispattern.length) || (minlen > 0  &&  minlen != thispattern.length)) {
+			if ((maxlen > 0  &&  maxlen != thisPattern.length) || (minlen > 0  &&  minlen != thisPattern.length)) {
 				alert("Cryptogram length is inconsistent with requested word length");
 				return false;
 			}
@@ -394,7 +406,8 @@ function validateForm() {
 		return false;
 	}
   // Are any corpus items checked?
-	anycorpus = false;
+	var anycorpus = false;
+	var item;
 	for (elnum = 0; elnum < theForm.elements.length; elnum++) {
 		item = theForm.elements[elnum];
 		if (item.id.substring (0, 6) == 'corpus') {

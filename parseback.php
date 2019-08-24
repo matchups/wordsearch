@@ -1,9 +1,9 @@
 <?php
 // Create SQL to implement $pattern
-// $consobj is an array of constraint objects
+// $consObjects is an array of constraint objects
 // returns complete SQL string
 // also echoes a description of the query to the web page
-function parseQuery ($pattern, &$consobj) {
+function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 	$pattern = expandSpecial (strtolower ($pattern)); // Convert # @ & to [groups]
 	$required = '';
 
@@ -13,7 +13,7 @@ function parseQuery ($pattern, &$consobj) {
 			   " word_entry.whole AS whole, entry.corpus_id AS corpus FROM words PW" .
 			   " INNER JOIN word_entry ON word_entry.word_id = PW.id " .
 			   " INNER JOIN entry ON entry.id = word_entry.entry_id " .
-			   " $prewhere WHERE " . corpusWhere('entry');
+			   " $prewhere WHERE " . corpusInfo('entry', 'W');
 
 	regexBounds (patternToRegex ($pattern, 'P'), $minlen, $maxlen);
 
@@ -22,17 +22,17 @@ function parseQuery ($pattern, &$consobj) {
 	for ($num = 2; $num <= $count; $num++) {
 		if (!isset($_GET["query$num"])) { // This can happen if there are three constraints and you delete the second one
 				$skip++;
-				$consobj[$num] = new constraint("", $num, false); // dummy to avoid issues later
 				continue;
 		}
 		$classname = "cons" . $_GET["radio$num"]; // subclass name based on user choice of constraint type
-		$consobj[$num] = new $classname($_GET["query$num"], $num, getCheckbox ("not$num"));
-		$required = $required . $consobj[$num]->required(); // Do this now because needed below
+		$consObjects[$num] = new $classname($_GET["query$num"], $num, getCheckbox ("not$num"));
+		$required = $required . $consObjects[$num]->required(); // Do this now because needed below
+		// Not done for corpus ones, but they shouldn't ever need it.
 	} // end for
 
 	// Identify pattern when we're doing an Any Order search.
 	if ($anyorder = getCheckbox ('anyorder')) {
-		Echo '  Any order ';
+		echo '  Any order ';
 		$sql = $sql . doAnyOrder ($pattern, $maxlen, $required);
 		$position = array ();
 	} else { // Not anyorder
@@ -50,21 +50,27 @@ function parseQuery ($pattern, &$consobj) {
 		}
 	}
 
+	foreach (corpusInfo ('', 'L') as $thisCorpus) {
+		$corpusObjects [$thisCorpus] = corpus::factory ($thisCorpus);
+		$corpusObjects [$thisCorpus]->builder ($consObjects);
+		if ($corpusObjects [$thisCorpus] -> requireWhole()) {
+			$_GET['whole']='on';
+		}
+	}
+
+  $counter = 0;
 	// Handle additional constraints
-	for ($num = 2; $num <= $count; $num++) {
-		if (!isset($_GET["query$num"])) {
-				continue;
+	foreach ($consObjects as $thisConsObject) {
+		if (++$counter % 2 == 0) { // Display constraint info, two per line
+				echo "<BR>";
 		}
-		if (($num - $skip) % 2 == 0) { // Display constraint info, two per line
-				Echo "<BR>";
-		}
-		Echo "</span>and<span class='specs'> ";
-		Echo $consobj[$num]->explain () . ' ';
-		$sql = $sql . $consobj[$num]->parse ();
-		$consobj[$num]->setlengths ($minlen, $maxlen);
-		$position += $consobj[$num]->position();
+		echo " </span>and<span class='specs'> ";
+		echo $thisConsObject->explain () . ' ';
+		$sql = $sql . $thisConsObject->parse ();
+		$thisConsObject->setlengths ($minlen, $maxlen);
+		$position += $thisConsObject->position();
 		// keep object around for post-filtering and for rebuilding form
-	} // end for
+	} // end foreach
 
 	$sql = $sql . doWordTypes ();
 	$sql = $sql . doLength ('PW', $minlen, $maxlen, true);
@@ -81,11 +87,11 @@ function parseQuery ($pattern, &$consobj) {
 			$fourjoin = doFour ($pattern);
 			$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
 		}
-		for ($num = 2; $num <= $count  &&  $fourjoin == ''; $num++) {
-			$fourjoin = doFour ($consobj[$num]->fourPattern());
+		foreach ($consObjects as $thisConsObject) {
+			$fourjoin = doFour ($thisConsObject->fourPattern());
 			$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
-		} // end for
-	}
+		} // end foreach
+	} // end filtered
 
 	$by = "PW.text, word_entry.whole DESC, entry.corpus_id";
 	$orderby = " GROUP BY " . str_replace('DESC', '', $by) . " ORDER BY $by";
@@ -108,7 +114,7 @@ function doAnyOrder ($pattern, &$maxlen, $required) {
 	}
 	$sortpat = stringSort ($patternStripped);
 	if ($repeat = getCheckbox ('repeat')) {
-		Echo '  with repeats allowed';
+		echo '  with repeats allowed';
 		$maxlen = 99;
 	}
 	// If there is a range, create an array of search strings (e.g., any[one] --> {anoy, anny, aeny})
@@ -139,7 +145,7 @@ function doAnyOrder ($pattern, &$maxlen, $required) {
 		$ndsortpat = noDupes ($sortpat[$opt]); // Remove duplicates so we can match...
 		$bankpat = noDupes (stringSort ($ndsortpat . $required)); // against the bank column
 		if ($wild > 0) {
-			$thissql = bankSQL ($bankpat, sizeof ($sortpat) == 1, $wild == 2  ||  preg_match ('/?.*?/', $pattern));
+			$thissql = bankSQL ($bankpat, sizeof ($sortpat) == 1, $wild == 2  ||  preg_match ('/\?.*\?/', $pattern));
 		} else {
 			$thissql = "PW.bank = '" . patternToSQL ($bankpat) . "'";
 		}
@@ -158,6 +164,12 @@ function doAnyOrder ($pattern, &$maxlen, $required) {
 		$more = $more . " ($thissql) ";
 	  }
 	$more = $more . ')';
+
+  if (isset ($_GET['from'])) {
+		// Handle continuation when original query timed out
+		$more = $more . " AND PW.text > '{$_GET['from']}'";
+	}
+
 	return $more;
 }
 
@@ -256,7 +268,7 @@ function doWordTypes() {
 	$more = '';
 	if (getCheckbox ('whole')) {
 		$more = $more . " AND word_entry.whole = 'Y'";
-		Echo "<BR>Whole entries only";
+		echo "<BR>Whole entries only";
 	}
 	$single = getCheckbox ("single");
 	$phrase = getCheckbox ("phrase");
@@ -265,10 +277,10 @@ function doWordTypes() {
 	} else {
 		if ($single) {
 			$more = $more . " AND word_entry.solid = 'Y'";
-			Echo "<BR>Single words only";
+			echo "<BR>Single words only";
 		} else {
 			$more = $more . " AND word_entry.solid = 'N'";
-			Echo "<BR>Phrases only";
+			echo "<BR>Phrases only";
 		}
 	}
 	return $more;
@@ -312,7 +324,9 @@ function bankSQL ($pattern, $main, $wild) {
 }
 
 // Create SQL for filtering by corpus
-function corpusWhere ($table) {
+function corpusInfo ($table, $option) {
+	// $option is either L for a list of corpora ($table is ignored)
+	// or W for a WHERE clause relating to $table.
 	$flags = '';
 	foreach ($_GET as $key => $parm) {
     if (substr ($key, 0, 6) == 'corpus') {
@@ -326,6 +340,10 @@ function corpusWhere ($table) {
 		}
   }
 
+	if ($option == 'L') {
+		return $corpus;
+	}
+
 	$list = implode (',', $corpus);
 	if (count ($corpus) == 1) {
 		$clause = " = $list";
@@ -334,12 +352,12 @@ function corpusWhere ($table) {
 	}
 
   if ($flags == '') {
-		$flagclause = " AND $table.flags = ''";
+		$flagClause = " AND $table.flags = ''";
 	} else {
-		$flagclause = " AND $table.flags RLIKE '^[$flags]*$'";
+		$flagClause = " AND $table.flags RLIKE '^[$flags]*$'";
 	}
 
-	return "$table.corpus_id $clause $flagclause ";
+	return "$table.corpus_id $clause $flagClause ";
 }
 
 // Convert special characters to letter groups
@@ -358,9 +376,11 @@ function getCheckbox ($id) {
 
 // Replace groups and repeat counts with wildcards when we only care about fixed letters
 function groupToWildcard ($pattern) {
-	while ($left = strpos ($pattern, '[') !== false) {
+	$debug = 0;
+	while (($left = strpos ($pattern, '[')) !== false) {
 		$right = strpos ($pattern, ']');
 		$pattern = substr ($pattern, 0, $left) . '?' . substr ($pattern, $right + 1);
+		if (++$debug > 10) {break;}
 	}
 
 	// Replace repeat counts with wildcards
@@ -375,11 +395,12 @@ function groupToWildcard ($pattern) {
 		},
 		$pattern);
 
-	return $pattern;
+  return $pattern;
 }
 
 // Return input string (assumed to be sorted) with duplicates removed
 function noDupes ($pat) {
+	$pat = stringSort ($pat);
 	for ($here = strlen ($pat) - 2; $here >= 0; $here--) {
 		if (substr ($pat, $here, 1) == substr ($pat, $here + 1, 1)) {
 			$pat = substr ($pat, 0, $here) . substr ($pat, $here + 1);
@@ -389,13 +410,14 @@ function noDupes ($pat) {
 }
 
 // Convert a pattern, as entered by the user, into a regular expression suitable for
-// the selected $language (P for PHP or S for SQL).
+// the selected language (P for PHP or S for SQL).  Can also pass U for an unarchored pattern.
 function patternToRegex ($pat, $lang) {
 	$letterpat = '[a-z]';
-	$regex = str_replace ('?', $letterpat, str_replace ('*',
-		$letterpat . '*', $pat));
-	$regex = '^' . $regex . '$';
-	if ($lang == 'P') {
+	$regex = str_replace ('?', $letterpat, str_replace ('*', $letterpat . '*', $pat));
+	if (strpos ($lang, 'U') === false) {
+		$regex = '^' . $regex . '$';
+	}
+	if (strpos ($lang, 'P') !== false) {
 		$regex = "/" . $regex . "/i";
 	}
 	return $regex;
