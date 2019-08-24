@@ -320,7 +320,7 @@ function bankSQL ($pattern, $main, $wild) {
 		$more = "PW.bank LIKE '" . patternToSQL ($like) . "' AND PW.bank < 'a" . substr ($like, 2, 1) . "zz'";
 	} else if (substr ($like, 0, 2) == '*b') {
 		// with or without A
-		$more = "PW.bank LIKE '" . patternToSQL (substr ($like, 1)) . "' OR PW.bank LIKE '" . patternToSQL ('a' . substr ($like, 1)) . "'";
+		$more = "(PW.bank LIKE '" . patternToSQL (substr ($like, 1)) . "' OR PW.bank LIKE '" . patternToSQL ('a' . substr ($like, 1)) . "')";
 	} else if ($wild) {
 		// as with a*, stop when we can
 		$more = "PW.bank LIKE '" . patternToSQL ($like) . "' AND PW.bank < '" . explode ('*', $like)[1] . "zz'";
