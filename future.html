@@ -25,9 +25,9 @@
     </OL>
   <LI>0.73 Miscellaneous internal  (<B>all done</B>)
     <OL type=a>
-    <LI>Dumper security (done)
-    <LI>Validate same IP address (done)
-    <LI>Git (done)
+    <LI>Dumper security
+    <LI>Validate same IP address
+    <LI>Git
     <LI>Refactor class-related JS stuff to PHP
 	<UL>
 	<LI>Wizarddev.js to big echo'ed PHP
@@ -56,7 +56,7 @@
     <LI>See what is actually a reasonable limit on the number of rows: 4K/second, so 80K, 1M
     <LI>Modify script to use $type, not hard-coded DEV when calling catsuggest; also update vup
   </OL>
-  <LI>0.74 Wiktionary <B>all done</B> except for running loader and step K
+  <LI>0.74 Wiktionary <B>all done</B>
     <OL type=a>
     <LI>Loader
       <UL>
@@ -66,7 +66,6 @@
       <LI>Combine with wikipedia to one PHP
       <LI>Don't flag redirects as foreign [and update existing ones]
       </UL>
-    <LI>Run loader to end, then resume <A HREF="http://www.8wheels.org/wordsearch/addwikipedia.php?limit=500&from=Sir_John_Meade%2C_1st_Baronet&corpus=2">Wikipedia load</A>
     <LI>Add to corpus table and flag table 
     <LI><strike>Enable searches, with foreign checkbox </strike> (not needed)
     <LI><strike>Link to results</strike> (not needed)
@@ -75,19 +74,16 @@
     <LI>Filter by category (update autosuggest to pass in corpus) 
     <LI><strike>Filter by language</strike> (use category)
     <LI><strike>Handle hits in both word lists</strike> (not needed)
-    <LI><font color=#FF00FF>But wait!  Capitalized and not.</font>
-<!--
-Git
--->
+    <LI>Capitalized and not
     <LI><font color=blue>Release</font>
-<!--
-pull stuff from desktop
--->
-    <LI>Later, <A HREF="http://www.8wheels.org/wordsearch/addwikipedia.php?limit=500&classname=wiktionary&from=Plissees&corpus=3">resume uppercase</A>
     </OL>
   <LI>0.75 User-specific word lists
     <OL type=a>
+<!--
+pull stuff from desktop via dropbox to resume
+-->
     <LI>Save result as list
+    <LI>Consolidate security checking
     <LI>Handle "more" feature
     <LI>Upload list
     <LI>Access saved
@@ -96,6 +92,7 @@ pull stuff from desktop
     <LI>Access shared with autocomplete lists https://www.upwork.com/hiring/development/creating-autocomplete-functionality-with-php-and-mysql/
     <LI>Menu: help, user, manage lists, manage queries
     <LI>Manage (delete, rename, edit, share, assign URL)
+    <LI>Release; add save stuff to vup
     </OL>
   <LI>0.76 Other search capabilities
     <OL type=a>
@@ -218,5 +215,10 @@ pull stuff from desktop
 * Retest
 * Tell everyone
 * If .75, remove archive from vup
+-->
+<!--
+<A HREF="http://www.8wheels.org/wordsearch/addwikipedia.php?limit=500&classname=wiktionary&from=Plissees&corpus=3">resume uppercase Wiktionary</A>
+<A HREF="http://www.8wheels.org/wordsearch/addwikipedia.php?limit=265&classname=wiktionary&from=antiliquor&corpus=3">resume lowercase Wiktionary</A>
+<A HREF="http://www.8wheels.org/wordsearch/addwikipedia.php?limit=500&classname=wikipedia&from=Sir_John_Meade%2C_1st_Baronet&corpus=2">Wikipedia load</A>
 -->
 </BODY>

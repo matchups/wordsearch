@@ -8,7 +8,7 @@ if (!isset ($_GET['sessionkey'])  ||  !isset ($_GET['level'])) {
 <HEAD>
 <TITLE>Word Search</TITLE>
 <?php
-$type = "beta";
+$type = "";
 Echo "<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>\n";
 Echo "<script src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'></script>\n";
 Echo "<script src='//netsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>\n";

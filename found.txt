@@ -2,46 +2,36 @@
 ---------- CATSUGGESTDEV.PHP
 
 ---------- CONSDEV.PHP
-		if (strpos ($this->regex, '(') !== false) { // MySQL doesn't support this
-				if (strpos (substr ($spec, 0, $first), $fchar) !== false) { // If we have already compared to an identical letter
 
 ---------- CONSSUBWORDDEV.PHP
 
 ---------- CONSWEIGHTSDEV.PHP
 
 ---------- CORPUSDEV.PHP
+		Echo "		myParent.insertBefore (newButton ('delcons{$corpus}_' + corpusOptionNumber, 'Remove', 'removeConstraint$corpus(' + corpusOptionNumber + ')'), here);
+		echo "function removeConstraint$corpus (corpusOptionNumber) {\n";
+		echo "} // end removeConstraint$corpus\n";
 
 ---------- FORMDEV.PHP
+      removeConstraint$corpus(count);
+echo "	myParent.insertBefore (newButton ('delcons' + optionNumber, 'Remove', 'removeConstraint(' + optionNumber + ')'), here);
+function removeConsMore (thisOption) {
 
 ---------- HELPDEV.HTML
 
 ---------- INDEXDEV.PHP
 
 ---------- PARSEDEV.PHP
-		if (strpos ($pattern, ']') > 0) {
-	if (strpos ($pattern, '?') !== false) {
-	if (strpos ($pattern, '*') !== false) {
-	if (($rbrack = strpos ($patternStripped, ']')) > 0) {
-		$lbrack = strpos ($patternStripped, '[');
-		if (strpos ('jqxz', $letter) !== false) {
-		if (strpos ($flags[$thisCorpus], $matches[2][$counter]) === false) {
-	while (($left = strpos ($pattern, '[')) !== false) {
-		$right = strpos ($pattern, ']');
-			if (strpos ($match, ',') !== false) {
-	if (strpos ($lang, 'U') === false) {
-	if (strpos ($lang, 'P') !== false) {
-		if (strpos ($pattern, '|') !== false  ||  strpos ($pattern, '!') !== false  ||  substr ($pattern, 1, 1) != '^') {
-	if (strpos ($pattern, '|') !== false || strpos ($pattern, '!') !== false) {
-	while (($left = strpos ($pattern, '[')) !== false) {
-		$right = strpos ($pattern, ']');
 
 ---------- PHRASESDEV.PHP
 
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
-	if (strpos ($sql, 'PW.bank') !== false) {
 
 ---------- UTILITYDEV.JS
+function removeConstraint(thisOption)
+	removeConsMore (thisOption); // generated code
+			removeConstraint (thisOption);
 
 ---------- UTILITYDEV.PHP

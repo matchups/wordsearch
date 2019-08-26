@@ -445,7 +445,7 @@ public static function getHint () {
 
 class conscustomsql extends constraint {
 	public function parse() {
-		return $this->parseWhere(' AND ' . $this->spec);
+		return " AND $this->spec ";
 	}
 
 	public static function getLabel () {
