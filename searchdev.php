@@ -116,6 +116,7 @@ try {
 		comment ("Got " . $result->rowCount() . " rows");
 	}
 	$time['afterquery'] = microtime();
+
 	if ($explain) {
 		echo "<div class='code'>$sql</div><br>";
 		showExplain ($result);
@@ -123,8 +124,15 @@ try {
 		// Loop through words and display results
 		comment ($sql);
 		$ret = showResults ($result, $consObjects, $corpusObjects);
-		if (preg_match ("/^time\^(.*)$/", $ret, $matches)) {
-			$url = preg_replace ('/&from=.*$/', '', $_SERVER['REQUEST_URI']) . "&from={$matches[1]}";
+		if ($ret['code'] == 'none') {
+			echo "No matches found.<BR>";
+		}
+		if (isset ($ret['save'])) {
+			$sessionEncoded = urlencode ($_GET['sessionkey']);
+			echo "<P><A HREF='http://www.alfwords.com/asksaveresults$type.php?sessionkey=$sessionEncoded&type=$type' target='_blank'>Save Results</A><BR>\n";
+		}
+		if ($ret ['code'] == 'time') {
+			$url = preg_replace ('/&from=.*$/', '', $_SERVER['REQUEST_URI']) . "&from={$ret['restart']}";
 			$url = substr ($url, 12); // remove /wordsearch/
 			echo "<P>Request timed out.  Select <A HREF=http://www.alfwords.com/$url>more</A> to see additional results.<BR>";
 		}
@@ -140,6 +148,9 @@ try {
 }
 catch(PDOException $e) {
 	errorMessage ("SQL failed: {$GLOBALS['lastSQL']}... " . $e->getMessage());
+} // end main code block
+catch(Exception $e) {
+	errorMessage ($e->getMessage());
 } // end main code block
 
 // Some stuff outside try/catch block so the rest of the page won't suffer.
