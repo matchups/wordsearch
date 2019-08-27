@@ -2,28 +2,6 @@
 $type = $_GET['type']; // beta, dev, etc.
 include "utility" . $type . ".php";
 
-// Need to check for a valid session before creating *any* output
-$valid = false;
-$code = '1';
-if (isset ($_GET['sessionkey'])) { // make sure session info is passed to us
-	$session = $_GET['sessionkey'];
-	try {
-		$conn = openConnection (false);
-		$sql = "SELECT ip_address FROM session WHERE session_key = '$session' AND status = 'A'";
-		$result = $conn->query($sql);
-		if ($result->rowCount() > 0) { // make sure it is an active session
-			$row = $result->fetch(PDO::FETCH_ASSOC);
-			// confirm IP address; copy from search
-			$valid = true;
-		} else {
-			$code = '3';
-		}
-	}
-	catch(PDOException $e) {
-		$code = $e->getCode ();
-	}
-}
-
 echo "<HTML>
 <HEAD>
 	<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
@@ -39,7 +17,7 @@ echo "<HTML>
 	<H2>Save Results</H2>\n";
 
 try {
-	if (!$valid) {
+	if ($code = securityCheck ($level, $userid, $sessionid)) {
 		throw new Exception ("Unable to save results; code $code");
 	}
 	echo "
@@ -51,7 +29,9 @@ try {
 	Overwrite existing list
 	<input type=radio name=savetype id=typeadd value=add />
 	Add to existing list
-	<input type=hidden name=sessionkey value='$session'>
+	<input type=hidden name=sessionkey value='{$_GET['sessionkey']}'>
+	<input type=hidden name=level value='$level'>
+	<input type=hidden name=type value='$type'>
 	<BR>
 	<input type='submit'>
 	</form>\n";

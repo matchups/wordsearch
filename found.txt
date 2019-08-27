@@ -1,4 +1,9 @@
 
+---------- ASKSAVERESULTSDEV.PHP
+	if ($code = securityCheck ($level, $userid, $sessionid)) {
+	<input type=hidden name=sessionkey value='$session'>
+	$conn->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
+
 ---------- CATSUGGESTDEV.PHP
 
 ---------- CONSDEV.PHP
@@ -8,14 +13,15 @@
 ---------- CONSWEIGHTSDEV.PHP
 
 ---------- CORPUSDEV.PHP
-		Echo "		myParent.insertBefore (newButton ('delcons{$corpus}_' + corpusOptionNumber, 'Remove', 'removeConstraint$corpus(' + corpusOptionNumber + ')'), here);
-		echo "function removeConstraint$corpus (corpusOptionNumber) {\n";
-		echo "} // end removeConstraint$corpus\n";
+
+---------- DOSAVERESULTSDEV.PHP
+	if ($code = securityCheck ($level, $userid, $sessionid)) {
+	$sql = "SELECT entry, corpus_id FROM session_words WHERE session_id = '$sessionid'";
 
 ---------- FORMDEV.PHP
-      removeConstraint$corpus(count);
-echo "	myParent.insertBefore (newButton ('delcons' + optionNumber, 'Remove', 'removeConstraint(' + optionNumber + ')'), here);
-function removeConsMore (thisOption) {
+$sessionkey = $_GET['sessionkey'];
+echo "<input type=hidden id='sessionkey' name='sessionkey' value='$sessionkey' />";
+echo "onclick=\"window.location.href = 'http:logout.php?sessionkey=$sessionkey'\" />\n";
 
 ---------- HELPDEV.HTML
 
@@ -26,12 +32,22 @@ function removeConsMore (thisOption) {
 ---------- PHRASESDEV.PHP
 
 ---------- RESULTSDEV.PHP
+				$sessionID = $row['id'];
+				THROW Exception ("No results getting session ID for $sessionKey");
+			$connw -> exec ("DELETE FROM session_words WHERE session_id = $sessionID");
+				$stmt->execute(array ($sessionID, $entry ['text'], $entry ['corpus']));
+			$ret ['save'] = $sessionID;
 
 ---------- SEARCHDEV.PHP
+if ($code = securityCheck ($level, $userid, $sessionid)) {
+	openConnection (true)->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
+			$sessionEncoded = urlencode ($_GET['sessionkey']);
+			echo "<P><A HREF='http://www.alfwords.com/asksaveresults$type.php?sessionkey=$sessionEncoded&type=$type&level=$level' target='_blank'>Save Results</A><BR>\n";
 
 ---------- UTILITYDEV.JS
-function removeConstraint(thisOption)
-	removeConsMore (thisOption); // generated code
-			removeConstraint (thisOption);
 
 ---------- UTILITYDEV.PHP
+function securityCheck (&$level, &$userid, &$sessionid) {
+		$session = $_GET['sessionkey'];
+			$sql = "SELECT $start, ip_address, session.id, user_id FROM session $middle WHERE session_key = '$session' AND status = 'A' $end";
+				$sessionid = $row['id'];

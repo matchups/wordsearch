@@ -1,29 +1,7 @@
 <?php
 $type = $_GET['type']; // beta, dev, etc.
 include "utility" . $type . ".php";
-
-// Need to check for a valid session before creating *any* output
-$valid = false;
-$code = '1';
-if (isset ($_GET['sessionkey'])) { // make sure session info is passed to us
-	$session = $_GET['sessionkey'];
-	try {
-		$conn = openConnection (false);
-		$sql = "SELECT user_id, ip_address FROM session WHERE session_key = '$session' AND status = 'A'";
-		$result = $conn->query($sql);
-		if ($result->rowCount() > 0) { // make sure it is an active session
-			$row = $result->fetch(PDO::FETCH_ASSOC);
-			$userid = $row['user_id'];
-			// confirm IP address; copy from search
-			$valid = true;
-		} else {
-			$code = '3';
-		}
-	}
-	catch(PDOException $e) {
-		$code = $e->getCode ();
-	}
-}
+include 'addmain.php';
 
 echo "<HTML>
 <HEAD>
@@ -37,48 +15,70 @@ echo "<HTML>
 	<H2>Save Results</H2>\n";
 
 try {
-	if (!$valid) {
+	if ($code = securityCheck ($level, $userid, $sessionid)) {
 		throw new Exception ("Unable to save results; code $code");
 	}
 
   $conn = openConnection (true);
-	if ($listname = $_GET['listname'] ?? '') == '') {
+	if (($listname = $_GET['listname'] ?? '') == '') {
 		throw new Exception ("List name is required");
 	}
 	$stmt = $conn->prepare("SELECT id FROM corpus WHERE name = ? AND owner = ?");
 	$stmt->execute (array ($listname, $userid));
 	if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-		$listid = $row['id'];
+		$corpusid = $row['id'];
 	} else {
-		$listid = '';
+		$corpusid = '';
 	}
 
+	$connw = openConnection (true);
 	switch ($savetype = $_GET['savetype'] ?? 'missing') {
 		case 'new':
-			if ($listid) {
+			if ($corpusid) {
 				throw new Exception ("List $listname already exists.");
 			}
-			//!! insert list
-			$listid = 'dummy';
+			$corpusid = sqlInsert ($conn, "INSERT corpus (name, owner) VALUES ('$listname', $userid)");
 			break;
 		case 'over':
-		  // delete existing entries
+			$sql = "SELECT id FROM entry WHERE corpus_id = $corpusid";
+			$result = $conn->query($sql);
+			while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+				deleteEntry ($connw, $row['id']);
+			}
 		case 'add':
-		if (!$listid) {
-			throw new Exception ("Can't find existing list $listname.");
-		}
+			if (!$corpusid) {
+				throw new Exception ("Can't find existing list $listname.");
+			}
 			break;
 		default:
 			throw New Exception ("Invalid save type: $savetype");
 	}
 
 	// slurp words
+	$sql = "SELECT entry, corpus_id FROM session_words WHERE session_id = '$sessionid'";
+	$result = $conn->query($sql);
+	if ($result->rowCount() > 0) { // make sure it is an active session
+		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+			$entries [$row['entry']] = '';
+		}
+	} else {
+		throw new Exception ("No saved words for list");
+	}
+
 	// add words
-	// message
+	$helper = new loadHelper ();
+	$counter = 0;
+	foreach ($entries as $entry => $dummy) {
+		if (isset (newEntry ($connw, $entry, '', $corpusid, $helper)['id'])) {
+			$counter++;
+		}
+	}
+echo "$counter new entries added to list $listname<P>\n";
 }
 catch(Exception $e) {
 	echo "<font color=red>" . $e->getMessage() . "</font>";
 } // end main code block
+unset ($connw);
 
 echo '</BODY>';
 // End of main script

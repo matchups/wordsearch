@@ -2,53 +2,9 @@
 $type = $_GET['type']; // beta, dev, etc.
 include "utility" . $type . ".php";
 
-// Need to check for a valid session before creating *any* output
-$valid = false;
-$code = '1';
-if (isset ($_GET['sessionkey'])  &&  isset ($_GET['level'])) { // make sure session info is passed to us
-	$session = $_GET['sessionkey'];
-	try {
-		$conn = openConnection (false);
-		$getLevel = $_GET ['level'];
-		if ($getLevel > 0) {
-			$start = "user.level";
-			$middle = "INNER JOIN user ON user.id = session.user_id";
-			$end = '';
-		} else {
-			$start = '0 AS level';
-			$middle = '';
-			$end = " AND session.user_id = 0";
-		}
-		$sql = "SELECT $start, ip_address FROM session $middle WHERE session_key = '$session' AND status = 'A' $end";
-		$result = $conn->query($sql);
-		if ($result->rowCount() > 0) { // make sure it is an active session
-			$row = $result->fetch(PDO::FETCH_ASSOC);
-			$level = $row['level'];
-			if ($level == $getLevel) {
-				if ($level < 2 && $type > '') {
-					$code = '4'; // basic not authorized for anything other than base
-				} else if ($level < 3 && $type == 'dev') {
-					$code = '5'; // only pro authorized for dev
-				} else if ($level == 0 && isset($_GET['query2'])) {
-					$code = '6'; // guest can't use additional criteria
-				} else if (explode ('|', $row['ip_address'])[0] == $_SERVER['REMOTE_ADDR']) {
-					$valid = true;
-				} else {
-					$code = '7';
-				}
-			} else {
-				$code = '2'; // URL lies about the user's level
-			}
-		} else {
-			$code = '3';
-		}
-	}
-	catch(PDOException $e) {
-		$code = $e->getCode ();
-	}
-}
+$conn = openConnection (false); // get into a global for subsequent use
 
-if (!$valid) {
+if ($code = securityCheck ($level, $userid, $sessionid)) {
 	header("Location: http://www.8wheels.org/wordsearch/index.html?code=$code"); // No valid session, so ask user to sign on
 		// and provide a general indication of the error type for our use
 	exit();
@@ -129,7 +85,7 @@ try {
 		}
 		if (isset ($ret['save'])) {
 			$sessionEncoded = urlencode ($_GET['sessionkey']);
-			echo "<P><A HREF='http://www.alfwords.com/asksaveresults$type.php?sessionkey=$sessionEncoded&type=$type' target='_blank'>Save Results</A><BR>\n";
+			echo "<P><A HREF='http://www.alfwords.com/asksaveresults$type.php?sessionkey=$sessionEncoded&type=$type&level=$level' target='_blank'>Save Results</A><BR>\n";
 		}
 		if ($ret ['code'] == 'time') {
 			$url = preg_replace ('/&from=.*$/', '', $_SERVER['REQUEST_URI']) . "&from={$ret['restart']}";
@@ -233,11 +189,5 @@ function refineQuery ($sql, &$rows) {
 
 function getWidth ($sql) {
 	return ($GLOBALS['conn']->query("EXPLAIN $sql")->fetch(PDO::FETCH_ASSOC))['rows'];
-}
-
-function timeDiff ($begin, $end) {
-	$beginArray = explode (' ', $begin);
-	$endArray = explode (' ', $end);
-	return intval ((($endArray[1] - $beginArray[1]) + ($endArray[0] - $beginArray[0])) * 1000 + 0.5);
 }
 ?>

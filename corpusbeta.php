@@ -31,7 +31,7 @@ class corpus {
 			$name = "Wiktionary";
 		} else if ($corpus == 87) {
 			$name = "Dev";
-		} else if ($corpus > 100) {
+		} else if ($corpus > 87) {
 			$name = "User";
 		} // Wiktionary TBD
 		$name = "corpus$name";
@@ -590,5 +590,8 @@ class corpusDev extends corpus {
 
 class corpusUser extends corpus {
 	// allowed will check user & shared stuff
+	public function allowed () {
+		return false;
+	}
 } // end corpusUser
 ?>

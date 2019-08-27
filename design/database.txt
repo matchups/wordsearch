@@ -23,7 +23,7 @@ user
 session
    id, user_id, status, started, last_active, ip_address, session_key
 corpus
-   id, name, url
+   id, name, url, owner
 corpus_flag
    id, corpus_id, letter, description
 category
