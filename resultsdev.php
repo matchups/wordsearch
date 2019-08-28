@@ -73,7 +73,10 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				THROW Exception ("No results getting session ID for $sessionKey");
 			}
 
-			$connw -> exec ("DELETE FROM session_words WHERE session_id = $sessionID");
+			// Delete previous list unless we're continuing
+			if (!isset ($_GET['from'])) {
+				$connw -> exec ("DELETE FROM session_words WHERE session_id = $sessionID");
+			}
 			foreach ($found as $entry) {
 				$stmt = $connw->prepare('INSERT session_words (session_id, entry, corpus_id) VALUES (?, ?, ?)');
 				$stmt->execute(array ($sessionID, $entry ['text'], $entry ['corpus']));
