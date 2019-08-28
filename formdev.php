@@ -139,10 +139,15 @@ echo "</script>\n";
 <button type="button" id="reset" onclick="resetForm();return false;">Reset</button>
 <input id="btntest" type="button" value="Log Out"
 <?php
-echo "onclick=\"window.location.href = 'http:logout.php?sessionkey=$sessionkey'\" />\n";
+$sessionEncoded = urlencode ($sessionkey);
+echo "onclick=\"window.location.href = 'http:logout.php?sessionkey=$sessionEncoded'\" />\n";
+
+if ($level > 1) {
+  echo "<P><A HREF='http:asksaveresults$type.php?sessionkey=$sessionEncoded&level=$level&type=$type&source=upload' target='_blank'>Upload word list</A><BR>\n";
+}
 
 // Wizard stuff
-Echo "<script>
+echo "<script>
 // Close the wizard.  If saveFlag, use the values to populate this constraint's query field.
 function closeWizard (saveFlag) {
 	var thisOption = document.getElementById('wizoption').value;

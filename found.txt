@@ -1,7 +1,5 @@
 
 ---------- ASKSAVERESULTSDEV.PHP
-	Save Results
-	<H2>Save Results</H2>\n";
 
 ---------- CATSUGGESTDEV.PHP
 
@@ -14,8 +12,6 @@
 ---------- CORPUSDEV.PHP
 
 ---------- DOSAVERESULTSDEV.PHP
-	Save Results
-	<H2>Save Results</H2>\n";
 
 ---------- FORMDEV.PHP
 

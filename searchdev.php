@@ -93,7 +93,8 @@ try {
 			echo "<BR>\n";
 		} else if (isset ($ret['save'])) {
 			$sessionEncoded = urlencode ($_GET['sessionkey']);
-			echo "<P><A HREF='http://www.alfwords.com/asksaveresults$type.php?sessionkey=$sessionEncoded&type=$type&level=$level' target='_blank'>Save Results</A><BR>\n";
+			echo "<P><A HREF='http://www.alfwords.com/asksaveresults$type.php?sessionkey=$sessionEncoded&type=$type&level=$level&source=results'
+				target='_blank'>Save Results</A><BR>\n";
 		}
 		$time['end'] = microtime();
 		foreach ($time as $key => $value) {

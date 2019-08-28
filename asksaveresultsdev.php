@@ -2,6 +2,15 @@
 $type = $_GET['type']; // beta, dev, etc.
 include "utility" . $type . ".php";
 
+if ($upload = ($_GET['source'] == 'upload')) {
+	$sourcedesc = 'Upload';
+	$method = 'post';
+	$enctype = 'enctype=multipart/form-data';
+} else {
+	$sourcedesc = 'Save Results as';
+	$method = 'get';
+	$enctype = '';
+}
 echo "<HTML>
 <HEAD>
 	<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
@@ -10,7 +19,7 @@ echo "<HTML>
 	<meta name='viewport' content='width=device-width, initial-scale=1'>
 	<link rel='stylesheet' href='styles.css'>
 	<TITLE>
-	Save Results
+	$sourcedesc Word List
 	</TITLE>
 </HEAD>
 <BODY>
@@ -21,8 +30,12 @@ try {
 		throw new Exception ("Unable to save results; code $code");
 	}
 	echo "
-	<form name='save' id='save' method='get' action='dosaveresults$type.php'>
-	<input type=text name=listname required=true /> Word list name<BR>
+	<form name='save' id='save' method='$method' action='dosaveresults$type.php' $enctype><BR>\n";
+	if ($upload) {
+		echo "Select word list file to upload:
+		    <input type='file' name='uploadfile' id='uploadfile'><BR>\n";
+	}
+	echo "<input type=text name=listname required=true /> Word list name<BR>
 	<input type=radio name=savetype id=typenew value=new checked=true />
 	New word list
 	<input type=radio name=savetype id=typeover value=over />
@@ -31,6 +44,7 @@ try {
 	Add to existing list
 	<input type=hidden name=sessionkey value='{$_GET['sessionkey']}'>
 	<input type=hidden name=level value='$level'>
+	<input type=hidden name=source value='{$_GET['source']}'>
 	<input type=hidden name=type value='$type'>
 	<BR>
 	<input type='submit'>

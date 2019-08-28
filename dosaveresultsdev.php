@@ -1,4 +1,12 @@
 <?php
+if (isset ($_POST['type'])) {
+	$_GET = $_POST;
+}
+if ($upload = ($_GET['source'] == 'upload')) {
+	$sourcedesc = 'Upload';
+} else {
+	$sourcedesc = 'Save Results as';
+}
 $type = $_GET['type']; // beta, dev, etc.
 include "utility" . $type . ".php";
 include 'addmain.php';
@@ -8,11 +16,12 @@ echo "<HTML>
 	<meta name='viewport' content='width=device-width, initial-scale=1'>
 	<link rel='stylesheet' href='styles.css'>
 	<TITLE>
+	$sourcedesc Word List
 	Save Results
 	</TITLE>
 </HEAD>
 <BODY>
-	<H2>Save Results</H2>\n";
+	<H2>$sourcedesc Word List</H2>\n";
 
 try {
 	if ($code = securityCheck ($level, $userid, $sessionid)) {
@@ -55,15 +64,45 @@ try {
 	}
 
 	// slurp words
-	$sql = "SELECT entry, corpus_id FROM session_words WHERE session_id = '$sessionid'";
-	$result = $conn->query($sql);
-	if ($result->rowCount() > 0) { // make sure it is an active session
-		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-			$entries [$row['entry']] = '';
+	if ($upload) {
+		$fileInfo = $_FILES["uploadfile"];
+		$target_dir = "uploads/";
+		$targetFile = "$target_dir$sessionid.txt";
+
+		// Check file size
+		$maxsize = 1024; // will depend on level and what you already have
+		if ($fileInfo["size"] > ($maxsize * 1024)) {
+	    throw new Exception ("Maximum file size is {$maxsize}K");
 		}
-	} else {
-		throw new Exception ("No saved words for list");
-	}
+
+		// Allow only text files
+		if (strtolower (pathinfo (basename ($fileInfo["name"]), PATHINFO_EXTENSION)) != "txt") {
+			echo "name={$fileInfo["name"]}  basename=" . basename ($fileInfo["name"]) . "  pathinfo=" .
+					pathinfo (basename ($fileInfo["name"]), PATHINFO_EXTENSION);
+	    throw new Exception ("Only .txt files may be uploaded");
+		}
+
+		// slurp it
+		if (!move_uploaded_file($fileInfo["tmp_name"], $targetFile)) {
+		  throw new Exception ("Error uploading file");
+		}
+		comment ("Uploaded {$fileInfo["name"]} --> $targetFile");
+		foreach (explode (chr(10), str_replace (chr(13), '', strtolower (file_get_contents($targetFile)))) as $word) {
+			if (preg_match ('/[a-z]{3}/', $word)) {
+				$entries [$word] = '';
+			}
+		}
+	} else { // upload --> results
+		$sql = "SELECT entry, corpus_id FROM session_words WHERE session_id = '$sessionid'";
+		$result = $conn->query($sql);
+		if ($result->rowCount() > 0) { // make sure it is an active session
+			while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+				$entries [$row['entry']] = '';
+			}
+		} else {
+			throw new Exception ("No saved words for list");
+		}
+	} // end results
 
 	// add words
 	$helper = new loadHelper ();
