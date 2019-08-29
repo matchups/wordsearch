@@ -378,10 +378,8 @@ function corpusInfo ($table, $option) {
 		}
 	}
 
-  comment ("count(C)=" . count($corpus));
 	$flagClause = ''; // for now
 	foreach ($corpus as $thisCorpus) {
-		comment ("$thisCorpus Y={$flags[$thisCorpus]} N={$nonflags[$thisCorpus]}");
 		if ($nonflags[$thisCorpus]) {
 			$rlike = "$table.flags NOT RLIKE '[{$nonflags[$thisCorpus]}]' ";
 			if (count ($corpus) == 1) {

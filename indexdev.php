@@ -23,27 +23,12 @@ echo "<meta name='viewport' content='width=device-width, initial-scale=1'>
 
 <BODY>\n";
 
-$version = "0.74";
+$version = "0.75h";
 echo "<H2>Word Search <span class='specs'>$version</span></H2>";
+$level = $_GET['level'];
 include "form$type.php";
 echo "<P>\n";
 
 preserveInfo ($type, $version);
-
-$level = $_GET['level'];
-$security = "?sessionkey=" . $_GET['sessionkey'] . "&level=$level";
-// Links to other versions of the project, based on permissions
-if ($type != "back"  &&  $level > 1) {
-	Echo "<A HREF='indexback.html$security&type=back'>Previous</A><BR>";
-}
-if ($type != "") {
-	Echo "<A HREF='index.php$security'>Current</A><BR>";
-}
-if ($type != "beta"  &&  $level > 1) {
-	Echo "<A HREF='indexbeta.php$security&type=beta'>Beta</A><BR>";
-}
-if ($type != "dev"  &&  $level > 2) {
-	Echo "<A HREF='indexdev.php$security&type=dev'>Development</A><BR>";
-}
 ?>
 </BODY>

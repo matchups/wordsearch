@@ -1,5 +1,7 @@
 body {
   font-family: Cambria, Times, serif;
+  margin-left: 200px; /* Same as the width of the sidenav */
+  padding: 0px 10px;
 }
 
 /* Code display (for development/debugging) */
@@ -79,3 +81,51 @@ body {
             color: #111;
             background-color: #F1F1F1;
         }
+
+/* Side Navigation */
+/* Fixed sidenav, full height */
+.sidenav {
+  height: 100%;
+  width: 200px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+/* Style the sidenav links and the dropdown button */
+.sidenav a, .dropdown-btn {
+  padding: 6px 8px 6px 16px;
+  font-family: Cambria, Times, serif;
+  text-decoration: none;
+  color: #818181;
+  display: block;
+  border: none;
+  background: none;
+  width:100%;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Headers are bigger than links */
+.dropdown-btn {
+  font-size: 20px;
+}
+.sidenav a{
+  font-size: 16px;
+}
+
+/* On mouse-over */
+.sidenav a:hover, .dropdown-btn:hover {
+  color: #f1f1f1;
+}
+
+/* Add an active class to the active dropdown button */
+.active {
+  background-color: green;
+  color: white;
+}

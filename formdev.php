@@ -33,7 +33,7 @@ echo "<div id='catlookup' class='wizard'>
 foreach ($corpusObjects as $corpusObject) {
   if (isset ($corpusObject->optionButtonList ()['category'])) {
     $corpus = $corpusObject->getCorpusNum();
-    echo "    <input type='text' name=category$corpus id=category$corpus class=category$corpus style='display: none'/>\n";
+    echo "    <input type='text' name=category$corpus id=category$corpus class=category$corpus />\n";
   }
 }
 echo "</form>
@@ -50,12 +50,7 @@ if ($level == 0) {
 } else {
 	if (($_GET[simple] ?? '') == 'on') {
 		$advanced = false;
-		echo "<A id=advanced>Advanced search</A>\n";
 	}
-}
-if ($advanced) {
-	Echo "<H3>Control</H3>";
-	Echo "<A id=basic HREF='http://alfwords.com'>Basic search</A>\n";
 }
 Echo "<BR>\n";
 Echo "<form name='search' id='search' onsubmit='return validateForm()' method='get'>\n";
@@ -131,19 +126,80 @@ echo "</script>\n";
 
 </form>
 
-<form id=help action="help.html">
-<input type="submit" value="Help" />
-</form>
-
 <P>
 <button type="button" id="reset" onclick="resetForm();return false;">Reset</button>
-<input id="btntest" type="button" value="Log Out"
 <?php
 $sessionEncoded = urlencode ($sessionkey);
-echo "onclick=\"window.location.href = 'http:logout.php?sessionkey=$sessionEncoded'\" />\n";
 
-if ($level > 1) {
-  echo "<P><A HREF='http:asksaveresults$type.php?sessionkey=$sessionEncoded&level=$level&type=$type&source=upload' target='_blank'>Upload word list</A><BR>\n";
+// Navigation bar
+echo "<div class='sidenav'>
+<button class='dropdown-btn' id='help-dd'>Help
+  <i class='fa fa-caret-down'></i>
+</button>
+<div class='dropdown-container' style='display: none'>
+  <a href='help.html' target='_blank' id=help>Queries</a>
+  <a href='helpmanage.html' target='_blank' id=helpmanage>Query and list management</a>
+  <span class=disabled>Accounts</span>
+  <a href='mailto:info@alfwords.com'>Contact</a>
+</div>\n";
+if ($level > 0) {
+  echo "<button class='dropdown-btn' id='account-dd' disabled=yes>Account
+    <i class='fa fa-caret-down'></i>
+  </button>
+  <div class='dropdown-container' style='display: none'>
+    <span class=disabled >Change password</span>
+    <span class=disabled >Change personal information</span>
+    <span class=disabled >Renew</span>
+    <span class=disabled >Cancel</span>
+  </div>\n";
+  if ($level > 1) {
+    echo "<button class='dropdown-btn' id='list-dd'>Lists
+        <i class='fa fa-caret-down'></i>
+      </button>
+      <div class='dropdown-container' style='display: none'>
+        <a href='http:asksaveresults$type.php?sessionkey=$sessionEncoded&level=$level&type=$type&source=upload' target='_blank'>Upload file</a>
+        <a href='#'>Share</a>
+        <a href='http:deletelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
+        <a href='#'>Rename</a>
+        <a href='#'>Delete word</a>
+        <a href='#'>Properties</a>
+      </div>
+      <button class='dropdown-btn' id='query-dd' disabled=yes>Queries
+        <i class='fa fa-caret-down'></i>
+      </button>
+      <div class='dropdown-container' style='display: none'>
+        <span class=disabled >Load</span>
+        <span class=disabled >Share</span>
+        <span class=disabled >Delete</span>
+        </div>\n";
+  }
+  echo "<button class='dropdown-btn' id='nav-dd'>Navigation
+      <i class='fa fa-caret-down'></i>
+    </button>
+    <div class='dropdown-container' style='display: none'>\n";
+  if ($advanced) {
+  	echo "<A id=basic href='http://alfwords.com'>Basic search</A>\n";
+  } else if ($level> 0) {
+    echo "<A id=advanced>Advanced search</A>\n";
+  }
+  $security = "?sessionkey=$sessionkey&level=$level";
+  // Links to other versions of the project, based on permissions
+  if ($type != "back"  &&  $level > 1) {
+  	Echo "<A HREF='indexback.html$security&type=back'>Previous</A>";
+  }
+  if ($type != "") {
+  	Echo "<A HREF='index.php$security'>Current</A>";
+  }
+  if ($type != "beta"  &&  $level > 1) {
+  	Echo "<A HREF='indexbeta.php$security&type=beta'>Beta</A>";
+  }
+  if ($type != "dev"  &&  $level > 2) {
+  	Echo "<A HREF='indexdev.php$security&type=dev'>Development</A>";
+  }
+
+  echo "<a href='http:logout.php?sessionkey=$sessionEncoded'>Log out</a>
+    </div>
+  </div>\n";
 }
 
 // Wizard stuff
@@ -308,8 +364,7 @@ function validateConstraint (thisOption) {
 		}
   echo "} // end validateCorpus\n";
 ?>
-// This needs to be at the end, after the wizard has been created
-
+// This needs to be at the end, after controls have been created
 var modal = document.getElementById('wizard');
 
 // When the user clicks anywhere outside of the wizard, close it
@@ -318,20 +373,23 @@ window.onclick = function(event) {
 		closeWizard ();
   }
 }
+
+dropInit ();
 </script>
 
 <?php
 function preserveInfo ($type, $version) {
 	// Put some things into form where the main script knows the value and the form doesn't.
 	// We can't do it inline, because there's no good way to pass in the values except as a function call.
-	echo "<script>\n";
-	echo "document.getElementById('type').value = '$type';\n";
-	echo "document.getElementById('version').value = '$version';\n";
-	echo "document.getElementById('search').action = 'search$type.php';\n";
-	echo "document.getElementById('help').action = 'help$type.html';\n";
+	echo "<script>
+	  document.getElementById('type').value = '$type';
+	  document.getElementById('version').value = '$version';
+	  document.getElementById('search').action = 'search$type.php';
+    document.getElementById('help').href = 'help$type.html';
+    document.getElementById('helpmanage').href = 'helpmanage$type.html';\n";
   $level = $_GET['level'];
   $security = "sessionkey={$_GET['sessionkey']}&level=$level&type=$type";
-  if ($GLOBALS['advanced']) {
+  if (!$GLOBALS['advanced']) {
      echo "document.getElementById('basic').href = 'index$type.php?simple=on&$security';\n";
 	} else {
 		if ($level > 0) {

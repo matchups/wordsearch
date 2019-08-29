@@ -1,5 +1,6 @@
 
 ---------- ASKSAVERESULTSDEV.PHP
+	$conn->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
 
 ---------- CATSUGGESTDEV.PHP
 
@@ -10,6 +11,9 @@
 ---------- CONSWEIGHTSDEV.PHP
 
 ---------- CORPUSDEV.PHP
+
+---------- DELETELISTDEV.PHP
+	$conn->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
 
 ---------- DOSAVERESULTSDEV.PHP
 
@@ -26,8 +30,9 @@
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
-			echo "<P><A HREF='http://www.alfwords.com/asksaveresults$type.php?sessionkey=$sessionEncoded&type=$type&level=$level' target='_blank'>Save Results</A><BR>\n";
+	openConnection (true)->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
 
 ---------- UTILITYDEV.JS
 
 ---------- UTILITYDEV.PHP
+		openConnection (true)->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");

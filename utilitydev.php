@@ -126,6 +126,9 @@ function securityCheck (&$level, &$userid, &$sessionid) {
 			$code = $e->getCode ();
 		}
 	}
+	if (!$code) {
+		openConnection (true)->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
+	}
 	return $code;
 }
 

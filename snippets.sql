@@ -1,4 +1,5 @@
-select text, length (text), length (bank) from words where bank like "a%e%i%o%u%" and text not like "%a%a%" and text not like "%e%e%" and text not like "%i%i%" and text not like "%o%o%" and text not like "%u%u%" and length (text) = length (bank)
+// supervocalics
+select text, length from words where bank like "a%e%i%o%u%" and text not like "%a%a%" and text not like "%e%e%" and text not like "%i%i%" and text not like "%o%o%" and text not like "%u%u%" and length = length (bank) and length > 15
 
 select text, length (text), length (bank) from words where text like "%u%u%" and text like "%o%o%" and text not like "%e%e%e%"  and text not like "%a%a%a%"  and text like "%a%a%"  and text like "%i%i%"  and text like "%e%e%"  and text not like "%i%i%i%"  and text not like "%o%o%o%"  and text not like "%u%u%u%" 
 
@@ -11,3 +12,8 @@ http://8wheels.org/wordsearch/dumper.php?sql=select+bank%2C+count%28id%29+from+w
 
 // Recent sessions
 select started, username from session inner join user on user.id = session.user_id where started > "2019-07-01"
+
+SELECT X.text FROM entry A, entry B, words X WHERE A.corpus_id = 89 AND B.corpus_id = 89 AND X.text = concat(A.name, B.name)
+// need to filter by category
+
+SHOW index FROM xxx

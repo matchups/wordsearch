@@ -49,6 +49,9 @@ try {
 	<BR>
 	<input type='submit'>
 	</form>\n";
+
+  $conn = openConnection (true);
+	$conn->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
 }
 catch(Exception $e) {
 	echo "<font color=red>" . $e->getMessage() . "</font>";

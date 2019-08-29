@@ -4,15 +4,17 @@ class corpus {
 	protected $urlpattern;
 	protected $name;
   protected $flags;
+	protected $owner;
 
 	public function __construct ($corpus) {
 		$this->corpus = $corpus;
 		$conn = openConnection (false);
 
 		// get name, URL
-		$row = SQLQuery ($conn, "SELECT name, url FROM corpus WHERE id = $corpus")->fetch(PDO::FETCH_ASSOC);
+		$row = SQLQuery ($conn, "SELECT name, url, owner FROM corpus WHERE id = $corpus ORDER by name")->fetch(PDO::FETCH_ASSOC);
 		$this->urlpattern = $row['url'];
 		$this->name = $row['name'];
+		$this->owner = $row['owner'];
 
 		// get flags
 		$result = SQLQuery ($conn, "SELECT letter, description FROM corpus_flag WHERE corpus_id = $corpus");
@@ -23,15 +25,13 @@ class corpus {
 
 	public static function factory ($corpus) {
 		// Alas, PHP does not support ranges in switches
-		if ($corpus == 1) {
-			$name = "WikiFeatured";
+		if ($corpus == 1  ||  $corpus == 87) {
+			$name = "Dev";
 		} else if ($corpus == 2) {
 			$name = "Wikipedia";
 		} else if ($corpus == 3) {
 			$name = "Wiktionary";
-		} else if ($corpus == 87) {
-			$name = "Dev";
-		} else if ($corpus > 100) {
+		} else if ($corpus > 87) {
 			$name = "User";
 		} // Wiktionary TBD
 		$name = "corpus$name";
@@ -572,16 +572,6 @@ class ccWikipediasize extends ccWikipediaText {
 	}
 }
 
-class corpusWikiFeatured extends corpusWikipedia {
-	function allowed () {
-		return false;
-	}
-
-	function form () {
-		return corpus::form ();  // don't run Wikipedia method
-	}
-} // end WikiFeatured
-
 class corpusDev extends corpus {
 	public function allowed () {
 		return false;
@@ -589,6 +579,19 @@ class corpusDev extends corpus {
 } // end Dev
 
 class corpusUser extends corpus {
-	// allowed will check user & shared stuff
+	public function allowed () {
+		try {
+			$result = openConnection (false)->query("SELECT user_id FROM session WHERE session_key = '{$_GET['sessionkey']}'");
+			if ($result->rowCount() > 0) { // make sure it is an active session
+				$userid = $result->fetch(PDO::FETCH_ASSOC)['user_id'];
+				return ($userid = $this->owner);
+			}
+			comment ("No rows!");
+		}
+		catch (PDOException $e) {
+			comment ("Can't figure allowed: " . $e->getMessage);
+		}
+		return false;
+	}
 } // end corpusUser
 ?>
