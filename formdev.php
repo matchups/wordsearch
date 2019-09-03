@@ -163,7 +163,7 @@ if ($level > 0) {
         <a href='http:askdeletelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
         <a href='http:askrenamelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Rename</a>
         <a href='#'>Delete word</a>
-        <a href='#'>Properties</a>\n";
+        <a href='http:asklistproperties$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Properties</a>\n";
     } else {
       echo "<span class=disabledmenu>Share</span>
         <span class=disabledmenu>Delete</span>

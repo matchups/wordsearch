@@ -1,6 +1,8 @@
 
 ---------- ASKDELETELISTDEV.PHP
 
+---------- ASKLISTPROPERTIESDEV.PHP
+
 ---------- ASKRENAMELISTDEV.PHP
 
 ---------- ASKSAVERESULTSDEV.PHP
@@ -14,8 +16,11 @@
 ---------- CONSWEIGHTSDEV.PHP
 
 ---------- CORPUSDEV.PHP
+	public function answerLink ($entry) {
 
 ---------- DODELETELISTDEV.PHP
+
+---------- DOLISTPROPERTIESDEV.PHP
 
 ---------- DORENAMELISTDEV.PHP
 
@@ -26,16 +31,16 @@
 ---------- HELPDEV.HTML
 
 ---------- INDEXDEV.PHP
-include "form$type.php";
 
 ---------- PARSEDEV.PHP
 
 ---------- PHRASESDEV.PHP
+    echo $corpusObject->answerLink ($row['entry']) . "<BR>\n";
 
 ---------- RESULTSDEV.PHP
+				echo $corpusObjects[$corpus]->answerLink ($entry) . ' ';
 
 ---------- SEARCHDEV.PHP
-include "form$type.php";
 
 ---------- UTILITYDEV.JS
 
