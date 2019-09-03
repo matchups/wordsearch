@@ -1,6 +1,6 @@
 
 ---------- ASKSAVERESULTSDEV.PHP
-	$conn->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
+	<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
 
 ---------- CATSUGGESTDEV.PHP
 
@@ -13,7 +13,9 @@
 ---------- CORPUSDEV.PHP
 
 ---------- DELETELISTDEV.PHP
-	$conn->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
+	<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
+
+---------- DODELETELISTDEV.PHP
 
 ---------- DOSAVERESULTSDEV.PHP
 
@@ -22,6 +24,7 @@
 ---------- HELPDEV.HTML
 
 ---------- INDEXDEV.PHP
+Echo "<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
 
 ---------- PARSEDEV.PHP
 
@@ -30,9 +33,8 @@
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
-	openConnection (true)->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
+<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
 
 ---------- UTILITYDEV.JS
 
 ---------- UTILITYDEV.PHP
-		openConnection (true)->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");

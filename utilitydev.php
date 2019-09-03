@@ -65,6 +65,7 @@ function fetchUrl($url) {
 // Do a SQL query and remember the code so we can display it with error messages
 function SQLQuery ($conn, $sql) {
 	$GLOBALS['lastSQL'] = $sql;
+	if (isset ($_GET['debug'])) {comment ($sql);}
 	return $conn->query($sql);
 }
 

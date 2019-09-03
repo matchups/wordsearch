@@ -1,6 +1,12 @@
 <?php
-if (!isset ($_GET['sessionkey'])  ||  !isset ($_GET['level'])) {
-	header("Location: http://www.8wheels.org/wordsearch/index.html"); // No valid session, so ask user to sign on
+$type = "dev";
+include "utility" . $type . ".php";
+
+$conn = openConnection (false); // get into a global for subsequent use
+
+if ($code = securityCheck ($level, $userid, $sessionid)) {
+	header("Location: http://www.8wheels.org/wordsearch/index.html?code=$code"); // No valid session, so ask user to sign on
+		// and provide a general indication of the error type for our use
 	exit();
 }
 ?>
@@ -8,12 +14,10 @@ if (!isset ($_GET['sessionkey'])  ||  !isset ($_GET['level'])) {
 <HEAD>
 <TITLE>Word Search</TITLE>
 <?php
-$type = "dev";
 Echo "<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
 	<script src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'></script>
 	<script src='//netsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>
 	<script src='utility$type.js'></script>\n";
-include "utility$type.php";
 include "cons$type.php";
 include "corpus$type.php";
 

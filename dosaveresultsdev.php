@@ -49,11 +49,7 @@ try {
 			$corpusid = sqlInsert ($conn, "INSERT corpus (name, owner) VALUES ('$listname', $userid)");
 			break;
 		case 'over':
-			$sql = "SELECT id FROM entry WHERE corpus_id = $corpusid";
-			$result = $conn->query($sql);
-			while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-				deleteEntry ($connw, $row['id']);
-			}
+			deleteAll ($connw, $corpusid);
 		case 'add':
 			if (!$corpusid) {
 				throw new Exception ("Can't find existing list $listname.");

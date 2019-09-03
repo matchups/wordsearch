@@ -139,7 +139,7 @@ echo "<div class='sidenav'>
 <div class='dropdown-container' style='display: none'>
   <a href='help.html' target='_blank' id=help>Queries</a>
   <a href='helpmanage.html' target='_blank' id=helpmanage>Query and list management</a>
-  <span class=disabled>Accounts</span>
+  <span class=disabledmenu>Accounts</span>
   <a href='mailto:info@alfwords.com'>Contact</a>
 </div>\n";
 if ($level > 0) {
@@ -147,30 +147,39 @@ if ($level > 0) {
     <i class='fa fa-caret-down'></i>
   </button>
   <div class='dropdown-container' style='display: none'>
-    <span class=disabled >Change password</span>
-    <span class=disabled >Change personal information</span>
-    <span class=disabled >Renew</span>
-    <span class=disabled >Cancel</span>
+    <span class=disabledmenu>Change password</span>
+    <span class=disabledmenu>Change personal information</span>
+    <span class=disabledmenu>Renew</span>
+    <span class=disabledmenu>Cancel</span>
   </div>\n";
   if ($level > 1) {
     echo "<button class='dropdown-btn' id='list-dd'>Lists
         <i class='fa fa-caret-down'></i>
       </button>
       <div class='dropdown-container' style='display: none'>
-        <a href='http:asksaveresults$type.php?sessionkey=$sessionEncoded&level=$level&type=$type&source=upload' target='_blank'>Upload file</a>
-        <a href='#'>Share</a>
+      <a href='http:asksaveresults$type.php?sessionkey=$sessionEncoded&level=$level&type=$type&source=upload' target='_blank'>Upload file</a>\n";
+    if ((SQLQuery($conn, "SELECT 1 FROM corpus WHERE owner = {$GLOBALS['userid']}"))->rowCount() > 0) {
+      echo "<a href='#'>Share</a>
         <a href='http:deletelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
         <a href='#'>Rename</a>
         <a href='#'>Delete word</a>
-        <a href='#'>Properties</a>
-      </div>
+        <a href='#'>Properties</a>\n";
+    } else {
+      echo "<span class=disabledmenu>Share</span>
+        <span class=disabledmenu>Delete</span>
+        <span class=disabledmenu>Rename</span>
+        <span class=disabledmenu>Delete word</span>
+        <span class=disabledmenu>Properties</span>\n";
+    }
+    echo "<span class=disabledmenu>Access shared</span>\n";
+    echo "</div>
       <button class='dropdown-btn' id='query-dd' disabled=yes>Queries
         <i class='fa fa-caret-down'></i>
       </button>
       <div class='dropdown-container' style='display: none'>
-        <span class=disabled >Load</span>
-        <span class=disabled >Share</span>
-        <span class=disabled >Delete</span>
+        <span class=disabledmenu>Load</span>
+        <span class=disabledmenu>Share</span>
+        <span class=disabledmenu>Delete</span>
         </div>\n";
   }
   echo "<button class='dropdown-btn' id='nav-dd'>Navigation

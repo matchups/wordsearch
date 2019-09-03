@@ -1,3 +1,4 @@
+
 <?php
 $type = $_GET['type']; // beta, dev, etc.
 include "utility" . $type . ".php";
@@ -38,9 +39,6 @@ $cache['body'] = '';
 try {
 	echo '<BODY onload="reloadQuery();">';
 	echo "<H2>Word Search $type $version Results: <span class='specs'>$pattern";
-
-	// Connect briefly in write mode to update the session
-	openConnection (true)->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
 
   try {
 		$sql = parseQuery ($pattern, $consObjects, $corpusObjects);
