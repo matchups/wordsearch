@@ -1,6 +1,7 @@
 
 ---------- ASKDELETELISTDEV.PHP
-	echo "<form name='delete' method='get' onsubmit='return validateForm()' action='dodeletelist$type.php'><BR>
+
+---------- ASKRENAMELISTDEV.PHP
 
 ---------- ASKSAVERESULTSDEV.PHP
 
@@ -16,14 +17,16 @@
 
 ---------- DODELETELISTDEV.PHP
 
+---------- DORENAMELISTDEV.PHP
+
 ---------- DOSAVERESULTSDEV.PHP
 
 ---------- FORMDEV.PHP
-        <a href='http:deletelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
 
 ---------- HELPDEV.HTML
 
 ---------- INDEXDEV.PHP
+include "form$type.php";
 
 ---------- PARSEDEV.PHP
 
@@ -32,6 +35,7 @@
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
+include "form$type.php";
 
 ---------- UTILITYDEV.JS
 

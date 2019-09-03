@@ -17,3 +17,5 @@ SELECT X.text FROM entry A, entry B, words X WHERE A.corpus_id = 89 AND B.corpus
 // need to filter by category
 
 SHOW index FROM xxx
+
+SELECT corpus_id, count (1) FROM entry GROUP BY corpus_id
