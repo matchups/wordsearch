@@ -1,6 +1,8 @@
 
+---------- ASKDELETELISTDEV.PHP
+	echo "<form name='delete' method='get' onsubmit='return validateForm()' action='dodeletelist$type.php'><BR>
+
 ---------- ASKSAVERESULTSDEV.PHP
-	<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
 
 ---------- CATSUGGESTDEV.PHP
 
@@ -12,19 +14,16 @@
 
 ---------- CORPUSDEV.PHP
 
----------- DELETELISTDEV.PHP
-	<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
-
 ---------- DODELETELISTDEV.PHP
 
 ---------- DOSAVERESULTSDEV.PHP
 
 ---------- FORMDEV.PHP
+        <a href='http:deletelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
 
 ---------- HELPDEV.HTML
 
 ---------- INDEXDEV.PHP
-Echo "<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
 
 ---------- PARSEDEV.PHP
 
@@ -33,7 +32,6 @@ Echo "<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
-<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
 
 ---------- UTILITYDEV.JS
 

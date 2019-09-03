@@ -21,7 +21,7 @@ try {
 	echo "<form name='delete' method='get' onsubmit='return validateForm()' action='dodeletelist$type.php'><BR>
 		Word list to delete<BR>
 		<select name='list' id=list>\n";
-	$result = SQLQuery($conn, "SELECT id, name FROM corpus WHERE owner = $userid");
+	$result = SQLQuery($conn, "SELECT id, name FROM corpus WHERE owner = $userid ORDER BY name");
 	while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 		echo "<option value={$row['id']}>{$row['name']}</option>\n";
 	}

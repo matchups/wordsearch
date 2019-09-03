@@ -160,8 +160,8 @@ if ($level > 0) {
       <a href='http:asksaveresults$type.php?sessionkey=$sessionEncoded&level=$level&type=$type&source=upload' target='_blank'>Upload file</a>\n";
     if ((SQLQuery($conn, "SELECT 1 FROM corpus WHERE owner = {$GLOBALS['userid']}"))->rowCount() > 0) {
       echo "<a href='#'>Share</a>
-        <a href='http:deletelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
-        <a href='#'>Rename</a>
+        <a href='http:askdeletelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
+        <a href='http:askrenamelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Rename</a>
         <a href='#'>Delete word</a>
         <a href='#'>Properties</a>\n";
     } else {
