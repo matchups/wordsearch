@@ -1,11 +1,19 @@
 
 ---------- ASKDELETELISTDEV.PHP
+<BODY>
+</BODY>";
 
 ---------- ASKLISTPROPERTIESDEV.PHP
+<BODY>
+</BODY>";
 
 ---------- ASKRENAMELISTDEV.PHP
+<BODY>
+</BODY>";
 
 ---------- ASKSAVERESULTSDEV.PHP
+<BODY>
+echo '</BODY>';
 
 ---------- CATSUGGESTDEV.PHP
 
@@ -16,31 +24,44 @@
 ---------- CONSWEIGHTSDEV.PHP
 
 ---------- CORPUSDEV.PHP
-	public function answerLink ($entry) {
 
 ---------- DODELETELISTDEV.PHP
+<BODY>
+</BODY>";
 
 ---------- DOLISTPROPERTIESDEV.PHP
+<BODY>
+</BODY>";
 
 ---------- DORENAMELISTDEV.PHP
+<BODY>
+</BODY>";
 
 ---------- DOSAVERESULTSDEV.PHP
+<BODY>
+echo '</BODY>';
 
 ---------- FORMDEV.PHP
 
 ---------- HELPDEV.HTML
+<BODY>
+</BODY>
 
 ---------- INDEXDEV.PHP
+<BODY>\n";
+</BODY>
 
 ---------- PARSEDEV.PHP
 
 ---------- PHRASESDEV.PHP
-    echo $corpusObject->answerLink ($row['entry']) . "<BR>\n";
+<BODY>
+</BODY>
 
 ---------- RESULTSDEV.PHP
-				echo $corpusObjects[$corpus]->answerLink ($entry) . ' ';
 
 ---------- SEARCHDEV.PHP
+	echo '<BODY onload="reloadQuery();">';
+echo '</BODY>';
 
 ---------- UTILITYDEV.JS
 

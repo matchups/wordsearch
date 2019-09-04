@@ -16,7 +16,7 @@ try {
     // set the PDO error mode to exception
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $tname = "entry";
+    $tname = "corpus";
 /*
     runit ("CREATE TABLE $tname (
 	id int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -26,9 +26,10 @@ try {
 
 /*
     runit ("ALTER TABLE $tname
-	ADD owner int");
+	ADD like_id int");
 */
-    runit ("CREATE INDEX entrycorpidx ON $tname(corpus_id)");
+//    runit ("CREATE INDEX entrycorpidx ON $tname(corpus_id)");
+    runit ("UPDATE $tname SET like_id = -1 WHERE id in (2,3)");
     }
 catch(PDOException $e)
     {

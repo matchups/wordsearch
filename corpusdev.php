@@ -11,19 +11,29 @@ class corpus {
 		$conn = openConnection (false);
 
 		// get name, URL
-		$row = SQLQuery ($conn, "SELECT name, url, owner FROM corpus WHERE id = $corpus ORDER by name")->fetch(PDO::FETCH_ASSOC);
+		$row = SQLQuery ($conn, "SELECT name, url, owner, like_id FROM corpus WHERE id = $corpus ORDER by name")->fetch(PDO::FETCH_ASSOC);
 		$this->urlpattern = $row['url'];
 		$this->name = $row['name'];
 		$this->owner = $row['owner'];
 
 		// get flags
-		$result = SQLQuery ($conn, "SELECT letter, description FROM corpus_flag WHERE corpus_id = $corpus");
+		if ($row['like_id'] > 0) {
+			$flag_corpus = $row['like_id'];
+		} else {
+			$flag_corpus = $corpus;
+		}
+		$result = SQLQuery ($conn, "SELECT letter, description FROM corpus_flag WHERE corpus_id = $flag_corpus");
 		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 			$this->flags [$row['letter']]=$row['description'];
 		}
 	} // end constructor
 
 	public static function factory ($corpus) {
+		$name = corpus::className ($corpus);
+		return new $name($corpus);
+	}
+
+	private static function className ($corpus) {
 		// Alas, PHP does not support ranges in switches
 		if ($corpus == 1  ||  $corpus == 87) {
 			$name = "Dev";
@@ -32,10 +42,14 @@ class corpus {
 		} else if ($corpus == 3) {
 			$name = "Wiktionary";
 		} else if ($corpus > 87) {
-			$name = "User";
+			$result = SQLQuery (openConnection (false), "SELECT like_id FROM corpus WHERE id = $corpus");
+			$row = $result->fetch(PDO::FETCH_ASSOC);
+			if ($row ['like_id']) {
+				return corpus::className ($row ['like_id']);
+			}
+			$name = 'User';
 		} // Wiktionary TBD
-		$name = "corpus$name";
-		return new $name($corpus);
+		return "corpus$name";
 	}
 
 	public function answerLink ($entry) {
@@ -55,7 +69,21 @@ class corpus {
 	}
 
 	public function allowed () {
-		return true;
+		if ($this->owner == '') {
+			return true;
+		}
+		try {
+			$result = openConnection (false)->query("SELECT user_id FROM session WHERE session_key = '{$_GET['sessionkey']}'");
+			if ($result->rowCount() > 0) { // make sure it is an active session
+				$userid = $result->fetch(PDO::FETCH_ASSOC)['user_id'];
+				return ($userid = $this->owner);
+			}
+			comment ("No rows!");
+		}
+		catch (PDOException $e) {
+			comment ("Can't figure allowed: " . $e->getMessage);
+		}
+		return false;
 	}
 
 	public function phrases () {
@@ -579,19 +607,5 @@ class corpusDev extends corpus {
 } // end Dev
 
 class corpusUser extends corpus {
-	public function allowed () {
-		try {
-			$result = openConnection (false)->query("SELECT user_id FROM session WHERE session_key = '{$_GET['sessionkey']}'");
-			if ($result->rowCount() > 0) { // make sure it is an active session
-				$userid = $result->fetch(PDO::FETCH_ASSOC)['user_id'];
-				return ($userid = $this->owner);
-			}
-			comment ("No rows!");
-		}
-		catch (PDOException $e) {
-			comment ("Can't figure allowed: " . $e->getMessage);
-		}
-		return false;
-	}
 } // end corpusUser
 ?>

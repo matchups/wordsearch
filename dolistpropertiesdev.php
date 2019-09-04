@@ -11,19 +11,23 @@ echo "<HTML>
 	</TITLE>
 </HEAD>
 <BODY>
-	<H2>Rename Word List</H2>\n";
+	<H2>Word List Properties</H2>\n";
 
 try {
 	if ($code = securityCheck ($level, $userid, $sessionid)) {
 		throw new Exception ("Unable to access page; code $code");
 	}
-	// Rename entries
-	$connw = OpenConnection (true);
-	$corpusid = $_GET['list'];
+	// Set properties
 	$url = $_GET['url'];
-	$connw->exec ("UPDATE corpus SET url = '$url' WHERE id = $corpusid");
-	unset ($connw);
-	Echo "URL for word list <i>{$_GET['listname']}</i> set to <i>$url</i>.";
+	$stmt = OpenConnection (true)->prepare("UPDATE corpus SET url = ?, like_id = ? WHERE id = ?");
+	$stmt->execute(array ($url, $_GET['like'] ?? 'NULL', $_GET['list']));
+
+  if ($url == '') {
+		$url = 'none';
+	}
+	Echo "Updating word list <i>{$_GET['listname']}</i>.<BR>
+	 URL set to <i>$url</i>.<BR>
+	 Set to be similar to <i>{$_GET['parentname']}</i>.";
 }
 catch(Exception $e) {
 	echo "<font color=red>" . $e->getMessage() . "</font>";
