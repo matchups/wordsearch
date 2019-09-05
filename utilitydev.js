@@ -289,11 +289,14 @@ function dropInit () {
 	for (i = 0; i < dropdown.length; i++) {
 	  dropdown[i].addEventListener("click", function() {
 	    this.classList.toggle("active");
+			var arrow = document.getElementById (this.id.substring(0, this.id.length - 2) + 'arrow');
 	    var dropdownContent = this.nextElementSibling;
 	    if (dropdownContent.style.display === "block") {
 	      dropdownContent.style.display = "none";
+				arrow.innerHTML = '&#9662;';
 	    } else {
 	      dropdownContent.style.display = "block";
+				arrow.innerHTML = '&#9652;';
 	    }
 	  });
 	}

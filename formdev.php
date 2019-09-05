@@ -134,7 +134,7 @@ $sessionEncoded = urlencode ($sessionkey);
 // Navigation bar
 echo "<div class='sidenav'>
 <button class='dropdown-btn' id='help-dd'>Help
-  <i class='fa fa-caret-down'></i>
+  <span id=help-arrow>&#9662;</span>
 </button>
 <div class='dropdown-container' style='display: none'>
   <a href='help.html' target='_blank' id=help>Queries</a>
@@ -144,7 +144,7 @@ echo "<div class='sidenav'>
 </div>\n";
 if ($level > 0) {
   echo "<button class='dropdown-btn' id='account-dd' disabled=yes>Account
-    <i class='fa fa-caret-down'></i>
+  <span id=account-arrow><font color=#808080>&#9662;</font></span>
   </button>
   <div class='dropdown-container' style='display: none'>
     <span class=disabledmenu>Change password</span>
@@ -154,12 +154,12 @@ if ($level > 0) {
   </div>\n";
   if ($level > 1) {
     echo "<button class='dropdown-btn' id='list-dd'>Lists
-        <i class='fa fa-caret-down'></i>
+    <span id=list-arrow>&#9662;</span>
       </button>
       <div class='dropdown-container' style='display: none'>
       <a href='http:asksaveresults$type.php?sessionkey=$sessionEncoded&level=$level&type=$type&source=upload' target='_blank'>Upload file</a>\n";
     if ((SQLQuery($conn, "SELECT 1 FROM corpus WHERE owner = {$GLOBALS['userid']}"))->rowCount() > 0) {
-      echo "<a href='#'>Share</a>
+      echo "<a href='http:asksharelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Share</a>
         <a href='http:askdeletelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
         <a href='http:askrenamelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Rename</a>
         <a href='#'>Delete word</a>
@@ -174,7 +174,7 @@ if ($level > 0) {
     echo "<span class=disabledmenu>Access shared</span>\n";
     echo "</div>
       <button class='dropdown-btn' id='query-dd' disabled=yes>Queries
-        <i class='fa fa-caret-down'></i>
+      <span id=query-arrow><font color=#808080>&#9662;</font></span>
       </button>
       <div class='dropdown-container' style='display: none'>
         <span class=disabledmenu>Load</span>
@@ -183,7 +183,7 @@ if ($level > 0) {
         </div>\n";
   }
   echo "<button class='dropdown-btn' id='nav-dd'>Navigation
-      <i class='fa fa-caret-down'></i>
+      <span id=nav-arrow>&#9662;</span>
     </button>
     <div class='dropdown-container' style='display: none'>\n";
   if ($advanced) {
