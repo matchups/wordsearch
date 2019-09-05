@@ -26,6 +26,8 @@ corpus
    id, name, url, owner, like_id
 corpus_flag
    id, corpus_id, letter, description
+corpus_share
+   id, corpus_id, user_id, display [H, N, Y]
 category
    id, title, corpus_id
 catparent

@@ -57,7 +57,8 @@ body {
 
 /* Autocomplete dropdown */
         .tt-hint,
-        .category {
+        .category,
+        .userlook {
             border: 2px solid #CCCCCC;
             border-radius: 8px 8px 8px 8px;
             font-size: 24px;
@@ -134,4 +135,20 @@ body {
 .active {
   background-color: green;
   color: white;
+}
+
+/* Carets */
+.triangle {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid black;
+}
+.triangle-active {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid black;
 }

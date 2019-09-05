@@ -18,11 +18,9 @@ try {
 		throw new Exception ("Unable to access page; code $code");
 	}
 	// Rename entries
-	$connw = OpenConnection (true);
 	$corpusid = $_GET['list'];
 	$newname = $_GET['newname'];
-	$connw->exec ("UPDATE corpus SET name = '$newname' WHERE id = $corpusid");
-	unset ($connw);
+	openConnection (true)->prepare ("UPDATE corpus SET name = ? WHERE id = ?")->execute(array ($newname, $corpusid));
 	Echo "Word list <i>{$_GET['listname']}</i> renamed to <i>$newname</i>.";
 }
 catch(Exception $e) {

@@ -1,19 +1,13 @@
 
 ---------- ASKDELETELISTDEV.PHP
-<BODY>
-</BODY>";
 
 ---------- ASKLISTPROPERTIESDEV.PHP
-<BODY>
-</BODY>";
 
 ---------- ASKRENAMELISTDEV.PHP
-<BODY>
-</BODY>";
 
 ---------- ASKSAVERESULTSDEV.PHP
-<BODY>
-echo '</BODY>';
+
+---------- ASKSHARELISTDEV.PHP
 
 ---------- CATSUGGESTDEV.PHP
 
@@ -26,42 +20,31 @@ echo '</BODY>';
 ---------- CORPUSDEV.PHP
 
 ---------- DODELETELISTDEV.PHP
-<BODY>
-</BODY>";
 
 ---------- DOLISTPROPERTIESDEV.PHP
-<BODY>
-</BODY>";
 
 ---------- DORENAMELISTDEV.PHP
-<BODY>
-</BODY>";
 
 ---------- DOSAVERESULTSDEV.PHP
-<BODY>
-echo '</BODY>';
+			$corpusid = sqlInsert ($conn, "INSERT corpus (name, owner) VALUES ('$listname', $userid)");
+
+---------- DOSHARELISTDEV.PHP
 
 ---------- FORMDEV.PHP
 
 ---------- HELPDEV.HTML
-<BODY>
-</BODY>
 
 ---------- INDEXDEV.PHP
-<BODY>\n";
-</BODY>
 
 ---------- PARSEDEV.PHP
 
 ---------- PHRASESDEV.PHP
-<BODY>
-</BODY>
 
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
-	echo '<BODY onload="reloadQuery();">';
-echo '</BODY>';
+
+---------- USERSUGGESTDEV.PHP
 
 ---------- UTILITYDEV.JS
 
