@@ -33,7 +33,7 @@ echo "<div id='catlookup' class='wizard'>
 foreach ($corpusObjects as $corpusObject) {
   if (isset ($corpusObject->optionButtonList ()['category'])) {
     $corpus = $corpusObject->getCorpusNum();
-    echo "    <input type='text' name=category$corpus id=category$corpus class=category$corpus />\n";
+    echo "    <input type='text' name=category$corpus id=category$corpus class=category$corpus style='display: none'/>\n";
   }
 }
 echo "</form>
