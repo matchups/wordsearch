@@ -144,7 +144,7 @@ echo "<div class='sidenav'>
 </div>\n";
 if ($level > 0) {
   echo "<button class='dropdown-btn' id='account-dd' disabled=yes>Account
-  <span id=account-arrow><font color=#808080>&#9662;</font></span>
+  <span id=account-arrow><font color=black>&#9662;</font></span>
   </button>
   <div class='dropdown-container' style='display: none'>
     <span class=disabledmenu>Change password</span>
@@ -162,7 +162,7 @@ if ($level > 0) {
       echo "<a href='http:asksharelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Share</a>
         <a href='http:askdeletelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
         <a href='http:askrenamelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Rename</a>
-        <a href='#'>Delete word</a>
+        <a href='http:askdeleteword$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete word</a>
         <a href='http:asklistproperties$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Properties</a>\n";
     } else {
       echo "<span class=disabledmenu>Share</span>
@@ -174,7 +174,7 @@ if ($level > 0) {
     echo "<span class=disabledmenu>Access shared</span>\n";
     echo "</div>
       <button class='dropdown-btn' id='query-dd' disabled=yes>Queries
-      <span id=query-arrow><font color=#808080>&#9662;</font></span>
+      <span id=query-arrow><font color=black>&#9662;</font></span>
       </button>
       <div class='dropdown-container' style='display: none'>
         <span class=disabledmenu>Load</span>

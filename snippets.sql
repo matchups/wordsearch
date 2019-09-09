@@ -13,7 +13,7 @@ http://8wheels.org/wordsearch/dumper.php?sql=select+bank%2C+count%28id%29+from+w
 // Recent sessions
 select started, username from session inner join user on user.id = session.user_id where started > "2019-07-01"
 
-SELECT X.text FROM entry A, entry B, words X WHERE A.corpus_id = 89 AND B.corpus_id = 89 AND X.text = concat(A.name, B.name)
+SELECT distinct X.text FROM entry A, entry B, words X INNER JOIN word_entry Y ON Y.word_id = X.id INNER JOIN entry_cat C ON C.entry_id = Y.entry_id INNER JOIN category T on T.id = C.cat_id WHERE A.corpus_id = 89 AND B.corpus_id = 89 AND X.text = concat(A.name, B.name) AND T.title LIKE "%people%"
 // need to filter by category
 
 SHOW index FROM xxx

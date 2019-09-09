@@ -138,4 +138,16 @@ function timeDiff ($begin, $end) {
 	$endArray = explode (' ', $end);
 	return intval ((($endArray[1] - $beginArray[1]) + ($endArray[0] - $beginArray[0])) * 1000 + 0.5);
 }
-?>
+
+function mailUser ($touser, $subject, $msg){
+	$result = openConnection(false)->query("SELECT email FROM user WHERE id=$touser");
+	if ($result->rowCount() > 0) {
+		$toemail = $result->fetch(PDO::FETCH_ASSOC)['email'];
+	} else {
+		throw new Exception ("Unable to find user $touser");
+	}
+
+	if (!mail ($toemail, $subject, $msg, "from:info@alfwords.com")) {
+		throw new Exception ("Unable to send e-mail");
+	}
+}

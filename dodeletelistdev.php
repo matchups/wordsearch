@@ -21,10 +21,19 @@ try {
 	include "addmain.php";
 	$connw = OpenConnection (true);
 	$corpusid = $_GET['list'];
+	$listname = $_GET['listname'];
+	$username = SQLQuery($connw, "SELECT realname FROM user WHERE id = $userid")->fetch(PDO::FETCH_ASSOC)['realname'];
 	deleteAll ($connw, $corpusid);
+	$sql = "SELECT id, user_id FROM corpus_share WHERE corpus_id = $corpusid";
+	$result = $connw->query($sql);
+	while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+		$connw->exec ("DELETE FROM corpus_share WHERE id = {$row['id']}");
+		mailUser ($row['user_id'], "Alfwords: List deleted", "$username has deleted list $listname, which was previously shared with you.");
+	}
 	$connw->exec ("DELETE FROM corpus WHERE id = $corpusid");
+
 	unset ($connw);
-	Echo "Word list <i>{$_GET['listname']}</i> deleted.";
+	Echo "Word list <i>$listname</i> deleted.";
 }
 catch(Exception $e) {
 	echo "<font color=red>" . $e->getMessage() . "</font>";

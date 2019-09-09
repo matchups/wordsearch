@@ -1,6 +1,8 @@
 
 ---------- ASKDELETELISTDEV.PHP
 
+---------- ASKDELETEWORDDEV.PHP
+
 ---------- ASKLISTPROPERTIESDEV.PHP
 
 ---------- ASKRENAMELISTDEV.PHP
@@ -10,6 +12,7 @@
 ---------- ASKSHARELISTDEV.PHP
 
 ---------- CATSUGGESTDEV.PHP
+    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username,	$password);
 
 ---------- CONSDEV.PHP
 
@@ -21,18 +24,24 @@
 
 ---------- DODELETELISTDEV.PHP
 
+---------- DODELETEWORDDEV.PHP
+
 ---------- DOLISTPROPERTIESDEV.PHP
 
 ---------- DORENAMELISTDEV.PHP
 
 ---------- DOSAVERESULTSDEV.PHP
-			$corpusid = sqlInsert ($conn, "INSERT corpus (name, owner) VALUES ('$listname', $userid)");
 
 ---------- DOSHARELISTDEV.PHP
+	$username = SQLQuery($conn, "SELECT realname FROM user WHERE id = $userid")->fetch(PDO::FETCH_ASSOC)['realname'];
+			mailUser ($touserid, "Alfwords: List unshared", "$username has removed the share on list $listname with you.");
+			mailUser ($touserid, "Alfwords: List shared", "$username has shared list $listname with you.");
 
 ---------- FORMDEV.PHP
 
 ---------- HELPDEV.HTML
+
+---------- HELPMANAGEDEV.HTML
 
 ---------- INDEXDEV.PHP
 
@@ -45,7 +54,12 @@
 ---------- SEARCHDEV.PHP
 
 ---------- USERSUGGESTDEV.PHP
+    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username,	$password);
 
 ---------- UTILITYDEV.JS
 
 ---------- UTILITYDEV.PHP
+  $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username,	$password);
+
+---------- WORDSUGGESTDEV.PHP
+    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username,	$password);

@@ -349,10 +349,7 @@ Worcester
 Worthington
 Wrentham
 Yarmouth
-List of cities by official name
-The following tabular list shows the 56 government divisions of the Commonwealth which have been officially granted the right to use the city form of government along with the official name in use by each municipality.[Note 1]
 
-Municipality
 Agawam
 Amesbury
 Attleboro
@@ -422,3 +419,5 @@ Dorchester
 Hyde Park
 Roxbury
 West Roxbury
+
+please delete me
