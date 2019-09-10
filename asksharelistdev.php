@@ -38,7 +38,7 @@ try {
 		<input type=radio name=share id=shareit value=S checked=yes /> Share
 		<input type=radio name=share id=unshareit value=U /> Unshare
 		<BR>
-		<input type='submit'>
+		<input type='submit' value='Submit' id='xxx'/>
 		</form>\n";
 }
 catch(Exception $e) {

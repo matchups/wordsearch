@@ -1,4 +1,6 @@
 
+---------- ASKACCESSSHAREDLISTDEV.PHP
+
 ---------- ASKDELETELISTDEV.PHP
 
 ---------- ASKDELETEWORDDEV.PHP
@@ -12,7 +14,6 @@
 ---------- ASKSHARELISTDEV.PHP
 
 ---------- CATSUGGESTDEV.PHP
-    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username,	$password);
 
 ---------- CONSDEV.PHP
 
@@ -21,6 +22,8 @@
 ---------- CONSWEIGHTSDEV.PHP
 
 ---------- CORPUSDEV.PHP
+
+---------- DOACCESSSHAREDLISTDEV.PHP
 
 ---------- DODELETELISTDEV.PHP
 
@@ -33,11 +36,9 @@
 ---------- DOSAVERESULTSDEV.PHP
 
 ---------- DOSHARELISTDEV.PHP
-	$username = SQLQuery($conn, "SELECT realname FROM user WHERE id = $userid")->fetch(PDO::FETCH_ASSOC)['realname'];
-			mailUser ($touserid, "Alfwords: List unshared", "$username has removed the share on list $listname with you.");
-			mailUser ($touserid, "Alfwords: List shared", "$username has shared list $listname with you.");
 
 ---------- FORMDEV.PHP
+	<form name='catwiz' id='catwiz'>\n";
 
 ---------- HELPDEV.HTML
 
@@ -53,13 +54,12 @@
 
 ---------- SEARCHDEV.PHP
 
+---------- STYLESDEV.PHP
+
 ---------- USERSUGGESTDEV.PHP
-    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username,	$password);
 
 ---------- UTILITYDEV.JS
 
 ---------- UTILITYDEV.PHP
-  $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username,	$password);
 
 ---------- WORDSUGGESTDEV.PHP
-    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username,	$password);

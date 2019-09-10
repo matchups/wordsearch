@@ -27,7 +27,7 @@ corpus
 corpus_flag
    id, corpus_id, letter, description
 corpus_share
-   id, corpus_id, user_id, display [H, N, Y]
+   id, corpus_id, user_id, display [H, S, D] for Hide / Show / Default
 category
    id, title, corpus_id
 catparent

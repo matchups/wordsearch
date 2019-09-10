@@ -1,5 +1,6 @@
 <?php
 try {
+  unset ($corpusObjects);
   $conn = openConnection (false);
   $result = $conn->query("SELECT id FROM corpus ORDER BY corpus.id");
   while($row = $result->fetch(PDO::FETCH_ASSOC)) {
@@ -14,6 +15,7 @@ catch (PDOException $e) {
 }
 ?>
 <!-- Sketch out wizards, which CSS will make invisible until user asks for one of them -->
+
 <div id="wizard" class="wizard">
   <div class="wizard-content">
 	<form name="popwiz" id="popwiz">
@@ -29,6 +31,7 @@ catch (PDOException $e) {
 // Set up lookups for any corpus which supports categories
 echo "<div id='catlookup' class='wizard'>
   <div class='wizard-content'>
+  <div class='csswarning'>Error building CSS.  This lookup may not look or function correctly.</div>
 	<form name='catwiz' id='catwiz'>\n";
 foreach ($corpusObjects as $corpusObject) {
   if (isset ($corpusObject->optionButtonList ()['category'])) {
@@ -171,8 +174,12 @@ if ($level > 0) {
         <span class=disabledmenu>Delete word</span>
         <span class=disabledmenu>Properties</span>\n";
     }
-    echo "<span class=disabledmenu>Access shared</span>\n";
-    echo "</div>
+    if ((SQLQuery($conn, "SELECT 1 FROM corpus_share WHERE user_id = {$GLOBALS['userid']}"))->rowCount() > 0) {
+      echo "<a href='http:askaccesssharedlist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Access Shared</a>\n";
+    } else {
+      echo "<span class=disabledmenu>Access Shared</span>\n";
+    }
+    echo "/div>
       <button class='dropdown-btn' id='query-dd' disabled=yes>Queries
       <span id=query-arrow><font color=black>&#9662;</font></span>
       </button>

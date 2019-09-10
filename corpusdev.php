@@ -73,10 +73,15 @@ class corpus {
 			return true;
 		}
 		try {
-			$result = openConnection (false)->query("SELECT user_id FROM session WHERE session_key = '{$_GET['sessionkey']}'");
+			$conn = openConnection (false);
+			$result = $conn->query("SELECT user_id FROM session WHERE session_key = '{$_GET['sessionkey']}'");
 			if ($result->rowCount() > 0) { // make sure it is an active session
 				$userid = $result->fetch(PDO::FETCH_ASSOC)['user_id'];
-				return ($userid = $this->owner);
+				if ($userid == $this->owner) {
+					return true;
+				}
+				$corpus = $this->corpus;
+				return $conn->query("SELECT 1 FROM corpus_share WHERE user_id = $userid AND corpus_id = $corpus AND display = 'S'")->rowCount() > 0;
 			}
 			comment ("No rows!");
 		}

@@ -129,12 +129,22 @@ try {
       $continue = $json["continue"];
       $more = true;
       $from = urlencode ($continue['gapcontinue']);
-      echo "<P><A HREF='addwikipedia.php?limit=$limit&classname=$classname&from=$from&corpus=$corpus'>Continue<A>";
+      $link = "addwikipedia.php?limit=$limit&classname=$classname&from=$from&corpus=$corpus";
+      echo "<P><A HREF='$ink'>Continue<A>";
     } else {
       $more = false;
       break;
     }
   } // end for
+
+  // Set up automatic continuation
+  echo "<P><script>";
+  if (($ttl = ($_GET['ttl'] ?? 20) - 1) > 0) {
+    echo "document.location.href = '$link&ttl=$ttl'";
+  } else {
+    echo "alert ('TTL has reached zero.  Please press Continue.')";
+  }
+  echo "</script>";
 } catch (Exception $e) {
     echo 'Creating entry failed: ' . $e->getMessage();
 }
