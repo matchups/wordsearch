@@ -179,7 +179,7 @@ if ($level > 0) {
     } else {
       echo "<span class=disabledmenu>Access Shared</span>\n";
     }
-    echo "/div>
+    echo "</div>
       <button class='dropdown-btn' id='query-dd' disabled=yes>Queries
       <span id=query-arrow><font color=black>&#9662;</font></span>
       </button>
