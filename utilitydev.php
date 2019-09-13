@@ -84,8 +84,15 @@ function securityCheck (&$level, &$userid, &$sessionid) {
 	$type = $_GET['type'];
 	$code = '1';
 	if (isset ($_GET['sessionkey'])  &&  isset ($_GET['level'])) { // make sure session info is passed to us
-		$session = $_GET['sessionkey'];
 		try {
+			foreach ($_GET as $key => $value) {
+				if (substr($key, 0, 5) == 'query'  &&  ($_GET['radio' . substr($key,5)] ?? '') == "customsql") {
+					// security risk allowed for read-only connection and privileged user
+				} else if (strpos ($value, "'") !== false  ||  strpos ($value, "\"") !== false) {
+					throw new Exception (8);
+				}
+			}
+			$session = $_GET['sessionkey'];
 			$conn = openConnection (false);
 			$getLevel = $_GET ['level'];
 			if ($getLevel > 0) {
@@ -126,11 +133,14 @@ function securityCheck (&$level, &$userid, &$sessionid) {
 		catch(PDOException $e) {
 			$code = $e->getCode ();
 		}
+		catch(Exception $e) {
+			$code = $e->getMessage ();
+		}
 	}
 	if (!$code) {
 		openConnection (true)->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
 	}
-	return $code;
+	return $code; // highest defined value is 8
 }
 
 function timeDiff ($begin, $end) {

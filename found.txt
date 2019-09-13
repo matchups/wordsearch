@@ -52,6 +52,10 @@
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
+	echo '<BODY onload="reloadQuery();">';
+buildReloadQuery ($consObjects);
+function buildReloadQuery ($consObjects) {
+	echo "function reloadQuery() {\n";
 
 ---------- STYLESDEV.PHP
 

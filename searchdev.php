@@ -144,13 +144,8 @@ function buildReloadQuery ($consObjects) {
 	}
 
 	foreach (explode (' ', $fieldlist) as $name) {
-		if (strpos ($name, '_dc') !== false) {
-			$checked = 'true';
-		} else	if (getCheckbox ($name)) {
-			$checked = 'true';
-		} else {
-			$checked = 'false';
-		}
+		// use explode to get the first _ piece so that, foe example, c3cap_dc --> c3cap
+		$checked = getCheckbox (explode ('_', $name)[0]) ? 'true' : 'false';
 		echo "theForm['$name'].checked = $checked;\n";
 	}
 

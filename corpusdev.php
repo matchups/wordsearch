@@ -404,8 +404,8 @@ class corpusWiktionary extends corpusWikipedia {
 
 	public function getValidateCorpusCode () {
 		$corpus = $this->corpus;
-		return "if (!theForm['c{$corpus}cap'].checked && !theForm['c{$corpus}uncap'].checked) {
-		 return 'Must selected either Capitalized or Uncapitalized for Wiktionary';
+		return "if (!theForm['c{$corpus}cap_dc'].checked && !theForm['c{$corpus}uncap_dc'].checked) {
+		 return 'Must select either Capitalized or Uncapitalized for Wiktionary';
 	 }";
 	}
 } // end Wiktionary

@@ -1,6 +1,10 @@
 echo off
 if x%1==x goto help
 if %1==edit goto edit
+if not %1==loud goto go
+shift
+echo on
+:go
 set type=dev
 if not x%2==x set type=%2
 del found.txt
