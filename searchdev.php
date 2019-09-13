@@ -188,7 +188,7 @@ function refineQuery ($sql, &$rows) {
 		}
 	}
 
-	return $sql;
+	return str_replace (array ("\n", "\t"), ' ', $sql);
 }
 
 function getWidth ($sql) {

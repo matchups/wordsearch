@@ -130,7 +130,7 @@ try {
       $more = true;
       $from = urlencode ($continue['gapcontinue']);
       $link = "addwikipedia.php?limit=$limit&classname=$classname&from=$from&corpus=$corpus";
-      echo "<P><A HREF='$ink'>Continue<A>";
+      echo "<P><A HREF='$link'>Continue<A>";
     } else {
       $more = false;
       break;

@@ -1,9 +1,10 @@
 <?php
 class corpus {
 	protected $corpus;
-	protected $urlpattern;
+	protected $urlPattern;
 	protected $name;
   protected $flags;
+	protected $flagCorpus;
 	protected $owner;
 
 	public function __construct ($corpus) {
@@ -18,11 +19,12 @@ class corpus {
 
 		// get flags
 		if ($row['like_id'] > 0) {
-			$flag_corpus = $row['like_id'];
+			$this->flagCorpus = $row['like_id'];
 		} else {
-			$flag_corpus = $corpus;
+			$this->flagCorpus = $corpus;
 		}
-		$result = SQLQuery ($conn, "SELECT letter, description FROM corpus_flag WHERE corpus_id = $flag_corpus");
+		$flagCorpus = $this->flagCorpus;
+		$result = SQLQuery ($conn, "SELECT letter, description FROM corpus_flag WHERE corpus_id = $flagCorpus");
 		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 			$this->flags [$row['letter']]=$row['description'];
 		}
@@ -220,6 +222,21 @@ class corpus {
 	public function getValidateCorpusCode () {
 		return '';
 	}
+
+	public function getSpecialEntry (&$table) {
+		if ($this->flagCorpus <> $this->corpus) {
+			$table = $this->getEntryTable();
+			$int = "WE{$this->corpus}";
+			return " LEFT OUTER JOIN word_entry $int ON $int.word_id = PW.id " .
+				"LEFT OUTER JOIN entry $table ON $table.id = $int.entry_id AND $table.corpus_id = " . $this->flagCorpus;
+		}
+		return "";
+	}
+
+	public function getEntryTable () {
+		return ($this->flagCorpus <> $this->corpus) ? "ECP{$this->corpus}" : 'entry';
+	}
+
 } // end base corpus class
 
 class corpusConstraint extends constraint {
@@ -376,8 +393,13 @@ class corpusWiktionary extends corpusWikipedia {
 
 	public function moreSQL ($table, $type, $value) {
 		// $type always 'cap' for now
+		if ($this->corpus == $this->flagCorpus) {
+			$corpusFilter = "<> {$this->corpus}";
+		} else {
+			$corpusFilter = "IS NULL";
+		}
 		$not = ($value == 'C' ? '' : 'NOT');
-		return (" AND ($table.corpus_id <> {$this->corpus} OR $table.flags $not LIKE '%C%') ");
+		return (" AND ($table.corpus_id $corpusFilter OR $table.flags $not LIKE '%C%') ");
 	}
 
 	public function getValidateCorpusCode () {
@@ -489,8 +511,9 @@ class ccWikipediacategory extends ccWikipediaText {
 	function parse () {
 		$this -> style = 'D'; // by default, do things with database-side filtering
 		if ($this->range == 'contains') {
-			$suffix = $this -> corpusObject -> getCorpusNum() . "_{$this->num}";
-			$more ['pre'] = " INNER JOIN entry_cat EC$suffix ON EC$suffix.entry_id = entry.id
+			$suffix = $this->corpusObject -> getCorpusNum() . "_{$this->num}";
+			$table = $this->corpusObject->getEntryTable();
+			$more ['pre'] = " INNER JOIN entry_cat EC$suffix ON EC$suffix.entry_id = $table.id
 			 		INNER JOIN category C$suffix ON C$suffix.id = EC$suffix.cat_id";
 			$spec = str_replace ("'", "\'", $this -> spec);
 			$more ['where'] = " AND C$suffix.title LIKE '%$spec%'";
