@@ -32,14 +32,25 @@ try {
 		echo "Select word list file to upload:
 		    <input type='file' name='uploadfile' id='uploadfile'><BR>\n";
 	}
-	echo "<input type=text name=listname required=true /> Word list name<BR>
-	<input type=radio name=savetype id=typenew value=new checked=true />
-	New word list
-	<input type=radio name=savetype id=typeover value=over />
-	Overwrite existing list
-	<input type=radio name=savetype id=typeadd value=add />
-	Add to existing list
-	<input type=hidden name=sessionkey value='{$_GET['sessionkey']}'>
+	echo "<input type=text name=listname required=true /> Word list name<BR>";
+	$current = openConnection(false)->query("SELECT count(1) AS current FROM corpus WHERE owner = $userid")->fetch(PDO::FETCH_ASSOC)['current'];
+	$limit = ($level == 3) ? 20 : 5;
+	if ($current < $limit) {
+		echo "<input type=radio name=savetype id=typenew value=new checked=true />
+		New word list\n";
+		$addcheck = '';
+	} else {
+		$addcheck = 'checked';
+	}
+	echo "<input type=radio name=savetype id=typeover value=over />  Overwrite existing list
+	<input type=radio name=savetype id=typeadd value=add $addcheck />
+	Add to existing list\n";
+	if ($current >= $limit) {
+		echo "\n<P>Your account is at its maximum ($limit) number of word lists.
+		You can add to an existing list, delete a list, or upgrade your account.
+		Also, if your list is of general interest, let us know and we will consider adding it to the common library.\n";
+	}
+	echo "<input type=hidden name=sessionkey value='{$_GET['sessionkey']}'>
 	<input type=hidden name=level value='$level'>
 	<input type=hidden name=source value='{$_GET['source']}'>
 	<input type=hidden name=type value='$type'>

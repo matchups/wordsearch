@@ -87,7 +87,7 @@ echo "<!--$classname";
 $helper = new $classname;
 echo get_class($helper) . '-->';
 $corpus = $_GET["corpus"] ?? 'x3';
-$title = "Articles: " . $helper->getTitle() . (substr ($corpus, 0, 1) == 'x' ? ' Dummy' : '') . " API read";
+$title = "Articles: " . $helper->getTitle() . (substr ($corpus, 0, 1) == 'x' ? ' Dummy' : '') . " API read " . ($_GET['ttl'] ?? '');
 echo "
 <TITLE>$title</TITLE>
 </HEAD>

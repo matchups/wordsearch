@@ -9,53 +9,8 @@
 <UL>
 <LI>0.7 Major expansion of word list
   <UL>
-  <LI>0.72 Content search (text & categories) (<B>all done</B>)
-    <OL type=a>
-    <LI>Classes for word lists
-    <LI>Text search prompt
-    <LI>Text search dummy implementation in class
-    <LI>Actual search -- includes wildcards, @#&, etc.
-    <LI>Corpus & flags restore value
-    <LI>Corpus criteria restore value
-    <LI>Regex search
-    <LI>Cache grab
-    <LI>Page size
-    <LI>Limit number of pages searched and allow restart/continue
-    <LI>Category search
-    </OL>
-  <LI>0.73 Miscellaneous internal  (<B>all done</B>)
-    <OL type=a>
-    <LI>Dumper security
-    <LI>Validate same IP address
-    <LI>Git
-    <LI>Refactor class-related JS stuff to PHP
-	<UL>
-	<LI>Wizarddev.js to big echo'ed PHP
-	<LI>Remove include w.js
-	<LI>Include to blow it in
-	<LI>Copy stuff to class functions
-	<LI>Call class functions
-	<LI>Refactor repetitive code in OpenWizard+
-	<LI>Letter match wizard--is ^ in the right place?+
-	<LI>Move wizard.php to form+
-	<LI>utilitydev.js to big echo'ed PHP (except true utility)+
-	<LI>Move stuff to class functions //!@, call class functions and remove boring stuff+
-	<LI>Address any //!! in utilitydev & form+
-	<LI>Update vup (not much, done)
-	<LI>Hints and whether we enable wizard button uses class function+
-	<LI>Always use createElement shortcuts and add radio values+
-	<LI>Pull out stuff from consdev.php to get it under 20K+ & update vup
-	</UL>
-    <LI>Convert small non-PHP stuff near top of searchdev.php to echos
-    <LI>Use ?? to replace some issets
-    <LI><strike>SQL timeout https://stackoverflow.com/questions/415905/how-to-set-a-maximum-execution-time-for-a-mysql-query/23319195</strike> Oh well, doesn't work
-    <LI>Github
-    <LI>Add reverse indexes to word/entry and to category
-    <LI>Show most popular categories in lookup
-    <LI>Look at performance changing some LIKEs to BETWEENs (done, but may not help)
-    <LI>See what is actually a reasonable limit on the number of rows: 4K/second, so 80K, 1M
-    <LI>Modify script to use $type, not hard-coded DEV when calling catsuggest; also update vup
-  </OL>
+  <LI>0.72 Content search (text & categories) (done)
+  <LI>0.73 Miscellaneous internal (done)
   <LI>0.74 Wiktionary <B>all done</B>
     <OL type=a>
     <LI>Loader
@@ -87,29 +42,30 @@
     <LI>corpus index on entry (done)
     <LI>Access saved (done)
     <LI>Menu (done)
-    <LI>Manage
+    <LI>Manage <b>(all done)</b>
 	<UL>
-	<LI>Delete (done)
-	<LI>Rename (done)
-	<LI>No left margin needed on subsidiary pages (done)
-	<LI>Properties: URL (done)
-	<LI>Properties: parent word list (done)
-	<LI>Share (done)
-	<LI>Delete words (done)
-	<LI><A HREF="https://www.w3schools.com/php/func_mail_mail.asp">E-mail sent</A> on shareand on deletion of shareds (done) 
-	<LI>Fix category lookup UI (done)
-	<LI>Access shared (done)
-	<LI>Fix issues with user lists 'like' Wiki* (categories, flags) (done)
+	<LI>Delete
+	<LI>Rename
+	<LI>No left margin needed on subsidiary pages
+	<LI>Properties: URL
+	<LI>Properties: parent word list
+	<LI>Share
+	<LI>Delete words
+	<LI><A HREF="https://www.w3schools.com/php/func_mail_mail.asp">E-mail sent</A> on shareand on deletion of shareds 
+	<LI>Fix category lookup UI
+	<LI>Access shared
+	<LI>Fix issues with user lists 'like' Wiki* (categories, flags)
 	<LI><strike>Defaults</strike>
-	<LI>Collapsing 'Lists' hides Queries & Navigation (done)
-	<LI>Carets in menu (done)
-	<LI>Sanitize inputs (done)
-	<LI><font color=red>Search page shows checks on both C and U, even if not both used</font>
+	<LI>Collapsing 'Lists' hides Queries & Navigation
+	<LI>Carets in menu
+	<LI>Sanitize inputs
+	<LI>Search page shows checks on both C and U, even if not both used
 	</UL>
     <LI>List management help (done)
-    <LI>Review query help: update for categories & Wiktionary; remove Not Working
-    <LI>Limit to 5 for premium to 50K entries (2M characters), 20 for professional to 200K entries (20M characters); message about general interest
+    <LI>Review query help: update for categories & Wiktionary; remove Not Working (done)
+    <LI>Limit to 5 for premium to 50K entries (2M characters), 20 for professional to 200K entries (20M characters); message about general interest (done)
     <LI>Separate CSS by $type
+    <LI>Query may take too long (*yearwar at level 2)
     <LI>Look into retiring preserveinfo
     <LI>Release
     </OL>

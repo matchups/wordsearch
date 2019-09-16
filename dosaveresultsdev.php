@@ -28,7 +28,7 @@ try {
 		throw new Exception ("Unable to save results; code $code");
 	}
 
-  $conn = openConnection (true);
+  $conn = openConnection (false);
 	if (($listname = $_GET['listname'] ?? '') == '') {
 		throw new Exception ("List name is required");
 	}
@@ -60,6 +60,7 @@ try {
 	}
 
 	// slurp words
+	$newCharCount = 0;
 	if ($upload) {
 		$fileInfo = $_FILES["uploadfile"];
 		$target_dir = "uploads/";
@@ -86,6 +87,7 @@ try {
 		foreach (explode (chr(10), str_replace (chr(13), '', strtolower (file_get_contents($targetFile)))) as $word) {
 			if (preg_match ('/[a-z]{3}/', $word)) {
 				$entries [$word] = '';
+				$newCharCount += strlen ($word);
 			}
 		}
 	} else { // upload --> results
@@ -94,11 +96,29 @@ try {
 		if ($result->rowCount() > 0) { // make sure it is an active session
 			while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 				$entries [$row['entry']] = '';
+				$newCharCount += strlen ($row['entry']);
 			}
 		} else {
 			throw new Exception ("No saved words for list");
 		}
 	} // end results
+
+	$newEntryCount = count($entries);
+	$row = $conn->query("SELECT sum(1) AS entries, sum(length(name)) AS characters FROM entry WHERE corpus_id = '$corpusid'")->fetch(PDO::FETCH_ASSOC);
+	$existingEntryCount = $row['entries'];
+	$existingCharCount = $row['characters'];
+	$entryLimit = ($level == 3) ? 200E3 : 50E3;
+	$charLimit = ($level == 3) ? 20E6 : 2E6;
+	$suggest = "You can delete a list to make room or upgrade your account.
+			Also, if your list is of general interest, let us know and we will consider adding it to the common library.";
+	if ($newEntryCount + $existingEntryCount > $entryLimit) {
+		throw new Exception (writeNumbers ("This list contains $newEntryCount entries.  Combined with the $existingEntryCount entries in your
+			existing lists, this is more than your account limit of $entryLimit.  $suggest"));
+	}
+	if ($newCharCount + $existingCharCount > $charLimit) {
+		throw new Exception (writeNumbers ("This list contains $newCharCount characters.  Combined with the $existingCharCount characters in your
+			existing lists, this is more than your account limit of $charLimit.  $suggest"));
+	}
 
 	// add words
 	$helper = new loadHelper ();
@@ -117,4 +137,16 @@ unset ($connw);
 
 echo '</BODY>';
 // End of main script
+
+function writeNumbers ($string) {
+	return preg_replace_callback ('/[0-9]{4,9}/', function ($matches) {
+	  if (($num = $matches[0]) > 1999E3) {
+			return (floor ($num / 1E6) . ' million');
+		} else if ($num > 1999) {
+			return (floor ($num / 1E3) . ' thousand');
+		} else {
+			return $num;
+		}
+  }, $string);
+}
 ?>
