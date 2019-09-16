@@ -118,7 +118,6 @@ echo "<P>";
 
 // Display form to allow user to edit and resubmit query
 include "form$type.php";
-preserveInfo ($type, $version);
 buildReloadQuery ($consObjects);
 
 echo '</BODY>';

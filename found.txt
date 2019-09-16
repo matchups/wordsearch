@@ -1,24 +1,17 @@
 
 ---------- ASKACCESSSHAREDLISTDEV.PHP
-	<link rel='stylesheet' href='styles.css'>
 
 ---------- ASKDELETELISTDEV.PHP
-	<link rel='stylesheet' href='styles.css'>
 
 ---------- ASKDELETEWORDDEV.PHP
-	<link rel='stylesheet' href='styles.css'>
 
 ---------- ASKLISTPROPERTIESDEV.PHP
-	<link rel='stylesheet' href='styles.css'>
 
 ---------- ASKRENAMELISTDEV.PHP
-	<link rel='stylesheet' href='styles.css'>
 
 ---------- ASKSAVERESULTSDEV.PHP
-	<link rel='stylesheet' href='styles.css'>
 
 ---------- ASKSHARELISTDEV.PHP
-	<link rel='stylesheet' href='styles.css'>
 
 ---------- CATSUGGESTDEV.PHP
 
@@ -31,51 +24,40 @@
 ---------- CORPUSDEV.PHP
 
 ---------- DOACCESSSHAREDLISTDEV.PHP
-	<link rel='stylesheet' href='styles.css'>
 
 ---------- DODELETELISTDEV.PHP
-	<link rel='stylesheet' href='styles.css'>
 
 ---------- DODELETEWORDDEV.PHP
-	<link rel='stylesheet' href='styles.css'>
 
 ---------- DOLISTPROPERTIESDEV.PHP
-	<link rel='stylesheet' href='styles.css'>
 
 ---------- DORENAMELISTDEV.PHP
-	<link rel='stylesheet' href='styles.css'>
 
 ---------- DOSAVERESULTSDEV.PHP
-	<link rel='stylesheet' href='styles.css'>
 
 ---------- DOSHARELISTDEV.PHP
-	<link rel='stylesheet' href='styles.css'>
 
 ---------- FORMDEV.PHP
-  <div class='csswarning'>Error building CSS.  This lookup may not look or function correctly.</div>
 
 ---------- HELPDEV.HTML
 
 ---------- HELPMANAGEDEV.HTML
 
 ---------- INDEXDEV.PHP
-<link rel='stylesheet' href='styles.css'>
-<link rel='stylesheet' href='wideleft.css'>
+preserveInfo ($type, $version);
 
 ---------- PARSEDEV.PHP
 
 ---------- PHRASESDEV.PHP
-<link rel="stylesheet" href="styles.css">
 
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
-<link rel='stylesheet' href='styles.css'>
-<link rel='stylesheet' href='wideleft.css'>
+preserveInfo ($type, $version);
+
+---------- STYLESDEV.CSS
 
 ---------- STYLESDEV.PHP
-  header("Content-Type: text/css; charset=utf-8");
-echo '.csswarning {display: ' . $display . '; color: red}';
 
 ---------- USERSUGGESTDEV.PHP
 

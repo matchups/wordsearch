@@ -48,6 +48,8 @@ echo "</form>
 $advanced = true;
 $sessionkey = $_GET['sessionkey'];
 $level = $_GET['level'];
+$type = $_GET['type'];
+$version = $_GET['version'];
 if ($level == 0) {
 	$advanced = false;
 } else {
@@ -56,13 +58,15 @@ if ($level == 0) {
 	}
 }
 Echo "<BR>\n";
-Echo "<form name='search' id='search' onsubmit='return validateForm()' method='get'>\n";
+Echo "<form name='search' id='search' action='search$type.php' onsubmit='return validateForm()' method='get'>\n";
 Echo "<input type=hidden id='simple' name='simple' value='" . ($advanced ? 'off' : 'on') . "' />\n";
 if ($advanced) {
 	Echo "<input type='submit' value='Submit' id='yyy'/>\n";
 }
+if ($type == 'dev') {
+  echo "<span id=expspan><input type=checkbox id='explain' name=explain /> Explain</span>\n";
+}
 ?>
-<span id=expspan><input type=checkbox id='explain' name=explain /> Explain</span>
 
 <H3>Pattern</H3>
 <label>Basic Pattern: </label>
@@ -91,12 +95,17 @@ echo "<H3>Filters</H3>
 if ($advanced) {
 	echo "<span id=twhole>Whole entry only? <input name=whole type=checkbox /></span><br>\n";
 }
+if ($level > 0) {
+  $sourceDisplay = '';
+} else {
+  $sourceDisplay = "style='display: none'"; //@@
+}
 echo "<label>Single words? <input name=single type=checkbox
    checked /></label><br>
 <label>Phrases? <input name=phrase type=checkbox checked /></label><br>
 <span id=hint></span>
 
-<div id='source'>
+<div id='source $sourceDisplay'>
 <H3>Source</H3>\n";
 $checklist = '';
 foreach ($corpusObjects as $corpusObject) {
@@ -118,30 +127,27 @@ foreach ($corpusObjects as $corpusObject) {
     theForm['$key'].value=0;
   }\n";
 }
-echo "} // end resetCorporaMore\n";
-echo "</script>\n";
-?>
-</div>
-<!-- Put the type (Beta, Dev, Back, or nil) in the form so subsequent scripts can access it -->
-<input type=hidden id='type' name='type' />
-<input type=hidden id='version' name='version' /><!-- Filled in by index.php -->
-<input type="submit" value="Submit" id="xxx"/>
+echo "} // end resetCorporaMore
+  </script>
+  </div>
+  <!-- Put the type (Beta, Dev, Back, or nil) in the form so subsequent scripts can access it -->
+  <input type=hidden id='type' name='type' value='$type' />
+  <input type=hidden id='version' name='version' value='$version' />
+  <input type='submit' value='Submit' id='xxx'/>
+  </form>
 
-</form>
+  <P>
+  <button type='button' id='reset' onclick='resetForm();return false;'>Reset</button>\n";
+  $sessionEncoded = urlencode ($sessionkey);
 
-<P>
-<button type="button" id="reset" onclick="resetForm();return false;">Reset</button>
-<?php
-$sessionEncoded = urlencode ($sessionkey);
-
-// Navigation bar
+  // Navigation bar
 echo "<div class='sidenav'>
 <button class='dropdown-btn' id='help-dd'>Help
   <span id=help-arrow>&#9662;</span>
 </button>
 <div class='dropdown-container' style='display: none'>
-  <a href='help.html' target='_blank' id=help>Queries</a>
-  <a href='helpmanage.html' target='_blank' id=helpmanage>Query and list management</a>
+  <a href='help$type.html' target='_blank' id=help>Queries</a>
+  <a href='helpmanage$type.html' target='_blank' id=helpmanage>Query and list management</a>
   <span class=disabledmenu>Accounts</span>
   <a href='mailto:info@alfwords.com'>Contact</a>
 </div>\n";
@@ -193,10 +199,11 @@ if ($level > 0) {
       <span id=nav-arrow>&#9662;</span>
     </button>
     <div class='dropdown-container' style='display: none'>\n";
+  $security = "sessionkey={$_GET['sessionkey']}&level=$level&type=$type";
   if ($advanced) {
-  	echo "<A id=basic href='http://alfwords.com'>Basic search</A>\n";
+  	echo "<A id=basic href='index$type.php?simple=on&$security'>Basic search</A>\n";
   } else if ($level> 0) {
-    echo "<A id=advanced>Advanced search</A>\n";
+    echo "<A id=advanced href='index$type.php?$security'>Advanced search</A>\n";
   }
   $security = "?sessionkey=$sessionkey&level=$level";
   // Links to other versions of the project, based on permissions
@@ -392,30 +399,3 @@ window.onclick = function(event) {
 
 dropInit ();
 </script>
-
-<?php
-function preserveInfo ($type, $version) {
-	// Put some things into form where the main script knows the value and the form doesn't.
-	// We can't do it inline, because there's no good way to pass in the values except as a function call.
-	echo "<script>
-	  document.getElementById('type').value = '$type';
-	  document.getElementById('version').value = '$version';
-	  document.getElementById('search').action = 'search$type.php';
-    document.getElementById('help').href = 'help$type.html';
-    document.getElementById('helpmanage').href = 'helpmanage$type.html';\n";
-  $level = $_GET['level'];
-  $security = "sessionkey={$_GET['sessionkey']}&level=$level&type=$type";
-  if (!$GLOBALS['advanced']) {
-     echo "document.getElementById('basic').href = 'index$type.php?simple=on&$security';\n";
-	} else {
-		if ($level > 0) {
-      echo "document.getElementById('advanced').href = 'index$type.php?$security';\n";
-		}
-		echo "document.getElementById('source').style.display = 'none';\n";
-	}
-	if ($type <> 'dev') {
-		echo "document.getElementById('expspan').style.display = 'none';\n";
-	}
-	echo "</script>\n";
-}
-?>
