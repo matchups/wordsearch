@@ -23,7 +23,7 @@ include "corpus$type.php";
 $pattern = $_GET['pattern'];
 $version = $_GET['version'];
 echo "<meta name='viewport' content='width=device-width, initial-scale=1'>
-<link rel='stylesheet' href='styles.css'>
+<link rel='stylesheet' href='styles$type.css'>
 <link rel='stylesheet' href='styles$type.php'>
 <link rel='stylesheet' href='wideleft.css'>
 <TITLE>
