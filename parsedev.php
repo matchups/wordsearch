@@ -80,24 +80,20 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 
 	$sql = $sql . doWordTypes ();
 	$sql = $sql . doLength ('PW', $minlen, $maxlen, true);
-	$filtered = false;
 	foreach (array (doPairs ($required . patternRequired ($pattern)),
 					doPosition ($position, $minlen, $maxlen)) as $join) {
 		if ($join > '') {
 			$sql = str_replace ($prewhere, "$join $prewhere", $sql);
-			$filtered = true;
 		}
 	}
-	if (!$filtered) {
-		if (!$anyorder) {
-			$fourjoin = doFour ($pattern, '');
-			$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
-		}
-		foreach ($consObjects as $thisConsObject) {
-			$fourjoin = doFour ($thisConsObject->fourPattern(), ++$counter);
-			$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
-		} // end foreach
-	} // end filtered
+	if (!$anyorder) {
+		$fourjoin = doFour ($pattern, '');
+		$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
+	}
+	foreach ($consObjects as $thisConsObject) {
+		$fourjoin = doFour ($thisConsObject->fourPattern(), ++$counter);
+		$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
+	} // end foreach
 
 	$by = "PW.text, word_entry.whole DESC, entry.corpus_id";
 	$orderby = " GROUP BY " . str_replace('DESC', '', $by) . " ORDER BY $by";
