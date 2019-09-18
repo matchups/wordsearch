@@ -28,7 +28,7 @@ class constraint {
 	protected function explainSub() {
 		// Provides explanation of constraint, displayed on results screen, not including possible Not.
 		// Called only from explain
-		throw new Exception ("Base explainSub--needs to be overridden");
+		return $this::getLabel() . " $this->spec";
 	}
 
 	public function parse() {
@@ -71,7 +71,7 @@ class constraint {
 	}
 
 	public function rebuildForm($realNumber) {
-		Echo "addOption(" . ($_GET["level"]/3) . ");\n";
+		Echo "addOption();\n";
 		if ($this->not) {
 			Echo "theForm['not$realNumber'].checked = true;\n";
 		}
@@ -94,16 +94,64 @@ class constraint {
 		return 'F'; // main form
 	}
 
+  // ** Begin Static functions **
+
+	// List of normal (not corpus-linked) constraint classes
+  public static function list () {
+		$classes = array ("conspattern", "consregex", "conssubword", "consweights", "conscharmatch", "conscrypto");
+		IF ($_GET['level'] == 3) {
+			array_push ($classes, "conscustomsql");
+		}
+		return $classes;
+	}
+
+  // Does this constraint support a wizard?
+	public static function wizard () {
+		return false;
+	}
+
+	public static function getWizardValue () {
+		// code to build newValue in wizard based on form fields
+		throw new Exception ("Must override getWizardValue");
+	}
+
+	public static function getWizardOpenCode () {
+		// code to set up wizard UI
+		throw new Exception ("Must override getWizardOpenCode");
+	}
+
+	public static function getLabel () {
+		// Label for radio button
+		throw new Exception ("Must override getLabel");
+	}
+
+	public static function getButtonCode () {
+		// Code to add and remove controls when button selected/deselected
+		// Should be array (add->stuff, del->stuff)
+		return '';
+	}
+
+	public static function getMoreCode () {
+		// any self-contained Javascript (such as functions called by code in other get...Code scripts) that doesn't belong anywhere else
+		return '';
+	}
+
+	public static function getValidateConstraintCode () {
+		// Code to validate specifications for constraint.  Can access thisSpec
+		throw new Exception ("Must override getValidateConstraintCode");
+	}
+
+	public static function getHint () {
+		return 'Dummy hint';
+	}
+
+
 	public function debug () {return "[" . get_class() . "#$this->num=$this->spec]";}
 
 } // end class constraint
 
 class conspattern extends constraint {
 	// Simple pattern
-	protected function explainSub() {
-		return "pattern $this->spec";
-	}
-
 	public function parse() {
 		// Convert to regular expression
 		$spec = patternToRegex (expandSpecial ($this->spec), 'S');
@@ -133,164 +181,25 @@ class conspattern extends constraint {
 			return groupToWildcard ($this->spec);
 		}
 	}
-}
 
-class conssubword extends constraint {
-	protected function explainSub() {
-		return "subword $this->spec";
+	public static function getLabel () {
+		return 'pattern';
 	}
 
-	public function parse() {
-	// boilerplate to look for subword
-	$more = " AND " . $this->maybeNot() . " EXISTS (SELECT 1 FROM words SW INNER JOIN word_entry SWE ON SWE.word_id = SW.id " .
-		   " INNER JOIN entry SE ON SE.id = SWE.entry_id " .
-		   " WHERE SW.text = ";
-	$mode = '';
-	$substr = '';
-	$fromend = false;
-	$spec = $this->spec . '}';
-	// loop through characters in spec and convert to SQL-usable reference to substrings of base word
-	while ($spec > '') {
-		$ch = substr ($spec, 0, 1);
-		$spec = substr ($spec, 1);
-		$newmode = $mode;
-
-		if (preg_match ('/[1-9]/', $ch)) { // Digit represents a letter position
-			if (preg_match ('/[0-9]/', substr ($spec, 0, 1))) { // Next character is also a digit, so
-				$ch = $ch . substr ($spec, 0, 1); // pull that off and make it a two-digit number
-				$spec = substr ($spec, 1);
+	public static function getValidateConstraintCode () {
+		return "  // Same validation as with the main pattern
+			if (!/^[a-z?*@#&\[\-\]]+$/i.test (thisValue)) {
+				return 'Invalid character in pattern ' + thisOption;
 			}
-			if ($fromend) { // It was a negative number, so generate SQL accordingly
-				$fromend = false;
-				$here = "char_length(PW.text)-" . ($ch - 1);
-				$herecount = "-$ch";
-			} else {
-				$here = $ch;
-				$herecount = $ch;
-			}
-			$newmode = 'N';
-			if ($start != "") { // Is this the end of a range where a start was already established?
-				if (($here > 0 && $here < $start) ||
-					   ($start < 0 && $here < $start)) { // Backwards range, so swap start and end
-					$swap = $here;
-					$here = $start;
-					$start = $swap;
-					$swap = $herecount;
-					$herecount = $startcount;
-					$startcount = $swap;
-					$reverse = true;
-				}
-				$piece = "substring(PW.text, $start, ";
-				// Figure the length, which depends on whether the string spans from a left-based spot to a right-based
-				// spot, or if both termini are on the same side.
-				if ($startcount * $herecount > 0) {
-				   $piece = $piece .
-						($herecount - $startcount + 1) . ')';
-				} else {
-					$piece = $piece . "$here - $startcount + 1)";
-				}
-				if ($reverse) {
-					$piece = "reverse($piece)";
-				}
-				// File this piece away and reset everything for the next one.
-				$substr = $substr . ", " . $piece;
-				$start = '';
-				$newmode = '';
-				$mode = '';
-				$reverse = false;
-			}
-		} elseif ($ch == '-') { // Dash means we are in numeric mode and counting from the end.
-			$newmode = 'N';
-			$fromend = true;
-		} elseif (preg_match ('/[a-z]/i', $ch)) {
-			if ($mode == 'A') { // Already in alpha mode, so stick this character on the end.
-				$chars = $chars . $ch;
-			} else {
-				$newmode = 'A'; // Otherwise, start alpha mode.
-				$chars = $ch;
-			}
-		} elseif ($ch == ':') { // Indicates a range; now looking for end
-			$start = $here;
-			$startcount = $herecount;
-		} elseif ($ch == '}') { // I don't think this is actually used
-			$newmode = '';
-		} elseif ($ch == ',') { // Separating numbers
-			if ($herecount <> 0) {
-				$newmode = '';
-			}
-		} else {
-			throw new Exception ("Bad character $ch in substring spec"); // Should have been prevented on front end
-		}
-
-		if ($newmode <> $mode) { // Mode has changed, so capture the last piece and get going on new one.
-			if ($mode == 'A') {
-				$substr = $substr . ", '$chars'";
-			} elseif ($mode == 'N') {
-				$substr = $substr . ", substr(PW.text, $here, 1)";
-			}
-			$mode = $newmode;
-		}
-	} // end while
-	$more = $more . ' concat(' . substr ($substr, 2) . ')'; // Combine all the pieces on the database side.
-	$more = $more . ' AND ' . corpusInfo('SE', 'W') . ')'; // subword has to be in same corpus as main word
-	return $this->parseWhere ($more);
-} // end function
-
-} // end class conssubword
-
-class consweights extends constraint {
-	protected function explainSub() {
-		if ($_GET["wttype$this->num"] == "SCR") {
-			$which = 'Scrabble&reg;';
-		} else {
-			$which = "Alphabet";
-		}
-	return "$which weight $this->spec";
-}
-
-	public function parse() {
-		preg_match ('/^([0-9]*)([-+]?)([0-9]*)([<=>][0-9]*)$/', $this->spec, $matches);
-		// $left (digits) / + or - / $right (digits) / $compare (like >30)
-		$compare = $matches [4];
-		if ($this->not) {
-			$compare = str_replace (array ('<', '=', '>'), array ('>=', '!=', '<='), $compare);
-		}
-		$left = $matches [1];
-		if ($matches [2] == '+') {
-			$default = 1;
-		} else {
-			$default = 0;
-		}
-		$right = $matches [3];
-		// Compute multiplier, based on character position in beginning, middle, or end of word.
-		if ($left == ''  &&  $right == '') {
-			$times = '';
-		} else if ($left == '') {
-			$times = "convert (substr('$right', spandex.value - char_length (PW.text) + " . strlen ($right) . ", 1), signed)";
-			$times = "(CASE WHEN char_length (PW.text) - spandex.value < " . (strlen ($right) + 1) . " THEN $times ELSE $default END)";
-		} else if ($right == '') {
-			$times = "convert (substr('$left', spandex.value, 1), signed)";
-			if ($default > 0) {
-				$times = "(CASE WHEN spandex.value <= " . strlen($left) . " THEN $times ELSE $default END)";
-			}
-		} else {
-			$times = "(CASE WHEN spandex.value <= " . strlen ($left) . " THEN convert (substr('$left', spandex.value, 1), signed) " .
-							"WHEN char_length (PW.text) - spandex.value < " . (strlen ($right) + 1) . " THEN " .
-								 "convert (substr('$right', spandex.value - char_length (PW.text) + " . strlen ($right) . ", 1), signed) " .
-							"ELSE $default END)";
-		}
-		if ($times != '') {
-			$times = '* ' . $times;
-		}
-		// Now use the spandex table (which contains numbers 1-100) to add up the weights of all the letters in the word.
-		$wttype = $_GET["wttype$this->num"];
-		$sql = "AND (SELECT sum(weights.weight $times) FROM weights INNER JOIN spandex " .
-			"WHERE weights.name = '$wttype' AND weights.letter = substr(PW.text, spandex.value, 1) ".
-			"AND spandex.value <= char_length(PW.text)) $compare ";
-
-		return $this->parseWhere ($sql);
+			if (badGroups (thisValue)) {
+				return 'Invalid letter group in pattern ' + thisOption;
+			}";
 	}
-} // end class consweights
+
+	public static function getHint () {
+		return "Enter a simple pattern, as with the main search box.";
+	}
+} // end class conspattern
 
 class consregex extends constraint {
 	private $regex;
@@ -301,10 +210,6 @@ class consregex extends constraint {
 		if (substr ($this->regex, 0, 1) != '/') {
 			$this->regex = '/' . $this->regex . '/';
 		}
-	}
-
-	protected function explainSub() {
-		return "regular expression $this->spec";
 	}
 
 	public function parse() {
@@ -360,13 +265,22 @@ class consregex extends constraint {
 			return groupToWildcard ($this->spec);
 		}
 	}
-}
 
-class conscharmatch extends constraint {
-	protected function explainSub() {
-		return "letter match $this->spec";
+	public static function getLabel () {
+		return 'regular expression';
 	}
 
+	public static function getValidateConstraintCode () {
+		return "// We'll let you put *anything* in a regular expression";
+	}
+
+	public static function getHint () {
+		return "Enter a <A target=\"_blank\" HREF=\"https://regexone.com/\">regular expression</A> which the word must match.";
+	}
+
+} // end class consregex
+
+class conscharmatch extends constraint {
 	public function parse() {
 		// Extract from string like 5=-2+^8: {5, =, -2, +^8}
 		preg_match ('/^(-?[1-9][0-9]*)([<=>])(-?[1-9][0-9]*)([+\-]\^[1-9][0-9]*)?$/', $this->spec, $matches);
@@ -399,13 +313,66 @@ class conscharmatch extends constraint {
 
 		return $this->parseWhere ($sql);
 	}
-}
 
-class conscrypto extends constraint {
-	protected function explainSub() {
-			return "cryptogram pattern " . $this->spec;
+	public static function wizard () {
+		return true;
 	}
 
+	public static function getWizardValue () {
+		return "if (document.getElementById('wrmatchless').checked) {
+						newValue = '<';
+					} else if (document.getElementById('wrmatchequal').checked) {
+						newValue = '=';
+					} else if (document.getElementById('wrmatchgreater').checked) {
+						newValue = '>';
+					}
+					newValue = document.getElementById('wnmatchleft').value + newValue + document.getElementById('wnmatchright').value;
+					offset = document.getElementById('wnoffset').value;
+					if (offset > 0) {
+						newValue += '+^' + offset;
+					} else if (offset < 0) {
+						newValue += '-^' + -offset;
+					}\n";
+	}
+
+	public static function getWizardOpenCode () {
+	return "		wizInsert (newSpan ('wtmatchleft', 'Character position to start with (positive to count from beginning or negative to count from end): '));
+	wizInsert (newInput ('wnmatchleft', 'number', 'R'));
+	wizInsert (newBreak ('wizbr1'));
+  wizInsert (newRadio ('wrmatchless', 'wrmatchrel', '', ''));
+	wizInsert (newSpan ('wtless', ' < less than '));
+	wizInsert (newRadio ('wrmatchequal', 'wrmatchrel', 'C', ''));
+	wizInsert (newSpan ('wtequal', ' equals '));
+	wizInsert (newRadio ('wrmatchgreater', 'wrmatchrel', '', ''));
+	wizInsert (newSpan ('wtgreater', ' > greater than '));
+	wizInsert (newBreak ('wizbr2'));
+	wizInsert (newSpan ('wtmatchright', 'Character position to compare against: '));
+	wizInsert (newInput ('wnmatchright', 'number', 'R'));
+	wizInsert (newBreak ('wizbr3'));
+	wizInsert (newSpan ('wtoffset', 'Offset (optional); for example, 2 if you want F to match D or -2 for R to match T: '));
+	wizInsert (newInput ('wnoffset', 'number', ''));\n";
+	} // end getWizardOpenCode
+
+	public static function getLabel () {
+		return 'letter match';
+	}
+
+	public static function getValidateConstraintCode () {
+		return "// First position, operator, second position, optional ^offset
+		if (!/^-?[1-9][0-9]*[<=>]-?[1-9][0-9]*([+\-]\^[1-9][0-9]*)?$/i.test(thisValue)) {
+			return 'Invalid letter match specification ' + thisOption;
+		}";
+	}
+
+	public static function getHint () {
+		return "The option allows you to specify that certain characters within the word must match or have another relationship.
+			The simplest case is something like 3=8, which means that the third and eighth letters are the same.  A more complicated
+			example is 3>-3+^5 which says that the third letter has to be more than five places later in the alphabet (+^5) than the
+			third letter from the end (-3).";
+	  }
+} // end class conscharmatch
+
+class conscrypto extends constraint {
 	public function parse() {
 		$spec = $this->spec;
 		if ($spec == '*') {
@@ -452,15 +419,51 @@ class conscrypto extends constraint {
 			$consmax = $consmin;
 		}
 	}
+
+	public static function getLabel () {
+		return 'cryptogram pattern';
+	}
+
+	public static function getValidateConstraintCode () {
+		return " if (thisValue == '*') {
+			return '';
+		}
+		if (/[^a-z]/i.test(thisValue)) {
+			return 'Invalid cryptogram pattern ' + thisOption;
+		}
+		if ((maxlen > 0  &&  maxlen != thisValue.length) || (minlen > 0  &&  minlen != thisValue.length)) {
+			return 'Cryptogram length is inconsistent with requested word length';
+		}";
+	}
+
+public static function getHint () {
+	return "The option allows you to specify a pattern of matching and nonmatching letters: a word which might be a solution in a
+		cryptogram for the other word.  For example, ELLISVILLE would match REENGINEER and ABCABC would match words such as
+		ATLATL, BONBON, and TSETSE.  Use * to specify that the word has no matching letters.";
+	}
 } // end class conscrypto
 
 class conscustomsql extends constraint {
-	protected function explainSub() {
-		return "Custom SQL: $this->spec";
-	}
-
 	public function parse() {
 		return " AND $this->spec ";
 	}
+
+	public static function getLabel () {
+		return 'custom SQL';
+	}
+
+	public static function getValidateConstraintCode () {
+		return "// We'll let you put anything in SQL, at least for now";
+	}
+
+	public static function getHint () {
+		return "Enter a constraint to appear in the WHERE clause, most likely referencing PW.text (the candidate word, letters only,
+			such as INTHEYEAR for <u>In the Year 2525</u> and/or PW.bank (the list of letters, such as AEHINRTY).";
+		}
 } // end class customsql
+
+// A couple of big ones get their own source files
+$type = $_GET['type'];
+include "consweights$type.php";
+include "conssubword$type.php";
 ?>

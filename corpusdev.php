@@ -343,6 +343,7 @@ class corpusWikipedia extends corpus {
   // Use wizard to allow user to look up category
 	protected function formCatLookup() {
 		$corpus = $this -> corpus;
+		$flagCorpus = $this -> flagCorpus;
 		echoUnique ("\n<script>
 			function categoryLookup (thisOption, thisCorpus) {
 				categoryOption = thisOption; // global
@@ -363,7 +364,7 @@ class corpusWikipedia extends corpus {
 			$(document).ready(function() {
 				$('input.category$corpus').typeahead({
 					name: 'category$corpus',
-					remote: 'catsuggest{$_GET['type']}.php?query=%QUERY&corpus=$corpus'
+					remote: 'catsuggest{$_GET['type']}.php?query=%QUERY&corpus=$flagCorpus'
 				});
 			})
 			</script>\n";

@@ -1,5 +1,6 @@
 <?php
 try {
+  unset ($corpusObjects);
   $conn = openConnection (false);
   $result = $conn->query("SELECT id FROM corpus ORDER BY corpus.id");
   while($row = $result->fetch(PDO::FETCH_ASSOC)) {
@@ -14,6 +15,7 @@ catch (PDOException $e) {
 }
 ?>
 <!-- Sketch out wizards, which CSS will make invisible until user asks for one of them -->
+
 <div id="wizard" class="wizard">
   <div class="wizard-content">
 	<form name="popwiz" id="popwiz">
@@ -29,6 +31,7 @@ catch (PDOException $e) {
 // Set up lookups for any corpus which supports categories
 echo "<div id='catlookup' class='wizard'>
   <div class='wizard-content'>
+  <div class='csswarning'>Error building CSS.  This lookup may not look or function correctly.</div>
 	<form name='catwiz' id='catwiz'>\n";
 foreach ($corpusObjects as $corpusObject) {
   if (isset ($corpusObject->optionButtonList ()['category'])) {
@@ -45,26 +48,25 @@ echo "</form>
 $advanced = true;
 $sessionkey = $_GET['sessionkey'];
 $level = $_GET['level'];
+$type = $_GET['type'];
+$version = $_GET['version'];
 if ($level == 0) {
 	$advanced = false;
 } else {
 	if (($_GET[simple] ?? '') == 'on') {
 		$advanced = false;
-		echo "<A id=advanced>Advanced search</A>\n";
 	}
 }
-if ($advanced) {
-	Echo "<H3>Control</H3>";
-	Echo "<A id=basic HREF='http://alfwords.com'>Basic search</A>\n";
-}
 Echo "<BR>\n";
-Echo "<form name='search' id='search' onsubmit='return validateForm()' method='get'>\n";
+Echo "<form name='search' id='search' action='search$type.php' onsubmit='return validateForm()' method='get'>\n";
 Echo "<input type=hidden id='simple' name='simple' value='" . ($advanced ? 'off' : 'on') . "' />\n";
 if ($advanced) {
 	Echo "<input type='submit' value='Submit' id='yyy'/>\n";
 }
+if ($type == 'dev') {
+  echo "<span id=expspan><input type=checkbox id='explain' name=explain /> Explain</span>\n";
+}
 ?>
-<span id=expspan><input type=checkbox id='explain' name=explain /> Explain</span>
 
 <H3>Pattern</H3>
 <label>Basic Pattern: </label>
@@ -93,12 +95,17 @@ echo "<H3>Filters</H3>
 if ($advanced) {
 	echo "<span id=twhole>Whole entry only? <input name=whole type=checkbox /></span><br>\n";
 }
+if ($level > 0) {
+  $sourceDisplay = '';
+} else {
+  $sourceDisplay = "style='display: none'"; //@@
+}
 echo "<label>Single words? <input name=single type=checkbox
    checked /></label><br>
 <label>Phrases? <input name=phrase type=checkbox checked /></label><br>
 <span id=hint></span>
 
-<div id='source'>
+<div id='source $sourceDisplay'>
 <H3>Source</H3>\n";
 $checklist = '';
 foreach ($corpusObjects as $corpusObject) {
@@ -120,29 +127,106 @@ foreach ($corpusObjects as $corpusObject) {
     theForm['$key'].value=0;
   }\n";
 }
-echo "} // end resetCorporaMore\n";
-echo "</script>\n";
-?>
-</div>
-<!-- Put the type (Beta, Dev, Back, or nil) in the form so subsequent scripts can access it -->
-<input type=hidden id='type' name='type' />
-<input type=hidden id='version' name='version' /><!-- Filled in by index.php -->
-<input type="submit" value="Submit" id="xxx"/>
+echo "} // end resetCorporaMore
+  </script>
+  </div>
+  <!-- Put the type (Beta, Dev, Back, or nil) in the form so subsequent scripts can access it -->
+  <input type=hidden id='type' name='type' value='$type' />
+  <input type=hidden id='version' name='version' value='$version' />
+  <input type='submit' value='Submit' id='xxx'/>
+  </form>
 
-</form>
+  <P>
+  <button type='button' id='reset' onclick='resetForm();return false;'>Reset</button>\n";
+  $sessionEncoded = urlencode ($sessionkey);
 
-<form id=help action="help.html">
-<input type="submit" value="Help" />
-</form>
+  // Navigation bar
+echo "<div class='sidenav'>
+<button class='dropdown-btn' id='help-dd'>Help
+  <span id=help-arrow>&#9662;</span>
+</button>
+<div class='dropdown-container' style='display: none'>
+  <a href='help$type.html' target='_blank' id=help>Queries</a>
+  <a href='helpmanage$type.html' target='_blank' id=helpmanage>Query and list management</a>
+  <span class=disabledmenu>Accounts</span>
+  <a href='mailto:info@alfwords.com'>Contact</a>
+</div>\n";
+if ($level > 0) {
+  echo "<button class='dropdown-btn' id='account-dd' disabled=yes>Account
+  <span id=account-arrow><font color=black>&#9662;</font></span>
+  </button>
+  <div class='dropdown-container' style='display: none'>
+    <span class=disabledmenu>Change password</span>
+    <span class=disabledmenu>Change personal information</span>
+    <span class=disabledmenu>Renew</span>
+    <span class=disabledmenu>Cancel</span>
+  </div>\n";
+  if ($level > 1) {
+    echo "<button class='dropdown-btn' id='list-dd'>Lists
+    <span id=list-arrow>&#9662;</span>
+      </button>
+      <div class='dropdown-container' style='display: none'>
+      <a href='http:asksaveresults$type.php?sessionkey=$sessionEncoded&level=$level&type=$type&source=upload' target='_blank'>Upload file</a>\n";
+    if ((SQLQuery($conn, "SELECT 1 FROM corpus WHERE owner = {$GLOBALS['userid']}"))->rowCount() > 0) {
+      echo "<a href='http:asksharelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Share</a>
+        <a href='http:askdeletelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
+        <a href='http:askrenamelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Rename</a>
+        <a href='http:askdeleteword$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete word</a>
+        <a href='http:asklistproperties$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Properties</a>\n";
+    } else {
+      echo "<span class=disabledmenu>Share</span>
+        <span class=disabledmenu>Delete</span>
+        <span class=disabledmenu>Rename</span>
+        <span class=disabledmenu>Delete word</span>
+        <span class=disabledmenu>Properties</span>\n";
+    }
+    if ((SQLQuery($conn, "SELECT 1 FROM corpus_share WHERE user_id = {$GLOBALS['userid']}"))->rowCount() > 0) {
+      echo "<a href='http:askaccesssharedlist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Access Shared</a>\n";
+    } else {
+      echo "<span class=disabledmenu>Access Shared</span>\n";
+    }
+    echo "</div>
+      <button class='dropdown-btn' id='query-dd' disabled=yes>Queries
+      <span id=query-arrow><font color=black>&#9662;</font></span>
+      </button>
+      <div class='dropdown-container' style='display: none'>
+        <span class=disabledmenu>Load</span>
+        <span class=disabledmenu>Share</span>
+        <span class=disabledmenu>Delete</span>
+        </div>\n";
+  }
+  echo "<button class='dropdown-btn' id='nav-dd'>Navigation
+      <span id=nav-arrow>&#9662;</span>
+    </button>
+    <div class='dropdown-container' style='display: none'>\n";
+  $security = "sessionkey={$_GET['sessionkey']}&level=$level&type=$type";
+  if ($advanced) {
+  	echo "<A id=basic href='index$type.php?simple=on&$security'>Basic search</A>\n";
+  } else if ($level> 0) {
+    echo "<A id=advanced href='index$type.php?$security'>Advanced search</A>\n";
+  }
+  $security = "?sessionkey=$sessionkey&level=$level";
+  // Links to other versions of the project, based on permissions
+  if ($type != "back"  &&  $level > 1) {
+  	Echo "<A HREF='indexback.html$security&type=back'>Previous</A>";
+  }
+  if ($type != "") {
+  	Echo "<A HREF='index.php$security'>Current</A>";
+  }
+  if ($type != "beta"  &&  $level > 1) {
+  	Echo "<A HREF='indexbeta.php$security&type=beta'>Beta</A>";
+  }
+  if ($type != "dev"  &&  $level > 2) {
+  	Echo "<A HREF='indexdev.php$security&type=dev'>Development</A>";
+  }
 
-<P>
-<button type="button" id="reset" onclick="resetForm();return false;">Reset</button>
-<input id="btntest" type="button" value="Log Out"
-<?php
-echo "onclick=\"window.location.href = 'http:logout.php?sessionkey=$sessionkey'\" />\n";
+  echo "<a href='http:logout.php?sessionkey=$sessionEncoded'>Log out</a>
+    </div>
+  </div>\n";
+}
 
 // Wizard stuff
-Echo "<script>
+echo "<script>
 // Close the wizard.  If saveFlag, use the values to populate this constraint's query field.
 function closeWizard (saveFlag) {
 	var thisOption = document.getElementById('wizoption').value;
@@ -303,8 +387,7 @@ function validateConstraint (thisOption) {
 		}
   echo "} // end validateCorpus\n";
 ?>
-// This needs to be at the end, after the wizard has been created
-
+// This needs to be at the end, after controls have been created
 var modal = document.getElementById('wizard');
 
 // When the user clicks anywhere outside of the wizard, close it
@@ -313,30 +396,6 @@ window.onclick = function(event) {
 		closeWizard ();
   }
 }
-</script>
 
-<?php
-function preserveInfo ($type, $version) {
-	// Put some things into form where the main script knows the value and the form doesn't.
-	// We can't do it inline, because there's no good way to pass in the values except as a function call.
-	echo "<script>\n";
-	echo "document.getElementById('type').value = '$type';\n";
-	echo "document.getElementById('version').value = '$version';\n";
-	echo "document.getElementById('search').action = 'search$type.php';\n";
-	echo "document.getElementById('help').action = 'help$type.html';\n";
-  $level = $_GET['level'];
-  $security = "sessionkey={$_GET['sessionkey']}&level=$level&type=$type";
-  if ($GLOBALS['advanced']) {
-     echo "document.getElementById('basic').href = 'index$type.php?simple=on&$security';\n";
-	} else {
-		if ($level > 0) {
-      echo "document.getElementById('advanced').href = 'index$type.php?$security';\n";
-		}
-		echo "document.getElementById('source').style.display = 'none';\n";
-	}
-	if ($type <> 'dev') {
-		echo "document.getElementById('expspan').style.display = 'none';\n";
-	}
-	echo "</script>\n";
-}
-?>
+dropInit ();
+</script>

@@ -19,7 +19,7 @@ if not %2==base set to=%2.
 if %2==base set to=.
 
 Echo on
-for %%i in (form index search cons conssubword consweights corpus parse results phrases utility asksaveresults dosaveresults ) do %command% %%i%from%php %%i%to%php
+for %%i in (form index search cons conssubword consweights corpus parse results phrases utility asksaveresults dosaveresults askaccesssharedlist askdeletelist askdeleteword asklistproperties askrenamelist asksharelist catsuggest doaccesssharedlist dodeletelist dodeleteword dolistproperties dorenamelist dosharelist styles usersuggest wordsuggest ) do %command% %%i%from%php %%i%to%php
 for %%i in (utility wizard  )  do %command% %%i%from%js %%i%to%js
 %command% help%from%html help%to%html
 %command% styles%from%css styles%to%css
@@ -45,11 +45,9 @@ goto done
 
 :archive
 echo on
-set archdir=%DATE:~10,4%-%DATE:~4,2%-%DATE:~7,2%
-mkdir archive\%archdir%
-copy *%1* archive\%archdir%
+set datestamp=%DATE:~10,4%-%DATE:~4,2%-%DATE:~7,2%
 del *%1*
-copy future.html archive\%archdir%
+copy future.html archive\future_%datestamp%
 echo off
 goto done
 
@@ -64,5 +62,5 @@ goto done
 :done
 set from=
 set to=
-set archdir=
+set datestamp=
 if not exist wizard* echo Time to remove wizard

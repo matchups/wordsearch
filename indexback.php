@@ -9,12 +9,14 @@ if (!isset ($_GET['sessionkey'])  ||  !isset ($_GET['level'])) {
 <TITLE>Word Search</TITLE>
 <?php
 $type = "back";
-Echo "<script src='utility$type.js'></script>";
-echo "<script src='wizard$type.js'></script>";
+Echo "<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
+	<script src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'></script>
+	<script src='//netsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>
+	<script src='utility$type.js'></script>
+	<meta name='viewport' content='width=device-width, initial-scale=1'>
+	<link rel='stylesheet' href='styles$type.css'>
+</HEAD>\n";
 ?>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="styles.css">
-</HEAD>
 
 <BODY>
 <?php

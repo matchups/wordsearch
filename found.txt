@@ -22,6 +22,9 @@
 ---------- CONSWEIGHTSDEV.PHP
 
 ---------- CORPUSDEV.PHP
+			comment ("No rows!");
+			comment ("Can't figure allowed: " . $e->getMessage);
+			comment ("matched " . implode ('/', $matches));
 
 ---------- DOACCESSSHAREDLISTDEV.PHP
 
@@ -34,6 +37,7 @@
 ---------- DORENAMELISTDEV.PHP
 
 ---------- DOSAVERESULTSDEV.PHP
+		comment ("Uploaded {$fileInfo["name"]} --> $targetFile");
 
 ---------- DOSHARELISTDEV.PHP
 
@@ -44,16 +48,19 @@
 ---------- HELPMANAGEDEV.HTML
 
 ---------- INDEXDEV.PHP
-preserveInfo ($type, $version);
 
 ---------- PARSEDEV.PHP
 
 ---------- PHRASESDEV.PHP
+  comment ($sql);
+  comment ("Got $m rows for $corpus");
 
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
-preserveInfo ($type, $version);
+		comment ("Got " . $result->rowCount() . " rows");
+		comment ($sql);
+		 		comment ("$prevkey-$key=" . timeDiff ($previous, $value));
 
 ---------- STYLESDEV.CSS
 
@@ -64,5 +71,12 @@ preserveInfo ($type, $version);
 ---------- UTILITYDEV.JS
 
 ---------- UTILITYDEV.PHP
+// Insert a comment into the output page.
+function comment ($text) {
+		// For regular users, don't provide full plaintext comment as a security measure,
+		// but create a digest of the comment so I can tell if I'm on the right track when trying to reproduce an issue.
+	$text = str_replace (array ('<!--', '-->'), array ('<! --', '-- >'), $text); // avoid prematurely closing comments in funny cases
+  comment ($text);
+	if (isset ($_GET['debug'])) {comment ($sql);}
 
 ---------- WORDSUGGESTDEV.PHP

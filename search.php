@@ -19,7 +19,7 @@ if (isset ($_GET['sessionkey'])  &&  isset ($_GET['level'])) { // make sure sess
 			$middle = '';
 			$end = " AND session.user_id = 0";
 		}
-		$sql = "SELECT $start FROM session $middle WHERE session_key = '$session' AND status = 'A' $end";
+		$sql = "SELECT $start, ip_address FROM session $middle WHERE session_key = '$session' AND status = 'A' $end";
 		$result = $conn->query($sql);
 		if ($result->rowCount() > 0) { // make sure it is an active session
 			$row = $result->fetch(PDO::FETCH_ASSOC);
@@ -31,8 +31,10 @@ if (isset ($_GET['sessionkey'])  &&  isset ($_GET['level'])) { // make sure sess
 					$code = '5'; // only pro authorized for dev
 				} else if ($level == 0 && isset($_GET['query2'])) {
 					$code = '6'; // guest can't use additional criteria
-				} else {
+				} else if (explode ('|', $row['ip_address'])[0] == $_SERVER['REMOTE_ADDR']) {
 					$valid = true;
+				} else {
+					$code = '7';
 				}
 			} else {
 				$code = '2'; // URL lies about the user's level
@@ -51,41 +53,35 @@ if (!$valid) {
 		// and provide a general indication of the error type for our use
 	exit();
 }
-?>
-<HTML>
+
+echo "<HTML>
 <HEAD>
-<?php
-Echo "<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>\n";
-Echo "<script src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'></script>\n";
-Echo "<script src='//netsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>\n";
-echo "<script src='utility$type.js'></script>";
-echo "<script src='wizard$type.js'></script>";
-?>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="styles.css">
-<TITLE>
-<?php
+<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
+	<script src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'></script>
+	<script src='//netsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>
+	<script src='utility$type.js'></script>";
+include "cons$type.php";
+include "corpus$type.php";
+
 $pattern = $_GET['pattern'];
 $version = $_GET['version'];
-Echo "$pattern - Word Search $type $version";
-?>
+echo "<meta name='viewport' content='width=device-width, initial-scale=1'>
+<link rel='stylesheet' href='styles.css'>
+<TITLE>
+$pattern - Word Search $type $version
 </TITLE>
-</HEAD>
+</HEAD>\n";
 
-<?php
 $time['top'] = microtime();
 include "results" . $type . ".php";
 include "parse" . $type . ".php";
-include "cons" . $type . ".php";
-include "corpus" . $type . ".php";
-
 // Initialize cache (used in fetchUrl)
 $cache['url'] = '';
 $cache['body'] = '';
 
 try {
 	echo '<BODY onload="reloadQuery();">';
-	Echo "<H2>Word Search $type $version Results: <span class='specs'>$pattern";
+	echo "<H2>Word Search $type $version Results: <span class='specs'>$pattern";
 
 	// Connect briefly in write mode to update the session
 	openConnection (true)->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
@@ -104,7 +100,7 @@ try {
 			if ($rows == 0) {
 				$rows = getWidth ($sql);
 			}
-			if (($level < 2 && $rows > 10000) || $rows > 100000) {
+			if (($level < 2 && $rows > 80000) || $rows > 1000000) {
 				$result = "Your query may take too long to run.  Please add more letters.";
 			}
 		}
@@ -113,10 +109,10 @@ try {
   	$result = $e->getMessage();
 	}
 
-	Echo "</span></H2>";
+	echo "</span></H2>";
 	$time['beforequery'] = microtime();
 	if ($result == '') {
-		$result = $conn->query($sql);
+		$result = SQLQuery ($conn, $sql);
 		comment ("Got " . $result->rowCount() . " rows");
 	}
 	$time['afterquery'] = microtime();
@@ -143,7 +139,7 @@ try {
 	}
 }
 catch(PDOException $e) {
-	errorMessage ("SQL failed: $sql... " . $e->getMessage());
+	errorMessage ("SQL failed: {$GLOBALS['lastSQL']}... " . $e->getMessage());
 } // end main code block
 
 // Some stuff outside try/catch block so the rest of the page won't suffer.
@@ -158,23 +154,17 @@ echo '</BODY>';
 // End of main script
 
 function buildReloadQuery ($consObjects) {
-	Echo "<script>\n";
+	echo "<script>\n";
 	echo "// This script is run on load of the results page to modify the skeleton form to match the\n";
 	echo "// original query.  It is built dynamically as part of the search process.\n";
 	echo "function reloadQuery() {\n";
 	echo "// Dynamically add subthings & populate fields\n";
 	echo 'theForm = document.forms["search"];' . "\n";
 	// If the checkbox is set in the query, set it in the form
-	$fieldlist = 'anyorder single phrase' . $_GET["morecbx"];
+	$fieldlist = 'anyorder single phrase';
 	if ( $_GET['level'] > 0) {
-		$advanced = true;
-		if (isset($_GET['simple'])) {
-			if ($_GET[simple] != 'on') {
-				$advanced = false;
-			}
-		}
-		if ($advanced) {
-			$fieldlist = $fieldlist . ' repeat whole';
+		if ($advanced = (($_GET['simple'] ?? '') != 'on')) {
+			$fieldlist = $fieldlist . ' repeat whole' . $_GET["morecbx"];
 		}
 	}
 
@@ -183,23 +173,25 @@ function buildReloadQuery ($consObjects) {
 	}
 
 	foreach (explode (' ', $fieldlist) as $name) {
-		if ($_GET[$name] == 'on') {
+		if (strpos ($name, '_dc') !== false) {
+			$checked = 'true';
+		} else	if (getCheckbox ($name)) {
 			$checked = 'true';
 		} else {
 			$checked = 'false';
 		}
-		Echo "theForm['$name'].checked = $checked;\n";
+		echo "theForm['$name'].checked = $checked;\n";
 	}
 
 	// For fields where the user can type, copy the values across
 	foreach (explode (' ', 'minlen maxlen pattern') as $name) {
 		$value = $_GET[$name];
-		Echo "theForm['$name'].value = '$value';\n";
+		echo "theForm['$name'].value = '$value';\n";
 	}
 
 	// Initialize these values; addOption will modify them to what they should be.
-	Echo "theForm['count'].value = 1;\n";
-	Echo "optionNumber=1;\n";
+	echo "theForm['count'].value = 1;\n";
+	echo "optionNumber=1;\n";
 	// Loop through additional constraints and set those up
 	$newCount['F']=1; // because we have a '2' offset for some reason
 	foreach ($consObjects as $thisConsObj) {
@@ -218,13 +210,13 @@ function buildReloadQuery ($consObjects) {
 function refineQuery ($sql, &$rows) {
 	if (strpos ($sql, 'PW.bank') !== false) {
 		$result = $GLOBALS['conn']->query("EXPLAIN $sql")->fetch(PDO::FETCH_ASSOC);
-		$key = $result['key']; // key used by SQL for outer loop
-		if (isset ($key)) {
+		if (isset ($result['key'])) {// key used by SQL for outer loop
 			$rows = $result['rows'];
 		} else {
 			$sql = str_replace ('words PW', 'words PW FORCE INDEX (wbankidx)', $sql);
 		}
 	}
+
 	return $sql;
 }
 

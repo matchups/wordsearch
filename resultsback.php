@@ -21,10 +21,11 @@ function showResults ($result, $consObjects, $corpusObjects) {
 		$oneword = $row['word'];
 		$corpus = $row['corpus'];
 		$entry = $row['entry'];
+		$entry_id = $row['entry_id'];
 		$matched = true;
 		// Check any constraints that require client-side work
 		foreach ($consObjects as $thisConsObject) {
-			if (!$thisConsObject->localFilter ($oneword, $entry)) {
+			if (!$thisConsObject->localFilter ($oneword, $entry, $entry_id)) {
 				$matched = false;
 				break;
 			}

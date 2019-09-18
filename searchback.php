@@ -55,6 +55,9 @@ if (!$valid) {
 <HTML>
 <HEAD>
 <?php
+Echo "<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>\n";
+Echo "<script src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'></script>\n";
+Echo "<script src='//netsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>\n";
 echo "<script src='utility$type.js'></script>";
 echo "<script src='wizard$type.js'></script>";
 ?>
@@ -87,29 +90,32 @@ try {
 	// Connect briefly in write mode to update the session
 	openConnection (true)->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
 
-	$sql = parseQuery ($pattern, $consObjects, $corpusObjects);
-  Echo "</span></H2>";
+  try {
+		$sql = parseQuery ($pattern, $consObjects, $corpusObjects);
 
-	// Optimize and run query
-	$rows = 0;
-	$sql = refineQuery ($sql, $rows);
-	$explain = getCheckbox ('explain');
-	$overload = false;
-	if ($explain) {
-		$sql = 'EXPLAIN ' . $sql;
-	} else if ($level < 3) {
-		if ($rows == 0) {
-			$rows = getWidth ($sql);
-		}
-		if (($level < 2 && $rows > 10000) || $rows > 100000) {
-			$overload = true;
+		// Optimize and run query
+		$rows = 0;
+		$sql = refineQuery ($sql, $rows);
+		$explain = getCheckbox ('explain');
+		$result = '';
+		if ($explain) {
+			$sql = 'EXPLAIN ' . $sql;
+		} else if ($level < 3) {
+			if ($rows == 0) {
+				$rows = getWidth ($sql);
+			}
+			if (($level < 2 && $rows > 10000) || $rows > 100000) {
+				$result = "Your query may take too long to run.  Please add more letters.";
+			}
 		}
 	}
+	catch(Exception $e) {
+  	$result = $e->getMessage();
+	}
 
+	Echo "</span></H2>";
 	$time['beforequery'] = microtime();
-	if ($overload) {
-		$result = "Your query may take too long to run.  Please add more letters.";
-	} else {
+	if ($result == '') {
 		$result = $conn->query($sql);
 		comment ("Got " . $result->rowCount() . " rows");
 	}
@@ -147,6 +153,7 @@ echo "<P>";
 include "form$type.php";
 preserveInfo ($type, $version);
 buildReloadQuery ($consObjects);
+
 echo '</BODY>';
 // End of main script
 

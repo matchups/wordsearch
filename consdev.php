@@ -451,7 +451,8 @@ public static function getHint () {
 
 class conscustomsql extends constraint {
 	public function parse() {
-		return $this->parseWhere(' AND ' . $this->spec);
+		comment (' AND ' . str_replace ('pw', 'PW', $this->spec));
+		return $this->parseWhere(' AND ' . str_replace ('pw', 'PW', $this->spec)); // restore case because MySQL treats aliases case-specifically
 	}
 
 	public static function getLabel () {

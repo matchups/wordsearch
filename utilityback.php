@@ -18,6 +18,9 @@ function errorMessage ($text) {
 function openConnection ($write) {
 	if ($write) {
 		$suffix = '_w';
+	} else if (isset ($GLOBALS['conn'])) {
+		// use existing one, if available
+		return $GLOBALS['conn'];
 	} else {
 		$suffix = '';
 	}
