@@ -139,7 +139,7 @@ try {
 
   // Set up automatic continuation
   echo "<P><script>";
-  if (($ttl = ($_GET['ttl'] ?? 20) - 1) > 0) {
+  if (($ttl = ($_GET['ttl'] ?? (10000 / $limit)) - 1) > 0) {
     echo "document.location.href = '$link&ttl=$ttl'";
   } else {
     echo "alert ('TTL has reached zero.  Please press Continue.')";

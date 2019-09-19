@@ -121,7 +121,7 @@ class consweights extends constraint {
 				removeChildren (thisOption, 'twtob rscrabble tscrabble ralpha talpha');
 			}
 		}\n";
-}
+  }
 
 	public static function getLabel () {
 		return 'weight';

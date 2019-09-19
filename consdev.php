@@ -463,6 +463,34 @@ class conscustomsql extends constraint {
 		return "// We'll let you put anything in SQL, at least for now";
 	}
 
+	public static function getButtonCode () {
+		$ret ['add'] = "
+				// If Custom, make subsidiary buttons available
+				if (theForm['rcustij' + thisOption] === undefined) {
+					var here = theForm['rcustomsql' + thisOption].nextSibling.nextSibling; // For some reason, can't access tcustomsql directly
+					var myParent = here.parentNode;
+
+					myParent.insertBefore (newSpan ('tcustob' + thisOption, ' ['), here);
+					myParent.insertBefore (newRadio ('rcustij' + thisOption, 'cutype' + thisOption, '', 'IJ', ''), here);
+					myParent.insertBefore (newSpan ('tcustij' + thisOption, ' join '), here);
+
+					myParent.insertBefore (newRadio ('rcustw' + thisOption, 'cutype' + thisOption, 'C', 'W', ''), here);
+					myParent.insertBefore (newSpan ('tcustw' + thisOption, ' where] '), here);
+				}";
+			$ret ['del'] = "		noCustomSub (thisOption);";
+			return $ret;
+	}
+
+	public static function getMoreCode () {
+	return "
+		// remove subsidiary radio buttons for Custom SQL, if present
+		function noCustomSub (thisOption) {
+			if (document.forms['search']['rcustij' + thisOption] !== undefined) {
+				removeChildren (thisOption, 'tcustob rcustij tcustij rcustw tcustw');
+			}
+		}\n";
+	}
+
 	public static function getHint () {
 		return "Enter a constraint to appear in the WHERE clause, most likely referencing PW.text (the candidate word, letters only,
 			such as INTHEYEAR for <u>In the Year 2525</u> and/or PW.bank (the list of letters, such as AEHINRTY).";
