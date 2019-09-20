@@ -71,6 +71,7 @@ class constraint {
 	}
 
 	public function rebuildForm($realNumber) {
+		echo " /* " . get_class($this) . ".rF($realNumber) */";
 		Echo "addOption();\n";
 		if ($this->not) {
 			Echo "theForm['not$realNumber'].checked = true;\n";
@@ -232,14 +233,6 @@ class consregex extends constraint {
 		} else {
 			return true; // done on the DB side; no filtering here
 		}
-	}
-
-	public function rebuildForm($realNumber) {
-		parent::rebuildForm($realNumber);
-		Echo "radioClicked ($realNumber);\n"; // This will display the Scrabble and alphabetic radio buttons
-		if ($_GET["wttype$this->num"] == 'ALF') {
-			Echo "theForm['ralpha$realNumber'].checked = true;\n";
-		} // else it is Scrabble, which is set by default.
 	}
 
 	public function position() {
@@ -450,9 +443,19 @@ public static function getHint () {
 } // end class conscrypto
 
 class conscustomsql extends constraint {
+	protected $type;
+
+  protected function init () {
+			$this -> type = $_GET["cutype" . $this->num];
+	}
+
 	public function parse() {
-		comment (' AND ' . str_replace ('pw', 'PW', $this->spec));
-		return $this->parseWhere(' AND ' . str_replace ('pw', 'PW', $this->spec)); // restore case because MySQL treats aliases case-specifically
+		$spec = str_replace ('pw', 'PW', $this->spec); // restore case because MySQL treats aliases case-specifically
+		if ($this->type == 'IJ') {
+			return array ('pre' => $spec);
+		} else {
+			return $this->parseWhere(' AND ' . $spec);
+		}
 	}
 
 	public static function getLabel () {
@@ -491,10 +494,26 @@ class conscustomsql extends constraint {
 		}\n";
 	}
 
+	public function rebuildForm($realNumber) {
+		parent::rebuildForm($realNumber);
+		if ($this->type == 'IJ') {
+			Echo "theForm['rcustij$realNumber'].checked = true;\n";
+		} // else it is Where, which is set by default.
+	}
+
 	public static function getHint () {
 		return "Enter a constraint to appear in the WHERE clause, most likely referencing PW.text (the candidate word, letters only,
 			such as INTHEYEAR for <u>In the Year 2525</u> and/or PW.bank (the list of letters, such as AEHINRTY).";
 		}
+
+	public function explain () {
+		// Show just the condition part
+		$spec = $this -> spec;
+		if ($_GET["cutype{$this->num}"] == 'IJ') {
+			$spec = explode (' on ', $this->spec)[1];
+		}
+		return $spec;
+	}
 } // end class customsql
 
 // A couple of big ones get their own source files

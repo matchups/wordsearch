@@ -16,12 +16,19 @@
 ---------- CATSUGGESTDEV.PHP
 
 ---------- CONSDEV.PHP
+		return $prefix . $this->explainSub();
+	protected function explainSub() {
 
 ---------- CONSSUBWORDDEV.PHP
 
 ---------- CONSWEIGHTSDEV.PHP
+	protected function explainSub() {
 
 ---------- CORPUSDEV.PHP
+	function explainSub () {
+	function explainSub () {
+	function explainSub () {
+	function explainSub () {
 
 ---------- DOACCESSSHAREDLISTDEV.PHP
 
@@ -38,7 +45,6 @@
 ---------- DOSHARELISTDEV.PHP
 
 ---------- FORMDEV.PHP
-echo "<input type=hidden name=morecbx value='$checklist' />\n";
 
 ---------- HELPDEV.HTML
 
@@ -47,14 +53,12 @@ echo "<input type=hidden name=morecbx value='$checklist' />\n";
 ---------- INDEXDEV.PHP
 
 ---------- PARSEDEV.PHP
-	preg_match_all ('/c([0-9]+)flag(.)/', $_GET['morecbx'], $matches);
 
 ---------- PHRASESDEV.PHP
 
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
-			$fieldlist = $fieldlist . ' repeat whole' . $_GET["morecbx"];
 
 ---------- STYLESDEV.CSS
 
@@ -63,7 +67,6 @@ echo "<input type=hidden name=morecbx value='$checklist' />\n";
 ---------- USERSUGGESTDEV.PHP
 
 ---------- UTILITYDEV.JS
-	theForm['morecbx'].value.substring (1).split(' ').forEach(function (fieldName) {
 
 ---------- UTILITYDEV.PHP
 

@@ -134,6 +134,13 @@ class consweights extends constraint {
 			}";
 		}
 
+	public function rebuildForm($realNumber) {
+		parent::rebuildForm($realNumber);
+		if ($_GET["wttype{$this->num}"] == 'ALF') {
+			Echo "theForm['ralpha$realNumber'].checked = true;\n";
+		} // else it is Scrabble, which is set by default.
+	}
+
 	public static function getButtonCode () {
 		$ret ['add'] = "
 				// If Weights, make subsidiary buttons available
