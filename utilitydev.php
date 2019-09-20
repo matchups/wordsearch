@@ -161,3 +161,62 @@ function mailUser ($touser, $subject, $msg){
 		throw new Exception ("Unable to send e-mail");
 	}
 }
+
+
+// Some functions used in CSS generation
+function cssInit () {
+	if ($_GET['test']) {
+	  return true;
+	} else {
+	  //Set the content-type header and charset.
+	  header("Content-Type: text/css; charset=utf-8");
+	  return false;
+	}
+}
+
+function getUserFromIP () {
+  $conn = openConnection (false);
+  $ipaddress = $_SERVER['REMOTE_ADDR'];
+  $userid = '0';
+  $sql = "SELECT max(id) AS session_id FROM session WHERE status = 'A' AND concat('|', ip_address, '|') LIKE '%|$ipaddress|%'";
+  $result = $conn ->query($sql);
+  if ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    $sql = "SELECT user_id FROM session WHERE id = {$row['session_id']}";
+    $result = $conn ->query($sql);
+    if ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+      $userid = $row['user_id'];
+    }
+  }
+
+  if ($userid == '0') {
+    throw new Exception ("Unable to get user ID");
+  }
+  return $userid;
+}
+
+function suggestStyleFromCorpus ($prefix, $userid, $shared) {
+  // Get list of corpora, regardless of whether they have categories
+  $sql = "SELECT DISTINCT corpus.id FROM corpus LEFT OUTER JOIN corpus_share ON corpus_share.corpus_id = corpus.id
+    WHERE corpus.owner = $userid";
+	if ($shared) {
+		$sql .= " OR corpus_share.user_id = $userid OR owner IS NULL";
+	}
+  $result = openConnection(false)->query($sql);
+  $ret = '';
+  while($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    $ret .= ".{$prefix}{$row['id']}, ";
+  }
+
+  // Provide lookup CSS
+  return $ret . ".{$prefix}end {
+              border: 2px solid #CCCCCC;
+              border-radius: 8px 8px 8px 8px;
+              font-size: 24px;
+              height: 45px;
+              line-height: 30px;
+              outline: medium none;
+              padding: 8px 12px;
+              width: 400px;
+          }
+  ";
+}

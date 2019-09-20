@@ -19,7 +19,7 @@ if not %2==base set to=%2.
 if %2==base set to=.
 
 Echo on
-for %%i in (form index search cons conssubword consweights corpus parse results phrases utility asksaveresults dosaveresults askaccesssharedlist askdeletelist askdeleteword asklistproperties askrenamelist asksharelist catsuggest doaccesssharedlist dodeletelist dodeleteword dolistproperties dorenamelist dosharelist styles usersuggest wordsuggest ) do %command% %%i%from%php %%i%to%php
+for %%i in (form index search cons conssubword consweights corpus parse results phrases utility asksaveresults dosaveresults askaccesssharedlist askdeletelist askdeleteword asklistproperties askrenamelist asksharelist catsuggest doaccesssharedlist dodeletelist dodeleteword dolistproperties dorenamelist dosharelist catcss styles usersuggest wordsuggest ) do %command% %%i%from%php %%i%to%php
 for %%i in (utility wizard  )  do %command% %%i%from%js %%i%to%js
 %command% help%from%html help%to%html
 %command% styles%from%css styles%to%css

@@ -13,22 +13,17 @@
 
 ---------- ASKSHARELISTDEV.PHP
 
+---------- CATCSSDEV.PHP
+
 ---------- CATSUGGESTDEV.PHP
 
 ---------- CONSDEV.PHP
-		return $prefix . $this->explainSub();
-	protected function explainSub() {
 
 ---------- CONSSUBWORDDEV.PHP
 
 ---------- CONSWEIGHTSDEV.PHP
-	protected function explainSub() {
 
 ---------- CORPUSDEV.PHP
-	function explainSub () {
-	function explainSub () {
-	function explainSub () {
-	function explainSub () {
 
 ---------- DOACCESSSHAREDLISTDEV.PHP
 
@@ -51,18 +46,20 @@
 ---------- HELPMANAGEDEV.HTML
 
 ---------- INDEXDEV.PHP
+<link rel='stylesheet' href='styles$type.php'>
 
 ---------- PARSEDEV.PHP
 
 ---------- PHRASESDEV.PHP
+Echo "<link rel='stylesheet' href='styles$type.css'>
 
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
+<link rel='stylesheet' href='styles$type.css'>
+<link rel='stylesheet' href='styles$type.php'>
 
 ---------- STYLESDEV.CSS
-
----------- STYLESDEV.PHP
 
 ---------- USERSUGGESTDEV.PHP
 
