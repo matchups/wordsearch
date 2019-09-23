@@ -40,31 +40,32 @@
 ---------- DOSHARELISTDEV.PHP
 
 ---------- FORMDEV.PHP
+function resetCorporaMore () {
+echo "} // end resetCorporaMore
 
 ---------- HELPDEV.HTML
 
 ---------- HELPMANAGEDEV.HTML
 
 ---------- INDEXDEV.PHP
-<link rel='stylesheet' href='styles$type.php'>
 
 ---------- PARSEDEV.PHP
 
 ---------- PHRASESDEV.PHP
-Echo "<link rel='stylesheet' href='styles$type.css'>
 
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
-<link rel='stylesheet' href='styles$type.css'>
-<link rel='stylesheet' href='styles$type.php'>
 
 ---------- STYLESDEV.CSS
 
 ---------- USERSUGGESTDEV.PHP
 
 ---------- UTILITYDEV.JS
+	resetCorporaMore(); // generated dynamically
 
 ---------- UTILITYDEV.PHP
+
+---------- WORDCSSDEV.PHP
 
 ---------- WORDSUGGESTDEV.PHP

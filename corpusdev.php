@@ -297,7 +297,7 @@ class corpusWikipedia extends corpus {
 		$code = "
 		notbox = document.getElementById('not{$corpus}_' + thisOption);
 		if (theForm['r{$corpus}_category' + thisOption].checked) {
-			if (theForm['r{$corpus}_contains' + thisOption] === undefined) {
+			if (theForm['rc{$corpus}_contains' + thisOption] === undefined) {
 				var here = theForm['r{$corpus}_size' + thisOption];
 				var myParent = here.parentNode;
 
