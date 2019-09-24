@@ -404,15 +404,6 @@ function expandSpecial ($string) {
 	return str_replace (array ('#', '@', '&'), array ('[aeiou]', '[^aeiou]', '[cdilmvx]'), $string);
 }
 
-function getCheckbox ($id) {
-	if (isset($_GET[$id])) {
-		if ($_GET[$id] == 'on') {
-			return true;
-		}
-	}
-	return false;
-}
-
 // Replace groups and repeat counts with wildcards when we only care about fixed letters
 function groupToWildcard ($pattern) {
 	$debug = 0;

@@ -221,3 +221,12 @@ function suggestStyleFromCorpus ($prefix, $userid, $shared) {
           }
   ";
 }
+
+function getCheckbox ($id) {
+	if (isset($_GET[$id])) {
+		if ($_GET[$id] == 'on') {
+			return true;
+		}
+	}
+	return false;
+}

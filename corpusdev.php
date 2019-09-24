@@ -132,6 +132,9 @@ class corpus {
 	}
 
 	protected function formAddRepeat () {
+		if (getCheckbox ('simple')) {
+			return; // Can't add constraints in simple UI
+		}
 		$corpus = $this->corpus;
 		$key = "count$corpus";
 		$name = $this->name;

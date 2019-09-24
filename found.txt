@@ -18,13 +18,16 @@
 ---------- CATSUGGESTDEV.PHP
 
 ---------- CONSDEV.PHP
-include 'asciitize.php';
 
 ---------- CONSSUBWORDDEV.PHP
 
 ---------- CONSWEIGHTSDEV.PHP
 
 ---------- CORPUSDEV.PHP
+					($ccobject = $this -> buildOne ($_GET["query$key"], $_GET["radio$key"], getCheckbox ("not$key"), $num)) !== null) {
+		if (getCheckbox ('simple')) {
+		$cap = getCheckbox ("c{$corpus}cap");
+		$uncap = getCheckbox ("c{$corpus}uncap");
 
 ---------- DOACCESSSHAREDLISTDEV.PHP
 
@@ -49,12 +52,21 @@ include 'asciitize.php';
 ---------- INDEXDEV.PHP
 
 ---------- PARSEDEV.PHP
+		$consObjects[$num] = new $classname($_GET["query$num"], $num, getCheckbox ("not$num"));
+	if ($anyorder = getCheckbox ('anyorder')) {
+	if ($repeat = getCheckbox ('repeat')) {
+	if (getCheckbox ('whole')) {
+	$single = getCheckbox ("single");
+	$phrase = getCheckbox ("phrase");
+function getCheckbox ($id) {
 
 ---------- PHRASESDEV.PHP
 
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
+		$explain = getCheckbox ('explain');
+		$checked = getCheckbox (explode ('_', $name)[0]) ? 'true' : 'false';
 
 ---------- STYLESDEV.CSS
 
