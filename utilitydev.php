@@ -86,7 +86,8 @@ function securityCheck (&$level, &$userid, &$sessionid) {
 	if (isset ($_GET['sessionkey'])  &&  isset ($_GET['level'])) { // make sure session info is passed to us
 		try {
 			foreach ($_GET as $key => $value) {
-				if (substr($key, 0, 5) == 'query'  &&  ($_GET['radio' . substr($key,5)] ?? '') == "customsql") {
+				$type = $_GET['radio' . substr($key,5)] ?? '';
+				if (substr($key, 0, 5) == 'query'  &&  ($type == "customsql" || $type == 'enum')) {
 					// security risk allowed for read-only connection and privileged user
 				} else if (strpos ($value, "'") !== false  ||  strpos ($value, "\"") !== false) {
 					throw new Exception (8);

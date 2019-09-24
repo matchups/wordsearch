@@ -1,4 +1,5 @@
 <?php
+include 'asciitize.php';
 class constraint {
 	// Base class for additional constraints
 	protected $spec; 		// what the user typed
@@ -99,7 +100,7 @@ class constraint {
 
 	// List of normal (not corpus-linked) constraint classes
   public static function list () {
-		$classes = array ("conspattern", "consregex", "conssubword", "consweights", "conscharmatch", "conscrypto");
+	$classes = array ("conspattern", "consregex", "conssubword", "consweights", "conscharmatch", "conscrypto", "consenum");
 		IF ($_GET['level'] == 3) {
 			array_push ($classes, "conscustomsql");
 		}
@@ -264,7 +265,6 @@ class consregex extends constraint {
 	}
 
 	public static function getValidateConstraintCode () {
-		echo " ((gVCCC))";
 		return "//";
 		/*
 		return "if (/[abc]/.test (thisValue)) {
@@ -516,6 +516,76 @@ class conscustomsql extends constraint {
 	}
 } // end class customsql
 
+class consenum extends constraint {
+  protected $counter;
+	protected $pattern;
+
+	public function parse() {
+		$this -> pattern = preg_replace_callback ('/[0-9]+|./', function ($matches) {
+			$match = $matches[0];
+			switch ($match) {
+				case ' ':
+				case '\'':
+				case '-';
+				return $match;
+
+				case '#':
+				return '[0-9]';
+
+				case '*':
+				return '[a-z]+';
+
+				case '?':
+				return '[^-\' 0-9a-z]';
+
+				default: // had better be some digits
+				return "[a-z]" . '{' . $match . '}';
+			}
+		},
+		$this -> spec);
+		comment ($this->pattern = '/^' . $this->pattern . '$/i');
+	}
+
+	public function setlengths(&$consmin, &$consmax) {
+		$this->counter = 0; // Need to use a class variable so it accessible within the anonymous callback function.
+		$spec = $this->spec;
+		preg_replace_callback ('/[0-9]+/', function ($matches) {
+				$this->counter += $matches[0];
+				return '';
+			},
+				$this->spec);
+		if (strpos ($this->spec, '*') === false  &&  $consmax > $this->counter) {
+			$consmax = $this->counter;
+		}
+		if ($this->counter > $consmin) {
+			$consmin = $this->counter;
+		}
+	}
+
+	public function localFilter($oneword, $entry, $entry_id) {
+		return preg_match ($this->pattern, asciitize ($entry));
+	}
+
+	public static function getLabel () {
+		return 'enumeration';
+	}
+
+	public static function getValidateConstraintCode () {
+		return "if (!/^[-' #*?0-9]+$/i.test (thisValue)) {
+			return 'Invalid character in enumeration ' + thisOption;
+		}";
+	}
+
+	public static function getHint () {
+		return "Enter the desired enumeration for the answer.  A simple example would be <font face=Courier>5 4</font>, to represent a five-letter word
+			followed by a four-letter word.  You can also use
+			<B>#</B> to represent any digit (e.g., <font face=Courier>#### 3 3 4</font> would match <u>1776 and All That</u>),
+			<B>\\'</B> and <B>-</B> (quote and hyphen) to represent themselves (<font face=Courier>6 2 \\'##</font> would match <u>Spirit of \\'76</u>),
+			<B>*</B> to represent a word (sequence of letters) of any length (<font face=Courier>6 * 9</font> would match <u>Ludvig van Beethoven</u> or <u>George Albert Boulenger,</u>
+			or <B>?</B> to represent any punctuation mark other than quote and hyphen.";
+			// A few lines up, first \ is to escape the second \ in the PHP string and the second one is to escape the apostrophe in the single-quoted generated code.
+	}
+}
 // A couple of big ones get their own source files
 $type = $_GET['type'];
 include "consweights$type.php";
