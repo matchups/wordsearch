@@ -24,11 +24,12 @@ Constraint# button and enter f[aeiou]+f and select Regular Expression, you'll
 get all words starting with B and containing two F's separated by one or more vowels.  If you check the
 Not box at the beginning of the line, it will allow only words which do
 not meet the criterion.  For example, if you check the box and use a
-pattern of *E*, it will find only words with no letter E.  (You can also
+regex of e, it will find only words with no letter E.  (You can also
 do this with a regex of ^[a-df-z]*$.)
+Normally, these searches are done against just the letters in the result.  For example, <i>Jos&eacute; M. Rodr&iacute;guez</i> would be considered as <font face=Courier>JOSEMRODRIGUEZ</font>.  If you check the Raw box, the original text would be searched.
 <H4>Pattern</H5>
 You can also intersect with another pattern, using the same syntax as in
-the basic pattern field.
+the basic pattern field.  The Raw checkbox works the same way as described above.
 <H4>Subword</H5>
 You can filter by a subword or secondary word.  Enter a series of
 specifications of the following forms:

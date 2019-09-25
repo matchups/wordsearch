@@ -442,7 +442,7 @@ function noDupes ($pat) {
 // Convert a pattern, as entered by the user, into a regular expression suitable for
 // the selected language (P for PHP or S for SQL).  Can also pass U for an unarchored pattern.
 function patternToRegex ($pat, $lang) {
-	$letterpat = '[a-z]';
+	$letterpat = '.';
 	$regex = str_replace ('?', $letterpat, str_replace ('*', $letterpat . '*', $pat));
 	if (strpos ($lang, 'U') === false) {
 		$regex = '^' . $regex . '$';

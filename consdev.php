@@ -154,10 +154,17 @@ class constraint {
 
 class conspattern extends constraint {
 	// Simple pattern
+	protected $raw;
+
+	protected function init () {
+		$this->raw = getCheckbox ("craw" . $this->num);
+	}
+
 	public function parse() {
 		// Convert to regular expression
 		$spec = patternToRegex (expandSpecial ($this->spec), 'S');
-		return $this->parseWhere ("AND PW.text " . $this->maybeNot() . " RLIKE '$spec' ");
+		$column = ($this->raw ? 'entry.name' : 'PW.text');
+		return $this->parseWhere ("AND $column " . $this->maybeNot() . " RLIKE '$spec' ");
 	}
 
 	public function position() {
@@ -188,6 +195,44 @@ class conspattern extends constraint {
 		return 'pattern';
 	}
 
+	public static function getButtonCode () {
+		$ret ['add'] = "insertRawSub ('rpattern', thisOption);";
+		$ret ['del'] = "noRawSub (thisOption);";
+		return $ret;
+	}
+
+	public function rebuildForm($realNumber) {
+		parent::rebuildForm($realNumber);
+		if ($this->raw) {
+			Echo "theForm['craw$realNumber'].checked = true;\n";
+		} // else it is Where, which is set by default.
+	}
+
+	public static function getMoreCode () {
+	return " // remove subsidiary radio buttons for patterns, if present
+		function noRawSub (thisOption) {
+			var theForm = document.getElementById('search');
+			// Make sure neither controlling radio button is selected.
+			if ((!theForm['rpattern' + thisOption].checked && !theForm['rregex' + thisOption].checked) || deleteMode) {
+				if (theForm['craw' + thisOption] !== undefined) {
+					removeChildren (thisOption, 'rawob craw traw');
+				}
+			}
+		}
+
+		function insertRawSub (field, thisOption) {
+			var theForm = document.getElementById('search');
+			// If pattern, provide a checkbox for Raw search
+			if (theForm['craw' + thisOption] === undefined) {
+				var here = theForm[field + thisOption].nextSibling.nextSibling;
+				var myParent = here.parentNode;
+
+				myParent.insertBefore (newSpan ('rawob' + thisOption, ' ['), here);
+				myParent.insertBefore (newInput ('craw' + thisOption, 'checkbox', ''), here);
+				myParent.insertBefore (newSpan ('traw' + thisOption, ' raw search] '), here);
+			}
+		}";
+	}
 	public static function getValidateConstraintCode () {
 		return "  // Same validation as with the main pattern
 			if (!/^[a-z?*@#&\[\-\]]+$/i.test (thisValue)) {
@@ -206,12 +251,14 @@ class conspattern extends constraint {
 class consregex extends constraint {
 	private $regex;
 	private $local;
+	protected $raw;
 
 	protected function init() {
 		$this->regex = expandSpecial ($this->spec);
 		if (substr ($this->regex, 0, 1) != '/') {
 			$this->regex = '/' . $this->regex . '/';
 		}
+		$this->raw = getCheckbox ("craw" . $this->num);
 	}
 
 	public function parse() {
@@ -220,13 +267,14 @@ class consregex extends constraint {
 			return "";
 		} else {// good, we can do it on the database side
 			$this->local = false;
-			return $this->parseWhere (" AND PW.text " . $this->maybeNot() . " RLIKE '" . substr ($this->regex, 1, strlen ($this->regex) - 2) . "' ");
+			$column = ($this->raw ? 'entry.name' : 'PW.text');
+			return $this->parseWhere (" AND $column " . $this->maybeNot() . " RLIKE '" . substr ($this->regex, 1, strlen ($this->regex) - 2) . "' ");
 		}
 	}
 
 	public function localFilter($oneword, $entry, $entry_id) {
 		if ($this->local) {
-			$matched = preg_match ($this->regex, $oneword);
+			$matched = preg_match ($this->regex, $this->raw ? entry : $oneword);
 			if ($this->not) {
 				$matched = !$matched;
 			}
@@ -262,6 +310,19 @@ class consregex extends constraint {
 
 	public static function getLabel () {
 		return 'regular expression';
+	}
+
+	public static function getButtonCode () {
+		$ret ['add'] = "insertRawSub ('rregex', thisOption);";
+		$ret ['del'] = "noRawSub (thisOption);";
+		return $ret;
+	}
+
+	public function rebuildForm($realNumber) {
+		parent::rebuildForm($realNumber);
+		if ($this->raw) {
+			Echo "theForm['craw$realNumber'].checked = true;\n";
+		} // else it is Where, which is set by default.
 	}
 
 	public static function getValidateConstraintCode () {

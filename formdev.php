@@ -356,9 +356,12 @@ function radioClicked (thisOption) {
 	myParent.insertBefore (newOption, here);
 }
 
+deleteMode = false;
 function removeConsMore (thisOption) {
+  deleteMode = true; // Deletion code may need to know whether this is a hard delete (whole row) or a soft delete (from changing options)
   $delcode
   removeChildren (thisOption, '$fieldlist');
+  deleteMode = false;
 }
 
 function validateConstraint (thisOption) {

@@ -18,16 +18,36 @@
 ---------- CATSUGGESTDEV.PHP
 
 ---------- CONSDEV.PHP
+			Echo "theForm['not$realNumber'].checked = true;\n";
+		Echo "theForm['query$realNumber'].value = '" . addslashes ($this->spec) . "';\n";
+		Echo "theForm['r" . $_GET["radio$this->num"] . "$realNumber'].checked = true;\n";
+			if ((!theForm['rpattern' + thisOption].checked && !theForm['rregex' + thisOption].checked) || deleteMode) {
+			if (theForm['craw' + thisOption] === undefined) {
+				var here = theForm[field + thisOption].nextSibling.nextSibling;
+				if (theForm['rcustij' + thisOption] === undefined) {
+					var here = theForm['rcustomsql' + thisOption].nextSibling.nextSibling; // For some reason, can't access tcustomsql directly
+			Echo "theForm['rcustij$realNumber'].checked = true;\n";
 
 ---------- CONSSUBWORDDEV.PHP
 
 ---------- CONSWEIGHTSDEV.PHP
+			Echo "theForm['ralpha$realNumber'].checked = true;\n";
+				if (theForm['rscrabble' + thisOption] === undefined) {
+					var here = theForm['rcharmatch' + thisOption];
 
 ---------- CORPUSDEV.PHP
-					($ccobject = $this -> buildOne ($_GET["query$key"], $_GET["radio$key"], getCheckbox ("not$key"), $num)) !== null) {
-		if (getCheckbox ('simple')) {
-		$cap = getCheckbox ("c{$corpus}cap");
-		$uncap = getCheckbox ("c{$corpus}uncap");
+			var theForm = document.getElementById('search');
+			var corpusOptionNumber = ++(theForm['$key'].value);
+			var here = theForm['add$corpus'];
+				var theForm = document.forms['search'];
+			echo "theForm['not{$corpusNum}_$realNumber'].checked = true;\n";
+		echo "theForm['query{$corpusNum}_$realNumber'].value = '" . addslashes ($this->spec) . "';\n";
+		echo "theForm['r{$corpusNum}_" . $_GET["radio{$corpusNum}_$this->num"] . "$realNumber'].checked = true;\n";
+		if (theForm['r{$corpus}_category' + thisOption].checked) {
+			if (theForm['rc{$corpus}_contains' + thisOption] === undefined) {
+				var here = theForm['r{$corpus}_size' + thisOption];
+		return "if (!theForm['c{$corpus}cap_dc'].checked && !theForm['c{$corpus}uncap_dc'].checked) {
+		Echo "theForm['rc{$corpus}_$range$realNumber'].checked = true;\n";
 
 ---------- DOACCESSSHAREDLISTDEV.PHP
 
@@ -44,6 +64,20 @@
 ---------- DOSHARELISTDEV.PHP
 
 ---------- FORMDEV.PHP
+  echo "if (theForm['$key'] !== undefined) {
+    for (count = theForm['$key'].value; count > 0; --count) {
+    theForm['$key'].value=0;
+	theForm = document.getElementById('search');\n";
+	var theForm = document.getElementById('search');
+	var here = theForm['count'];
+      echo "theForm['r" . substr ($classname, 4) . "' + optionNumber].checked = true;\n";
+	var theForm = document.forms['search'];
+      echo "if (theForm['r$suffix' + thisOption].checked) {
+    echo "if (theForm['r$suffix' + thisOption].checked) {
+	echo "theForm['wizard' + thisOption].disabled = !wizard;
+	theForm.removeChild(document.getElementById('hint'));
+		var thisItem = theForm['query' + thisOption];
+      echo "if (theForm['r" . substr ($classname, 4) . "' + thisOption].checked) {\n";
 
 ---------- HELPDEV.HTML
 
@@ -52,27 +86,53 @@
 ---------- INDEXDEV.PHP
 
 ---------- PARSEDEV.PHP
-		$consObjects[$num] = new $classname($_GET["query$num"], $num, getCheckbox ("not$num"));
-	if ($anyorder = getCheckbox ('anyorder')) {
-	if ($repeat = getCheckbox ('repeat')) {
-	if (getCheckbox ('whole')) {
-	$single = getCheckbox ("single");
-	$phrase = getCheckbox ("phrase");
-function getCheckbox ($id) {
 
 ---------- PHRASESDEV.PHP
 
 ---------- RESULTSDEV.PHP
 
 ---------- SEARCHDEV.PHP
-		$explain = getCheckbox ('explain');
-		$checked = getCheckbox (explode ('_', $name)[0]) ? 'true' : 'false';
+	echo 'theForm = document.forms["search"];' . "\n";
+		echo "theForm['$name'].checked = $checked;\n";
+		echo "theForm['$name'].value = '$value';\n";
+	echo "theForm['count'].value = 1;\n";
 
 ---------- STYLESDEV.CSS
 
 ---------- USERSUGGESTDEV.PHP
 
 ---------- UTILITYDEV.JS
+	var theForm = document.forms["search"];
+	if (theForm["anyorder"].checked) {
+	theForm["repeat"].disabled = !letterBank;
+		theForm["repeat"].checked = false;
+	document.getElementById("trepeat").style = "color:" + (letterBank ? 'black' : 'gray'); // for some reason, theForm["trepeat"] doesn't work here
+	var here = theForm["count"];
+	var theForm = document.forms["search"];
+	theForm["pattern"].value = "";
+	theForm["anyorder"].checked = false;
+	theForm["repeat"].checked = false;
+	theForm["whole"].checked = false;
+	theForm["single"].checked = true;
+	theForm["phrase"].checked = true;
+	theForm["minlen"].value = "";
+	theForm["maxlen"].value = "";
+	for (thisOption = theForm["count"].value; thisOption > 1; thisOption--) {
+		if (theForm["query" + thisOption] !== undefined) {
+	theForm["count"].value = "1";
+	theForm['morecbx'].value.substring (1).split(' ').forEach(function (fieldName) {
+	var theForm = document.forms["search"];
+	var minlen = theForm["minlen"].value;
+	var maxlen = theForm["maxlen"].value;
+	var single = theForm["single"].checked;
+	var phrase = theForm["phrase"].checked;
+	var pattern = theForm["pattern"].value;
+	if (theForm["anyorder"].checked  &&  /[\[@#&].*[\[@#&]/.test(pattern)) {
+		theForm["maxlen"].focus();
+	for (elnum = 0; elnum < theForm.elements.length; elnum++) {
+		item = theForm.elements[elnum];
+			if (theForm[countField] === undefined) {
+				count = theForm[countField].value;
 
 ---------- UTILITYDEV.PHP
 
