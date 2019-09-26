@@ -257,20 +257,23 @@ function doFour ($pattern, $suffix) {
 			if (preg_match ('/^[a-z]*$/', $substring = substr ($pattern, $first, $length))) {
 				$newScore = 1;
 				foreach (str_split (strtoupper ($substring)) as $char) {
-					$newScore *= (strpos (".ETAOINSRHDLUCMFYWGPBVKXQJZ", $char));
+					$newScore *= (strpos ("..ETAOINSRHDLUCMFYWGPBVKXQJZ", $char));
 				}
-				if (preg_match ('/[^aeious][^aeiohlrs]/i', $substring)) {
+				if (strpos (strtoupper ($substring), 'QU')) {
+					$newscore /= 10; // Don't overvalue this based on high scores of both letters.
+				} else if (preg_match ('/[^aeious][^aeiohlrs]/i', $substring)) {
 					$newScore *= 2;
 				}
 				if ($newScore > $bestScore) {
 					$bestScore = $newScore;
 					if ($length == 4) {
 						$verb = '=';
+						$target = "'$substring'";
 					} else {
-						$verb = 'LIKE';
-						$substring = $substring . '_';
+						$verb = 'BETWEEN';
+						$target = "'$substring' AND '$substring~'";
 					}
-					$ret = "INNER JOIN word_four WF$suffix ON WF$suffix.word_id = word_entry.word_id AND WF$suffix.quartet $verb '$substring'";
+					$ret = "INNER JOIN word_four WF$suffix ON WF$suffix.word_id = word_entry.word_id AND WF$suffix.quartet $verb $target";
 				}
 			}
 		}
