@@ -14,10 +14,7 @@ if ($code = securityCheck ($level, $userid, $sessionid)) {
 <HEAD>
 <TITLE>Word Search</TITLE>
 <?php
-Echo "<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
-	<script src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'></script>
-	<script src='//xnetsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>
-	<script src='utility$type.js'></script>\n";
+echo scriptRefs (true, $type);
 include "cons$type.php";
 include "corpus$type.php";
 

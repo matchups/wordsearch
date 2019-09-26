@@ -230,3 +230,16 @@ function getCheckbox ($id) {
 	}
 	return false;
 }
+
+function scriptRefs ($typeahead, $utility) {
+	return ($typeahead ? "<script src='https://code.jquery.com/jquery-2.1.4.min.js'
+	integrity='sha384-R4/ztc4ZlRqWjqIuvf6RX5yb/v90qNGx6fS48N0tRxiGkqveZETq72KgDVJCp2TC'
+	crossorigin='anonymous'></script>
+<script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'
+	integrity='sha384-pPttEvTHTuUJ9L2kCoMnNqCRcaMPMVMsWVO+RLaaaYDmfSP5//dP6eKRusbPcqhZ'
+	crossorigin='anonymous'></script>
+<script src='typeahead.js'></script>\n" : '') .
+($utility ? "<script src='utility$utility.js'></script>\n" : '');
+}
+
+?>

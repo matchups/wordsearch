@@ -18,16 +18,10 @@
 ---------- CATSUGGESTDEV.PHP
 
 ---------- CONSDEV.PHP
-	public function fourPattern () {
-	public function fourPattern () {
-	public function fourPattern () {
-			followed by a four-letter word.  You can also use
 
 ---------- CONSSUBWORDDEV.PHP
 
 ---------- CONSWEIGHTSDEV.PHP
-		return "		wizInsert (newSpan ('wtweightleft', 'Weight multipliers of letters at beginning of word (e.g., 1133 for third and fourth to be multiplied by three): '));
-			used for the corresponding letters--x3 for the first letter and x2 for the fourth letter.  These digits can be followed by
 
 ---------- CORPUSDEV.PHP
 
@@ -48,19 +42,12 @@
 ---------- FORMDEV.PHP
 
 ---------- HELPDEV.HTML
-used for the corresponding letters--x3 for the first letter and x2 for the fourth letter.  These digits can be followed by
-followed by a four-letter word.  You can also use
 
 ---------- HELPMANAGEDEV.HTML
 
 ---------- INDEXDEV.PHP
 
 ---------- PARSEDEV.PHP
-		$fourjoin = doFour ($pattern, '');
-		$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
-		$fourjoin = doFour ($thisConsObject->fourPattern(), ++$counter);
-		$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
-			return "INNER JOIN word_four WF$suffix ON WF$suffix.word_id = word_entry.word_id AND WF$suffix.quartet $verb '$substring'";
 
 ---------- PHRASESDEV.PHP
 
@@ -75,6 +62,7 @@ followed by a four-letter word.  You can also use
 ---------- UTILITYDEV.JS
 
 ---------- UTILITYDEV.PHP
+	return ($typeahead ? "<script src='https://code.jquery.com/jquery-2.1.4.min.js'
 
 ---------- WORDCSSDEV.PHP
 
