@@ -1,23 +1,38 @@
 
 ---------- ASKACCESSSHAREDLISTDEV.PHP
+	echo "<form name='share' method='get' onsubmit='return validateForm()' action='doaccesssharedlist$type.php'><BR>
+function validateForm () {
 
 ---------- ASKDELETELISTDEV.PHP
+	echo "<form name='delete' method='get' onsubmit='return validateForm()' action='dodeletelist$type.php'><BR>
+function validateForm () {
 
 ---------- ASKDELETEWORDDEV.PHP
+	echo "<form name='delete' method='get' onsubmit='return validateForm()' action='dodeleteword$type.php'><BR>
+function validateForm () {
 
 ---------- ASKLISTPROPERTIESDEV.PHP
+	echo "<form name='lookup' method='get' onsubmit='return validateForm()' action='dolistproperties$type.php'><BR>
+function validateForm () {
 
 ---------- ASKRENAMELISTDEV.PHP
+	echo "<form name='delete' method='get' onsubmit='return validateForm()' action='dorenamelist$type.php'><BR>
+function validateForm () {
+
+---------- ASKSAVEQUERYDEV.PHP
 
 ---------- ASKSAVERESULTSDEV.PHP
 
 ---------- ASKSHARELISTDEV.PHP
+	echo "<form name='share' method='get' onsubmit='return validateForm()' action='dosharelist$type.php'><BR>
+function validateForm () {
 
 ---------- CATCSSDEV.PHP
 
 ---------- CATSUGGESTDEV.PHP
 
 ---------- CONSDEV.PHP
+		// Code to validate specifications for constraint.  Can access thisSpec
 
 ---------- CONSSUBWORDDEV.PHP
 
@@ -35,11 +50,18 @@
 
 ---------- DORENAMELISTDEV.PHP
 
+---------- DOSAVEQUERYDEV.PHP
+
 ---------- DOSAVERESULTSDEV.PHP
 
 ---------- DOSHARELISTDEV.PHP
 
 ---------- FORMDEV.PHP
+Echo "<form name='search' id='search' action='search$type.php' onsubmit='return validateForm()' method='get'>\n";
+function validateConstraint (thisOption) {
+  echo "} // end validateConstraint
+  function validateCorpus (thisCorpus) {\n";
+  echo "} // end validateCorpus\n";
 
 ---------- HELPDEV.HTML
 
@@ -60,9 +82,12 @@
 ---------- USERSUGGESTDEV.PHP
 
 ---------- UTILITYDEV.JS
+function validateForm() {
+	// Loop through additional constraints and validate them in a way suitable for the chosen type
+		if (ret = validateConstraint (thisOption)) {
+				var ret = validateCorpus (corpus);
 
 ---------- UTILITYDEV.PHP
-	return ($typeahead ? "<script src='https://code.jquery.com/jquery-2.1.4.min.js'
 
 ---------- WORDCSSDEV.PHP
 

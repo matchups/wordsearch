@@ -26,7 +26,7 @@ echo "<meta name='viewport' content='width=device-width, initial-scale=1'>
 
 <BODY>\n";
 
-$version = "0.75";
+$version = "0.76";
 echo "<H2>Word Search <span class='specs'>$version</span></H2>";
 $level = $_GET['level'];
 include "form$type.php";

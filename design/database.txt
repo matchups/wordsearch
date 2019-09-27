@@ -32,12 +32,14 @@ category
    id, title, corpus_id
 catparent
    id, cat_id, parentcat
+query
+   id, owner, name, parms
+query_share
+   id, query_id, user_id
 
 question
    id, query
 user_question
    id, user_id, question_id, answer_SHA
-query
-   id, user_id, name, parms
 
 SELECT DISTINCT TABLE_NAME, INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS

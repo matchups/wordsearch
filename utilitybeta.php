@@ -86,7 +86,8 @@ function securityCheck (&$level, &$userid, &$sessionid) {
 	if (isset ($_GET['sessionkey'])  &&  isset ($_GET['level'])) { // make sure session info is passed to us
 		try {
 			foreach ($_GET as $key => $value) {
-				if (substr($key, 0, 5) == 'query'  &&  ($_GET['radio' . substr($key,5)] ?? '') == "customsql") {
+				$type = $_GET['radio' . substr($key,5)] ?? '';
+				if (substr($key, 0, 5) == 'query'  &&  ($type == "customsql" || $type == 'enum')) {
 					// security risk allowed for read-only connection and privileged user
 				} else if (strpos ($value, "'") !== false  ||  strpos ($value, "\"") !== false) {
 					throw new Exception (8);
@@ -161,3 +162,84 @@ function mailUser ($touser, $subject, $msg){
 		throw new Exception ("Unable to send e-mail");
 	}
 }
+
+
+// Some functions used in CSS generation
+function cssInit () {
+	if ($_GET['test']) {
+	  return true;
+	} else {
+	  //Set the content-type header and charset.
+	  header("Content-Type: text/css; charset=utf-8");
+	  return false;
+	}
+}
+
+function getUserFromIP () {
+  $conn = openConnection (false);
+  $ipaddress = $_SERVER['REMOTE_ADDR'];
+  $userid = '0';
+  $sql = "SELECT max(id) AS session_id FROM session WHERE status = 'A' AND concat('|', ip_address, '|') LIKE '%|$ipaddress|%'";
+  $result = $conn ->query($sql);
+  if ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    $sql = "SELECT user_id FROM session WHERE id = {$row['session_id']}";
+    $result = $conn ->query($sql);
+    if ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+      $userid = $row['user_id'];
+    }
+  }
+
+  if ($userid == '0') {
+    throw new Exception ("Unable to get user ID");
+  }
+  return $userid;
+}
+
+function suggestStyleFromCorpus ($prefix, $userid, $shared) {
+  // Get list of corpora, regardless of whether they have categories
+  $sql = "SELECT DISTINCT corpus.id FROM corpus LEFT OUTER JOIN corpus_share ON corpus_share.corpus_id = corpus.id
+    WHERE corpus.owner = $userid";
+	if ($shared) {
+		$sql .= " OR corpus_share.user_id = $userid OR owner IS NULL";
+	}
+  $result = openConnection(false)->query($sql);
+  $ret = '';
+  while($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    $ret .= ".{$prefix}{$row['id']}, ";
+  }
+
+  // Provide lookup CSS
+  return $ret . ".{$prefix}end {
+              border: 2px solid #CCCCCC;
+              border-radius: 8px 8px 8px 8px;
+              font-size: 24px;
+              height: 45px;
+              line-height: 30px;
+              outline: medium none;
+              padding: 8px 12px;
+              width: 400px;
+          }
+  ";
+}
+
+function getCheckbox ($id) {
+	if (isset($_GET[$id])) {
+		if ($_GET[$id] == 'on') {
+			return true;
+		}
+	}
+	return false;
+}
+
+function scriptRefs ($typeahead, $utility) {
+	return ($typeahead ? "<script src='https://code.jquery.com/jquery-2.1.4.min.js'
+	integrity='sha384-R4/ztc4ZlRqWjqIuvf6RX5yb/v90qNGx6fS48N0tRxiGkqveZETq72KgDVJCp2TC'
+	crossorigin='anonymous'></script>
+<script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'
+	integrity='sha384-pPttEvTHTuUJ9L2kCoMnNqCRcaMPMVMsWVO+RLaaaYDmfSP5//dP6eKRusbPcqhZ'
+	crossorigin='anonymous'></script>
+<script src='typeahead.js'></script>\n" : '') .
+($utility ? "<script src='utility$utility.js'></script>\n" : '');
+}
+
+?>

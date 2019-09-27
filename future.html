@@ -11,27 +11,8 @@
   <UL>
   <LI>0.72 Content search (text & categories) (done)
   <LI>0.73 Miscellaneous internal (done)
-  <LI>0.74 Wiktionary <B>all done</B>
-    <OL type=a>
-    <LI>Loader
-      <UL>
-      <LI>Create loader
-      <LI>Load categories
-      <LI>Flag foreign-only words
-      <LI>Combine with wikipedia to one PHP
-      <LI>Don't flag redirects as foreign [and update existing ones]
-      </UL>
-    <LI>Add to corpus table and flag table 
-    <LI><strike>Enable searches, with foreign checkbox </strike> (not needed)
-    <LI><strike>Link to results</strike> (not needed)
-    <LI>Remove Gettysburg & Featured 
-    <LI><strike>Filter by content (text & regex)</strike> (not needed)
-    <LI>Filter by category (update autosuggest to pass in corpus) 
-    <LI><strike>Filter by language</strike> (use category)
-    <LI><strike>Handle hits in both word lists</strike> (not needed)
-    <LI>Capitalized and not
-    </OL>
-  <LI>0.75 User-specific word lists (b>(all done)</b>
+  <LI>0.74 Wiktionary (done)
+  <LI>0.75 User-specific word lists <b>(all done)</b>
     <OL type=a>
     <LI>Save result as list
     <LI>Move addmain to main folder
@@ -42,24 +23,6 @@
     <LI>Access saved
     <LI>Menu
     <LI>Manage
-	<UL>
-	<LI>Delete
-	<LI>Rename
-	<LI>No left margin needed on subsidiary pages
-	<LI>Properties: URL
-	<LI>Properties: parent word list 
-	<LI>Share
-	<LI>Delete words
-	<LI><A HREF="https://www.w3schools.com/php/func_mail_mail.asp">E-mail sent</A> on share and on deletion of shareds 
-	<LI>Fix category lookup UI
-	<LI>Access shared
-	<LI>Fix issues with user lists 'like' Wiki* (categories, flags)
-	<LI><strike>Defaults</strike>
-	<LI>Collapsing 'Lists' hides Queries & Navigation
-	<LI>Carets in menu
-	<LI>Sanitize inputs
-	<LI>Search page shows checks on both C and U, even if not both used
-	</UL>
     <LI>List management help
     <LI>Review query help: update for categories & Wiktionary; remove Not Working
     <LI>Limit to 5 for premium to 50K entries (2M characters), 20 for professional to 200K entries (20M characters); message about general interest
@@ -67,39 +30,39 @@
     <LI>Query may take too long (*yearwar at level 2)
     <LI>Retire preserveinfo
     </OL>
-  <LI>0.76 Other search capabilities <b>In progress</b>
+  <LI>0.76 Other search capabilities <b>(all done)</b>
     <OL type=a>
-    <LI>Custom SQL with PW. (converted to lowercase) (done)
-    <LI>Custom SQL: IJ or WHERE (done)
-    <LI>Improve word lookup GUI (done)
-    <LI>Fix remove corpus constraint button fail (done)
-    <LI>Enumeration (digit # ' - sp * ?) with help (done)
-    <LI>Hide corpus MORE in simple UI (done)
-    <LI>Raw pattern/regex with help (done)
-    <LI>Use best 4-pattern and use BETWEEN on xxx_ things (done)
+    <LI>Custom SQL with PW. (converted to lowercase)
+    <LI>Custom SQL: IJ or WHERE
+    <LI>Improve word lookup GUI
+    <LI>Fix remove corpus constraint button fail
+    <LI>Enumeration (digit # ' - sp * ?) with help
+    <LI>Hide corpus MORE in simple UI
+    <LI>Raw pattern/regex with help
+    <LI>Use best 4-pattern and use BETWEEN on xxx_ things
     <LI><strike>Debug typeahead</strike>
-    <LI>Number of incoming links (done)
-    <LI><font color=blue>Implement subresource integrity and local copies of libraries</font> (in progress)
+    <LI>Number of incoming links
+    <LI>Implement subresource integrity and local copies of libraries
+    <LI>Release
 <!--
-//code.jquery.com/jquery-2.1.4.min.js
-//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'
--->
-    <LI><font color=blue>Release</font>
-<!--
-Look for 'dev' references in beta after vup
-Future+1: vup new stuff to beta; remove 'dev' from include utility in base
-Future+2: Remove 'dev' from include utility in dev
+* Tell everyone (just Eric Chaikin & Andy Latto unless .#0)
 -->
     </OL>
   </UL>
 <LI>0.8 Saving queries--see user types document for limits and features
   <UL>
-  <LI>0.81 Save query
+  <LI>0.81 Save query (done)
   <LI>0.82 Recall query
   <LI>0.83 Delete query
   <LI>0.84 Share query
   <LI>0.85 Access shared query
-  <LI>0.86 rename query
+  <LI>0.86 Rename query
+  <LI><font color=blue>Release</font>
+<!--
+Look for 'dev' references in beta after vup
+vup new stuff to beta; remove 'dev' from include utility in base
+Future+1: Remove 'dev' from include utility in dev
+-->
   </UL>
 <LI>0.9 Output options
   <UL>
@@ -121,11 +84,11 @@ Future+2: Remove 'dev' from include utility in dev
     </UL>
   <LI>0.93 Display letters only
   <LI>0.94 Number of answers per page
-  <LI>0.95 Answers in anagram, bank, length, subword, weight, popularity [# incoming links] order
-  <LI>0.96 Force upper/lower case
-  <LI>0.97 Choice of fonts
-  <LI>0.98 Multiple hits per line
-  <LI>0.99 Show subwords, weights, etc.
+  <LI>0.95 Show subwords, weights, etc.
+  <LI>0.96 Answers in anagram, bank, length, subword, weight, popularity [# incoming links] order
+  <LI>0.97 Force upper/lower case
+  <LI>0.98 Choice of fonts
+  <LI>0.99 Multiple hits per line
   <LI>0.9A Use italics, bold, color to differentiate corpuses and flags
   </UL>
 <LI>1.0 Public release
@@ -206,7 +169,7 @@ Future+2: Remove 'dev' from include utility in dev
 <!-- Release process
 * Test
 * Increment version number
-* vup
+* vup; compare beta to dev
 * Copy everything to network (with hide)
 * Retest
 * git push

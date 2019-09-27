@@ -271,7 +271,13 @@ class consregex extends constraint {
 	}
 
 	public static function getValidateConstraintCode () {
-		return "// We'll let you put *anything* in a regular expression";
+		echo " ((gVCCC))";
+		return "//";
+		/*
+		return "if (/[abc]/.test (thisValue)) {
+				return 'Quotation marks are not allowed in regular expressions.';
+			}";
+			*/
 	}
 
 	public static function getHint () {
@@ -445,7 +451,7 @@ public static function getHint () {
 
 class conscustomsql extends constraint {
 	public function parse() {
-		return " AND $this->spec ";
+		return $this->parseWhere(' AND ' . $this->spec);
 	}
 
 	public static function getLabel () {

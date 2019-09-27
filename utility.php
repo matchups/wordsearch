@@ -65,6 +65,7 @@ function fetchUrl($url) {
 // Do a SQL query and remember the code so we can display it with error messages
 function SQLQuery ($conn, $sql) {
 	$GLOBALS['lastSQL'] = $sql;
+	if (isset ($_GET['debug'])) {comment ($sql);}
 	return $conn->query($sql);
 }
 
@@ -76,4 +77,87 @@ function echoUnique ($text) {
 		$GLOBALS['cache'][$hash] = true;
 	}
 }
-?>
+
+// Check for a valid session before creating *any* output
+// Returns an error code or nil on success
+function securityCheck (&$level, &$userid, &$sessionid) {
+	$type = $_GET['type'];
+	$code = '1';
+	if (isset ($_GET['sessionkey'])  &&  isset ($_GET['level'])) { // make sure session info is passed to us
+		try {
+			foreach ($_GET as $key => $value) {
+				if (substr($key, 0, 5) == 'query'  &&  ($_GET['radio' . substr($key,5)] ?? '') == "customsql") {
+					// security risk allowed for read-only connection and privileged user
+				} else if (strpos ($value, "'") !== false  ||  strpos ($value, "\"") !== false) {
+					throw new Exception (8);
+				}
+			}
+			$session = $_GET['sessionkey'];
+			$conn = openConnection (false);
+			$getLevel = $_GET ['level'];
+			if ($getLevel > 0) {
+				$start = "user.level";
+				$middle = "INNER JOIN user ON user.id = session.user_id";
+				$end = '';
+			} else {
+				$start = '0 AS level';
+				$middle = '';
+				$end = " AND session.user_id = 0";
+			}
+			$sql = "SELECT $start, ip_address, session.id, user_id FROM session $middle WHERE session_key = '$session' AND status = 'A' $end";
+			$result = $conn->query($sql);
+			if ($result->rowCount() > 0) { // make sure it is an active session
+				$row = $result->fetch(PDO::FETCH_ASSOC);
+				$level = $row['level'];
+				$userid = $row['user_id'];
+				$sessionid = $row['id'];
+				if ($level == $getLevel) {
+					if ($level < 2 && $type > '') {
+						$code = '4'; // basic not authorized for anything other than base
+					} else if ($level < 3 && $type == 'dev') {
+						$code = '5'; // only pro authorized for dev
+					} else if ($level == 0 && isset($_GET['query2'])) {
+						$code = '6'; // guest can't use additional criteria
+					} else if (explode ('|', $row['ip_address'])[0] == $_SERVER['REMOTE_ADDR']) {
+						$code = '';
+					} else {
+						$code = '7';
+					}
+				} else {
+					$code = '2'; // URL lies about the user's level
+				}
+			} else {
+				$code = '3';
+			}
+		}
+		catch(PDOException $e) {
+			$code = $e->getCode ();
+		}
+		catch(Exception $e) {
+			$code = $e->getMessage ();
+		}
+	}
+	if (!$code) {
+		openConnection (true)->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
+	}
+	return $code; // highest defined value is 8
+}
+
+function timeDiff ($begin, $end) {
+	$beginArray = explode (' ', $begin);
+	$endArray = explode (' ', $end);
+	return intval ((($endArray[1] - $beginArray[1]) + ($endArray[0] - $beginArray[0])) * 1000 + 0.5);
+}
+
+function mailUser ($touser, $subject, $msg){
+	$result = openConnection(false)->query("SELECT email FROM user WHERE id=$touser");
+	if ($result->rowCount() > 0) {
+		$toemail = $result->fetch(PDO::FETCH_ASSOC)['email'];
+	} else {
+		throw new Exception ("Unable to find user $touser");
+	}
+
+	if (!mail ($toemail, $subject, $msg, "from:info@alfwords.com")) {
+		throw new Exception ("Unable to send e-mail");
+	}
+}

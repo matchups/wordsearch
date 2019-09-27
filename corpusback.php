@@ -1,6 +1,6 @@
 <?php
 class corpus {
-	public $corpus; // needs to be accessed from corpusConstraint, which is logically an inner class
+	protected $corpus;
 	protected $urlpattern;
 	protected $name;
   protected $flags;
@@ -10,12 +10,12 @@ class corpus {
 		$conn = openConnection (false);
 
 		// get name, URL
-		$row = $conn->query("SELECT name, url FROM corpus WHERE id = $corpus")->fetch(PDO::FETCH_ASSOC);
+		$row = SQLQuery ($conn, "SELECT name, url FROM corpus WHERE id = $corpus")->fetch(PDO::FETCH_ASSOC);
 		$this->urlpattern = $row['url'];
 		$this->name = $row['name'];
 
 		// get flags
-		$result = $conn->query("SELECT letter, description FROM corpus_flag WHERE corpus_id = $corpus");
+		$result = SQLQuery ($conn, "SELECT letter, description FROM corpus_flag WHERE corpus_id = $corpus");
 		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 			$this->flags [$row['letter']]=$row['description'];
 		}
@@ -27,6 +27,8 @@ class corpus {
 			$name = "WikiFeatured";
 		} else if ($corpus == 2) {
 			$name = "Wikipedia";
+		} else if ($corpus == 3) {
+			$name = "Wiktionary";
 		} else if ($corpus == 87) {
 			$name = "Dev";
 		} else if ($corpus > 87) {
@@ -70,20 +72,22 @@ class corpus {
 			echo "   &nbsp; &nbsp; <label>$flagname okay? <input name=$xname id=$xname type=checkbox /></label>\n";
 			$checklist = $checklist . ' ' . $xname;
 		}
-		echo "<br>";
-		return $checklist;
+		return $checklist . $this -> formExtra();
+	}
+
+  protected function formExtra () {
+		return '';
 	}
 
 	public function builder (&$consObjects) {
 		// Allows corpus to set up filtering, either via SQL or client processing
 		// Base implementation calls a function on the corpus object for each row
-		if (isset ($_GET["count$this->corpus"])) {
-			$count = $_GET["count$this->corpus"];
-			for ($num = 1; $num <= $count; $num++) {
-				$key = "{$this->corpus}_$num";
-				if (($ccobject = $this -> buildOne ($_GET["query$key"], $_GET["radio$key"], getCheckbox ("not$key"), $num)) !== null) {
-					$consObjects [$key] = $ccobject;
-				}
+		$count = $_GET["count$this->corpus"] ?? 0;
+		for ($num = 1; $num <= $count; $num++) {
+			$key = "{$this->corpus}_$num";
+			if (isset ($_GET["query$key"])  &&
+					($ccobject = $this -> buildOne ($_GET["query$key"], $_GET["radio$key"], getCheckbox ("not$key"), $num)) !== null) {
+				$consObjects [$key] = $ccobject;
 			}
 		}
 	}
@@ -105,70 +109,38 @@ class corpus {
 			var here = theForm['add$corpus'];
 			var myParent = here.parentNode;
 
-			// Label for constraint
-			var newOption = document.createElement('span');
-			newOption.id = 'label{$corpus}_' + corpusOptionNumber;
-			newOption.innerHTML = '&nbsp;&nbsp;$name#' + corpusOptionNumber + ': (not)';
-			myParent.insertBefore (newOption, here);
-
-			// Checkbox for NOT
-			newOption = document.createElement('input');
-			newOption.name = 'not{$corpus}_' + corpusOptionNumber;
-			newOption.type = 'checkbox';
-			newOption.id = 'not{$corpus}_' + corpusOptionNumber;
-			myParent.insertBefore (newOption, here);
-
-			newOption = document.createElement('input');
-			newOption.name = 'query{$corpus}_' + corpusOptionNumber;
-			newOption.type = 'text';
-			newOption.required = true;
-			newOption.id = 'query{$corpus}_' + corpusOptionNumber;
-			myParent.insertBefore (newOption, here);\n";
+			myParent.insertBefore (newSpan ('label{$corpus}_' + corpusOptionNumber, '&nbsp;&nbsp;$name#' + corpusOptionNumber + ': (not)'), here);
+			myParent.insertBefore (newInput ('not{$corpus}_' + corpusOptionNumber, 'checkbox', ''), here);
+			myParent.insertBefore (newInput ('query{$corpus}_' + corpusOptionNumber, 'text', 'R'), here);\n";
 
     $clickedCode = $this -> clickedCode ();
 
 		$first = true;
 		foreach ($this->optionButtonList() as $id => $description) {
-			echo "var newOption = document.createElement('input');\n";
+			echo "var newOption = newRadio ('r{$corpus}_$id' + corpusOptionNumber, 'radio{$corpus}_' + corpusOptionNumber, '', '$id', '');\n";
 			if (($lead = substr ($description, 0, 1)) == '!') {
 				echo "newOption.disabled = true;\n";
 				$description = substr ($description, 1);
 			}
-			echo "newOption.type = 'radio';\n";
-			echo "newOption.name = 'radio{$corpus}_' + corpusOptionNumber;\n";
-			echo "newOption.value = '$id';\n";
-			echo "newOption.id = 'r{$corpus}_$id' + corpusOptionNumber;\n";
 			if ($clickedCode) {
 				echo "newOption.setAttribute('onclick','radioClicked$corpus(' + corpusOptionNumber + ')')\n";
 			}
-
 			if ($first) {
 				echo "newOption.checked = true;\n";
 				$first = false;
 			}
 			echo "myParent.insertBefore (newOption, here);\n";
 
-			echo "newOption = document.createElement('span');\n";
+			echo "newOption = newSpan ('t{$corpus}_$id' + corpusOptionNumber, ' $description ');\n";
 			if ($lead == '!') {
 				echo "newOption.class = 'disabled';\n";
 			}
-			echo "newOption.id = 't{$corpus}_$id' + corpusOptionNumber;\n";
-			echo "newOption.innerHTML = ' $description ';\n";
 			echo "myParent.insertBefore (newOption, here);\n";
 		}
 
-		Echo "// Button to remove constraint
-			newOption = document.createElement ('button');
-			newOption.type = 'button';
-			newOption.id = 'delcons{$corpus}_' + corpusOptionNumber;
-			newOption.innerHTML = 'Remove';
-			newOption.setAttribute('onclick','removeConstraint$corpus(' + corpusOptionNumber + ')');
-			myParent.insertBefore (newOption, here);
-
-			newOption = document.createElement ('br');
-			newOption.id = 'br{$corpus}_' + corpusOptionNumber;
-			myParent.insertBefore (newOption, here);
-
+		// Button to remove constraint
+		Echo "		myParent.insertBefore (newButton ('delcons{$corpus}_' + corpusOptionNumber, 'Remove', 'removeConstraint$corpus(' + corpusOptionNumber + ')'), here);
+			myParent.insertBefore (newBreak ('br{$corpus}_' + corpusOptionNumber), here);
 			} // End addOption$corpus\n";
 
     if ($clickedCode) {
@@ -187,34 +159,32 @@ class corpus {
 		foreach ($this->optionButtonList() as $id => $description) {
 			$fieldlist = $fieldlist . " r{$corpus}_$id t{$corpus}_$id";
 		}
-		echo "removeChildrenCorpus (corpusOptionNumber, '$fieldlist');\n";
-		echo "if (corpusOptionNumber == theForm['$key'].value) {\n";
-		echo "  document.forms['search']['$key'].value--;\n";
-		echo "}\n";
+		echo "removeChildrenCorpus (corpusOptionNumber, '$fieldlist');
+			if (corpusOptionNumber == document.forms['search']['$key'].value) {
+			  document.forms['search']['$key'].value--;
+			}\n";
 		if ($clickedCode) {
 			echo "noSub$corpus (corpusOptionNumber);\n";
 		}
-		echo "} // end removeConstraint$corpus\n";
-
-		echo "</script>\n";
-		echo "<input type=hidden id='$key' name='$key' value='0' />";
+		echo "} // end removeConstraint$corpus
+		</script>
+		<input type=hidden id='$key' name='$key' value='0' />\n";
 	}
 
-	protected function optionButtonList () {
+	function optionButtonList () {
 		return array ();
 	}
 
 	public function requireWhole () {
 		// Do we need to restrict to whole entries because we need to look at the linked pages?
-		if (isset ($_GET["count$this->corpus"])) {
-			if ($_GET["count$this->corpus"] > 0) {
-				return true; // By default, if there are any special considerations, the answer is yes
-			}
-		}
-		return false;
+		return ($_GET["count$this->corpus"] ?? 0) > 0;
 	}
 
 	function clickedCode () {
+		return '';
+	}
+
+	public function getValidateCorpusCode () {
 		return '';
 	}
 } // end base corpus class
@@ -233,7 +203,7 @@ class corpusConstraint extends constraint {
 
 	function rebuildForm($realNumber) {
 		$corpusNum = $this->corpusObject->getCorpusNum();
-		echo "addOption$corpusNum(); // 927\n";
+		echo "addOption$corpusNum();";
 		if ($this->not) {
 			echo "theForm['not{$corpusNum}_$realNumber'].checked = true;\n";
 		}
@@ -256,11 +226,10 @@ class corpusWikipedia extends corpus {
 		return true;
 	}
 
-	function form () {
-		$checklist = parent::form();
+	function formExtra () {
 		$this->formAddRepeat ();
-		$this->formCatLookup();
-		return $checklist;
+		$this->formCatLookup ();
+		return '';
 	}
 
 	function optionButtonList () {
@@ -282,41 +251,23 @@ class corpusWikipedia extends corpus {
 				var here = theForm['r{$corpus}_size' + thisOption];
 				var myParent = here.parentNode;
 
-				newOption = document.createElement('span');
-				newOption.id = 't{$corpus}_ob' + thisOption;
-				newOption.innerHTML = ' [';
-				myParent.insertBefore (newOption, here);\n";
+				myParent.insertBefore (newSpan ('t{$corpus}_ob' + thisOption, ' ['), here);\n";
 
     $first = true;
 		foreach ($options as $key => $text) {
-			$code = $code . "	newOption = document.createElement('input');
-					newOption.type = 'radio';
-					newOption.name = 'wc{$corpus}_type' + thisOption;
-					newOption.value = '$key';
-					newOption.id = 'rc{$corpus}_$key' + thisOption;\n";
+			$code = $code . "	newOption = newRadio ('rc{$corpus}_$key' + thisOption, 'wc{$corpus}_type' + thisOption, '', '$key', '')\n";
 			if ($first) {
 				$code = $code . " newOption.checked = true;\n";
 				$first = false;
 			}
 			$code = $code . " myParent.insertBefore (newOption, here);
 
-			newOption = document.createElement('span');
-			newOption.id = 'tc{$corpus}_$key' + thisOption;
-			newOption.innerHTML = ' $text ';
-			myParent.insertBefore (newOption, here);\n";
+			myParent.insertBefore (newSpan ('tc{$corpus}_$key' + thisOption,  ' $text '), here);\n";
 		} // end foreach (hard to tell with all that quoted stuff!)
 
-		$code = $code . "newOption = document.createElement ('button');
-					newOption.type = 'button';
-					newOption.id = 'catlook{$corpus}_' + thisOption;
-					newOption.innerHTML = 'Lookup';
-					newOption.setAttribute('onclick','categoryLookup$corpus(' + thisOption + ')');
-					myParent.insertBefore (newOption, here);
-
-					newOption = document.createElement('span');
-					newOption.id = 'tclsp{$corpus}_' + thisOption;
-					newOption.innerHTML = ']&nbsp;&nbsp;';
-					myParent.insertBefore (newOption, here);
+		$code = $code . "				myParent.insertBefore (newButton ('catlook{$corpus}_' + thisOption, 'Lookup',
+			'categoryLookup(' + thisOption + ', $corpus)'), here);
+					myParent.insertBefore (newSpan ('tclsp{$corpus}_' + thisOption, ']&nbsp;&nbsp;'), here);
 
 					if (notbox.checked) {
 						notbox.checked = false;
@@ -341,22 +292,68 @@ class corpusWikipedia extends corpus {
 
   // Use wizard to allow user to look up category
 	protected function formCatLookup() {
-		echo "\n<script>
-			function categoryLookup{$this->corpus} (thisOption) {
+		$corpus = $this -> corpus;
+		echoUnique ("\n<script>
+			function categoryLookup (thisOption, thisCorpus) {
 				categoryOption = thisOption; // global
+				currentCorpus = thisCorpus; // global
 				document.getElementById('catlookup').style.display = 'block';
-			};
+				document.getElementById('category' + currentCorpus).style.display = 'block';
+			}
 			function closeCatWizard (saveFlag) {
 				if (saveFlag) {
-					document.getElementById('query{$this->corpus}_' + categoryOption).value = document.getElementById('category').value;
+					document.getElementById('query' + currentCorpus + '_' + categoryOption).value = document.getElementById('category' + currentCorpus).value;
 				}
 				// Hide wizard
 				document.getElementById('catlookup').style.display = 'none';
+				document.getElementById('category' + currentCorpus).style.display = 'none';
 			}
-
+			</script>\n");
+		echo "<script>
+			$(document).ready(function() {
+				$('input.category$corpus').typeahead({
+					name: 'category$corpus',
+					remote: 'catsuggest{$_GET['type']}.php?query=%QUERY&corpus=$corpus'
+				});
+			})
 			</script>\n";
 	}
 } // end Wikipedia
+
+class corpusWiktionary extends corpusWikipedia {
+	public function formExtra () {
+		$checklist = '';
+		foreach (array ('', 'un') as $mid) {
+			$xname = "c{$this->corpus}{$mid}cap";
+			echo "   &nbsp; &nbsp; <label>{$mid}capitalized <input name=$xname id={$xname}_dc type=checkbox checked=yes /></label>\n";
+			$checklist = "$checklist {$xname}_dc";
+		}
+		return parent :: formExtra() . $checklist;
+	}
+
+	public function builder (&$consObjects) {
+		parent::builder ($consObjects);
+		$corpus = $this->corpus;
+		$cap = getCheckbox ("c{$corpus}cap");
+		$uncap = getCheckbox ("c{$corpus}uncap");
+		if (!$cap || !$uncap) {
+			$_GET["c{$corpus}flag@cap"] = $cap ? 'C' : 'U';
+		}
+	}
+
+	public function moreSQL ($table, $type, $value) {
+		// $type always 'cap' for now
+		$not = ($value == 'C' ? '' : 'NOT');
+		return (" AND ($table.corpus_id <> {$this->corpus} OR $table.flags $not LIKE '%C%') ");
+	}
+
+	public function getValidateCorpusCode () {
+		$corpus = $this->corpus;
+		return "if (!theForm['c{$corpus}cap'].checked && !theForm['c{$corpus}uncap'].checked) {
+		 return 'Must selected either Capitalized or Uncapitalized for Wiktionary';
+	 }";
+	}
+} // end Wiktionary
 
 class ccWikipediaText extends corpusConstraint {
 	// Intermediate class; never instantiated directly
@@ -434,7 +431,7 @@ class ccWikipediacategory extends ccWikipediaText {
 
 	function explainSub () {
 		$a = $b = '';
-		if ($this->range = 'contains') {
+		if ($this->range == 'contains') {
 			$a = 'contains ';
 		} else if ($this->range = 'desc') {
 			$b = ' and descendants';
@@ -448,7 +445,7 @@ class ccWikipediacategory extends ccWikipediaText {
 		if ($this->range != 'contains') {
 			$conn = openConnection (false);
 			$specFix = str_replace ("'", "\\'", $this -> spec);
-			$row = $conn->query("SELECT id FROM category WHERE title = '$specFix' and corpus_id = 2")->fetch(PDO::FETCH_ASSOC);
+			$row = SQLQuery ($conn, "SELECT id FROM category WHERE title = '$specFix' and corpus_id = $corpus")->fetch(PDO::FETCH_ASSOC);
 			if ($row === false) {
 				throw new Exception("Unable to find category {$this->spec}");
 	    }
@@ -459,7 +456,7 @@ class ccWikipediacategory extends ccWikipediaText {
 	function parse () {
 		$this -> style = 'D'; // by default, do things with database-side filtering
 		if ($this->range == 'contains') {
-			$suffix = "{$this -> corpusObject -> corpus}_{$this->num}";
+			$suffix = $this -> corpusObject -> getCorpusNum() . "_{$this->num}";
 			$more ['pre'] = " INNER JOIN entry_cat EC$suffix ON EC$suffix.entry_id = entry.id
 			 		INNER JOIN category C$suffix ON C$suffix.id = EC$suffix.cat_id";
 			$spec = str_replace ("'", "\'", $this -> spec);
@@ -474,7 +471,7 @@ class ccWikipediacategory extends ccWikipediaText {
 				$sql = "select C.id from category M
 						inner join catparent J on J.parentcat = M.title
 						inner join category C on C.id = J.cat_id where M.id = {$catList[$searchCount]}";
-				$result = $conn->query($sql);
+				$result = SQLQuery ($conn, $sql);
 				if (($depth = ($catDepth[$searchCount] + 1)) > 4) {
 					continue; // categories get silly beyond this point
 				}
@@ -505,41 +502,48 @@ class ccWikipediacategory extends ccWikipediaText {
 
 	function localFilter($oneword, $entry, $entry_id) {
 		if ($this -> style == 'D') {return true;} // already dealt with on database side
-		$searchCount = 0;
-		$corpus = $this->corpusObject->corpus;
+		$searchCount = 1;
+		$corpus = $this->corpusObject->getCorpusNum();
 		$conn = openConnection (false);
 		$sql = "SELECT entry_cat.cat_id FROM entry_cat INNER JOIN category ON category.id = entry_cat.cat_id
 		 		WHERE entry_cat.entry_id = $entry_id AND category.corpus_id = $corpus";
-		$result = $conn->query($sql);
+		$result = SQLQuery ($conn, $sql);
 		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 			// Make a list to seed the tree walk
 			$catID = $row ["cat_id"];
 			if (!isset ($catIndex [$catID])) {
-				$catList [$buildCount++] = array ('id' => catID, 'depth' => 0);
+				$catList [$buildCount++] = array ('id' => $catID, 'depth' => 0);
 				$catIndex [$catID] = true;
 			}
 		}
 		// Walk the tree of ancestors from the entry
 		while ($searchCount < $buildCount) {
 			$oneCat = $catList [$searchCount]['id'];
+			$depth = $catList [$searchCount]['depth'];
 			if ($oneCat == $this -> categoryID) {
 				return true;
 			}
-			$sql = "SELECT category.id FROM catparent
-					INNER JOIN category ON category.title = catparent.parentcat
-					WHERE catparent.cat_id = $oneCat AND corpus_id = $corpus";
-			$result = $conn->query($sql);
-			while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-				$catList [++$buildCount] = $row ['id'];
+			if (++$depth < 6) {
+				$sql = "SELECT category.id FROM catparent
+						INNER JOIN category ON category.title = catparent.parentcat
+						WHERE catparent.cat_id = $oneCat AND corpus_id = $corpus";
+				$result = SQLQuery ($conn, $sql);
+				while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+					$catID = $row ['id'];
+					if (!isset ($catIndex [$catID])) {
+						$catList [$buildCount++] = array ('id' => $catID, 'depth' => $depth);
+						$catIndex [$catID] = true;
+					}
+				}
 			}
 			$searchCount++;
 		}
 		return false; // all done searching and didn't find it
-	} // end ocalFilter
+	} // end localFilter
 
 	function rebuildForm($realNumber) {
 		parent::rebuildForm($realNumber);
-		$corpus = $this->corpusObject->corpus;
+		$corpus = $this->corpusObject->getCorpusNum();
 		Echo "radioClicked$corpus ($realNumber);\n"; // This will display the secondary radio buttons
 		$range = $_GET["wc{$corpus}_type{$this->num}"];
 		Echo "theForm['rc{$corpus}_$range$realNumber'].checked = true;\n";
@@ -570,7 +574,7 @@ class ccWikipediasize extends ccWikipediaText {
 
 class corpusWikiFeatured extends corpusWikipedia {
 	function allowed () {
-		return $GLOBALS['level']==3;
+		return false;
 	}
 
 	function form () {
@@ -580,7 +584,7 @@ class corpusWikiFeatured extends corpusWikipedia {
 
 class corpusDev extends corpus {
 	public function allowed () {
-		return $GLOBALS['level']==3;
+		return false;
 	}
 } // end Dev
 
@@ -589,6 +593,5 @@ class corpusUser extends corpus {
 	public function allowed () {
 		return false;
 	}
-
 } // end corpusUser
 ?>

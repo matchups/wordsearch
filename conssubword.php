@@ -92,7 +92,7 @@ class conssubword extends constraint {
 		}
 	} // end while
 	$more = $more . ' concat(' . substr ($substr, 2) . ')'; // Combine all the pieces on the database side.
-	$more = $more . ' AND ' . corpusInfo('SE', 'W') . ')'; // subword has to be in same corpus as main word
+	$more = insertSql ($more, corpusInfo('SE', 'W')) . ')'; // subword has to be in same corpus as main word
 	return $this->parseWhere ($more);
 } // end function
 

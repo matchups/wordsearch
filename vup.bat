@@ -19,9 +19,9 @@ if not %2==base set to=%2.
 if %2==base set to=.
 
 Echo on
-for %%i in (form index search cons conssubword consweights corpus parse results phrases utility asksaveresults dosaveresults askaccesssharedlist askdeletelist askdeleteword asklistproperties askrenamelist asksharelist catsuggest doaccesssharedlist dodeletelist dodeleteword dolistproperties dorenamelist dosharelist catcss styles usersuggest wordsuggest ) do %command% %%i%from%php %%i%to%php
-for %%i in (utility wizard  )  do %command% %%i%from%js %%i%to%js
-%command% help%from%html help%to%html
+for %%i in (form index search cons conssubword consweights corpus parse results phrases utility asksaveresults dosaveresults askaccesssharedlist askdeletelist askdeleteword asklistproperties askrenamelist asksharelist catsuggest doaccesssharedlist dodeletelist dodeleteword dolistproperties dorenamelist dosharelist catcss styles usersuggest wordcss wordsuggest ) do %command% %%i%from%php %%i%to%php
+for %%i in (utility )  do %command% %%i%from%js %%i%to%js
+for %%i in (help helpmanage ) do %command% %%i%from%html %%i%to%html
 %command% styles%from%css styles%to%css
 @Echo off
 goto done
@@ -63,4 +63,3 @@ goto done
 set from=
 set to=
 set datestamp=
-if not exist wizard* echo Time to remove wizard

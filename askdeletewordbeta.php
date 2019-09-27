@@ -4,11 +4,9 @@ include "utility" . $type . ".php";
 
 echo "<HTML>
 <HEAD>
-	<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
-	<script src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'></script>
-	<script src='//xnetsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>
-		<meta name='viewport' content='width=device-width, initial-scale=1'>
-	<link rel='stylesheet' href='styles.css'>
+" . scriptRefs (true, false) . "	<meta name='viewport' content='width=device-width, initial-scale=1'>
+		<link rel='stylesheet' href='styles.css'>
+		<link rel='stylesheet' href='wordcss$type.php'>
 	<TITLE>
 	Delete Word from List
 	</TITLE>

@@ -43,7 +43,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 			}
 			if ($row['whole'] == 'Y') {
 				// If this is the whole entry, set up a link
-				echo $corpusObjects[$corpus]->answerLink ($entry);
+				echo $corpusObjects[$corpus]->answerLink ($entry) . ' ';
 			} else {
 				// Else if part of an entry name, set up a link to our page to list phrases
 				if (!$same) {
@@ -85,7 +85,8 @@ function showExplain ($result) {
 			if ($table == 'PW' || $table == 'SW') {
 				$table = 'words';
 			}
-			sqlDump ("SHOW index FROM " . $table);
+			echo "<P>Sorry, currently unable to show possible indexes.  Please edit resultsdev.php.<P>";
+			// sqlDump ("SHOW index FROM " . $table);
 		}
 	}
 }

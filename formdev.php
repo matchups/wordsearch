@@ -98,7 +98,7 @@ if ($advanced) {
 if ($level > 0) {
   $sourceDisplay = '';
 } else {
-  $sourceDisplay = "style='display: none'"; //@@
+  $sourceDisplay = "style='display: none'";
 }
 echo "<label>Single words? <input name=single type=checkbox
    checked /></label><br>
@@ -128,6 +128,20 @@ foreach ($corpusObjects as $corpusObject) {
   }\n";
 }
 echo "} // end resetCorporaMore
+
+function saveQuery() {
+  var url='http:asksavequery$type.php?';
+  var elnum, item, name, value;
+  for (elnum = 0; elnum < document.getElementById('search').elements.length; elnum++) {
+		item = theForm.elements[elnum];
+		name = item.name;
+    value = item.value;
+    if (name && value) {
+      url += name + '=' + encodeURIComponent(value) + '&';
+    }
+	}
+  window.open(url, '_blank');
+}
   </script>
   </div>
   <!-- Put the type (Beta, Dev, Back, or nil) in the form so subsequent scripts can access it -->
@@ -180,19 +194,31 @@ if ($level > 0) {
         <span class=disabledmenu>Delete word</span>
         <span class=disabledmenu>Properties</span>\n";
     }
-    if ((SQLQuery($conn, "SELECT 1 FROM corpus_share WHERE user_id = {$GLOBALS['userid']}"))->rowCount() > 0) {
+    $userid = $GLOBALS['userid'];
+    if ((SQLQuery($conn, "SELECT 1 FROM corpus_share WHERE user_id = $userid"))->rowCount() > 0) {
       echo "<a href='http:askaccesssharedlist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Access Shared</a>\n";
     } else {
       echo "<span class=disabledmenu>Access Shared</span>\n";
     }
     echo "</div>
-      <button class='dropdown-btn' id='query-dd' disabled=yes>Queries
-      <span id=query-arrow><font color=black>&#9662;</font></span>
+      <button class='dropdown-btn' id='query-dd'>Queries
+      <span id=query-arrow>&#9662;</span>
       </button>
-      <div class='dropdown-container' style='display: none'>
-        <span class=disabledmenu>Load</span>
+      <div class='dropdown-container' style='display: none'>\n";
+      comment ("SELECT count(1) AS current FROM query WHERE owner = $userid");
+    $current = $conn->query("SELECT count(1) AS current FROM query WHERE owner = $userid")->fetch(PDO::FETCH_ASSOC)['current'];
+    comment ('current=$current');
+    $limit = ($level == 3) ? 20 : 5;
+    if ($current < $limit) {
+      echo "  <a onclick='saveQuery();'>Save</a>\n";
+    } else {
+      echo "  <span class=disabledmenu>Can't save: at limit of $limit</span>\n";
+    }
+
+    echo "  <span class=disabledmenu>Load</span>
         <span class=disabledmenu>Share</span>
         <span class=disabledmenu>Delete</span>
+        <span class=disabledmenu>Rename</span>
         </div>\n";
   }
   echo "<button class='dropdown-btn' id='nav-dd'>Navigation
@@ -215,7 +241,7 @@ if ($level > 0) {
       if ($type == $typeinfo ['id']) {
         Echo "<span class=disabledmenu>{$typeinfo['name']}</span>\n";
       } else {
-        Echo "<A HREF='index{$typeinfo['id']}.html$security&type={$typeinfo['id']}'>{$typeinfo['name']}</A>\n";
+        Echo "<A HREF='index{$typeinfo['id']}.php$security&type={$typeinfo['id']}'>{$typeinfo['name']}</A>\n";
       }
     }
   }
@@ -378,7 +404,7 @@ function validateConstraint (thisOption) {
   echo "} // end validateConstraint
 
   function validateCorpus (thisCorpus) {\n";
-    // Generate stuff from classes @@
+    // Generate stuff from classes
     foreach ($corpusObjects as $thisCorpus => $corpusObject) {
       if ($code = $corpusObject->getValidateCorpusCode ()) {
         echo "if (thisCorpus == $thisCorpus) {

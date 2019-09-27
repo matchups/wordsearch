@@ -1,4 +1,5 @@
 <?php
+include 'asciitize.php';
 class constraint {
 	// Base class for additional constraints
 	protected $spec; 		// what the user typed
@@ -71,6 +72,7 @@ class constraint {
 	}
 
 	public function rebuildForm($realNumber) {
+		echo " /* " . get_class($this) . ".rF($realNumber) */";
 		Echo "addOption();\n";
 		if ($this->not) {
 			Echo "theForm['not$realNumber'].checked = true;\n";
@@ -98,7 +100,7 @@ class constraint {
 
 	// List of normal (not corpus-linked) constraint classes
   public static function list () {
-		$classes = array ("conspattern", "consregex", "conssubword", "consweights", "conscharmatch", "conscrypto");
+	$classes = array ("conspattern", "consregex", "conssubword", "consweights", "conscharmatch", "conscrypto", "consenum");
 		IF ($_GET['level'] == 3) {
 			array_push ($classes, "conscustomsql");
 		}
@@ -152,10 +154,17 @@ class constraint {
 
 class conspattern extends constraint {
 	// Simple pattern
+	protected $raw;
+
+	protected function init () {
+		$this->raw = getCheckbox ("craw" . $this->num);
+	}
+
 	public function parse() {
 		// Convert to regular expression
 		$spec = patternToRegex (expandSpecial ($this->spec), 'S');
-		return $this->parseWhere ("AND PW.text " . $this->maybeNot() . " RLIKE '$spec' ");
+		$column = ($this->raw ? 'entry.name' : 'PW.text');
+		return $this->parseWhere ("AND $column " . $this->maybeNot() . " RLIKE '$spec' ");
 	}
 
 	public function position() {
@@ -186,6 +195,44 @@ class conspattern extends constraint {
 		return 'pattern';
 	}
 
+	public static function getButtonCode () {
+		$ret ['add'] = "insertRawSub ('rpattern', thisOption);";
+		$ret ['del'] = "noRawSub (thisOption);";
+		return $ret;
+	}
+
+	public function rebuildForm($realNumber) {
+		parent::rebuildForm($realNumber);
+		if ($this->raw) {
+			Echo "theForm['craw$realNumber'].checked = true;\n";
+		} // else it is Where, which is set by default.
+	}
+
+	public static function getMoreCode () {
+	return " // remove subsidiary radio buttons for patterns, if present
+		function noRawSub (thisOption) {
+			var theForm = document.getElementById('search');
+			// Make sure neither controlling radio button is selected.
+			if ((!theForm['rpattern' + thisOption].checked && !theForm['rregex' + thisOption].checked) || deleteMode) {
+				if (theForm['craw' + thisOption] !== undefined) {
+					removeChildren (thisOption, 'rawob craw traw');
+				}
+			}
+		}
+
+		function insertRawSub (field, thisOption) {
+			var theForm = document.getElementById('search');
+			// If pattern, provide a checkbox for Raw search
+			if (theForm['craw' + thisOption] === undefined) {
+				var here = theForm[field + thisOption].nextSibling.nextSibling;
+				var myParent = here.parentNode;
+
+				myParent.insertBefore (newSpan ('rawob' + thisOption, ' ['), here);
+				myParent.insertBefore (newInput ('craw' + thisOption, 'checkbox', ''), here);
+				myParent.insertBefore (newSpan ('traw' + thisOption, ' raw search] '), here);
+			}
+		}";
+	}
 	public static function getValidateConstraintCode () {
 		return "  // Same validation as with the main pattern
 			if (!/^[a-z?*@#&\[\-\]]+$/i.test (thisValue)) {
@@ -204,12 +251,14 @@ class conspattern extends constraint {
 class consregex extends constraint {
 	private $regex;
 	private $local;
+	protected $raw;
 
 	protected function init() {
 		$this->regex = expandSpecial ($this->spec);
 		if (substr ($this->regex, 0, 1) != '/') {
 			$this->regex = '/' . $this->regex . '/';
 		}
+		$this->raw = getCheckbox ("craw" . $this->num);
 	}
 
 	public function parse() {
@@ -218,13 +267,14 @@ class consregex extends constraint {
 			return "";
 		} else {// good, we can do it on the database side
 			$this->local = false;
-			return $this->parseWhere (" AND PW.text " . $this->maybeNot() . " RLIKE '" . substr ($this->regex, 1, strlen ($this->regex) - 2) . "' ");
+			$column = ($this->raw ? 'entry.name' : 'PW.text');
+			return $this->parseWhere (" AND $column " . $this->maybeNot() . " RLIKE '" . substr ($this->regex, 1, strlen ($this->regex) - 2) . "' ");
 		}
 	}
 
 	public function localFilter($oneword, $entry, $entry_id) {
 		if ($this->local) {
-			$matched = preg_match ($this->regex, $oneword);
+			$matched = preg_match ($this->regex, $this->raw ? entry : $oneword);
 			if ($this->not) {
 				$matched = !$matched;
 			}
@@ -232,14 +282,6 @@ class consregex extends constraint {
 		} else {
 			return true; // done on the DB side; no filtering here
 		}
-	}
-
-	public function rebuildForm($realNumber) {
-		parent::rebuildForm($realNumber);
-		Echo "radioClicked ($realNumber);\n"; // This will display the Scrabble and alphabetic radio buttons
-		if ($_GET["wttype$this->num"] == 'ALF') {
-			Echo "theForm['ralpha$realNumber'].checked = true;\n";
-		} // else it is Scrabble, which is set by default.
 	}
 
 	public function position() {
@@ -270,8 +312,20 @@ class consregex extends constraint {
 		return 'regular expression';
 	}
 
+	public static function getButtonCode () {
+		$ret ['add'] = "insertRawSub ('rregex', thisOption);";
+		$ret ['del'] = "noRawSub (thisOption);";
+		return $ret;
+	}
+
+	public function rebuildForm($realNumber) {
+		parent::rebuildForm($realNumber);
+		if ($this->raw) {
+			Echo "theForm['craw$realNumber'].checked = true;\n";
+		} // else it is Where, which is set by default.
+	}
+
 	public static function getValidateConstraintCode () {
-		echo " ((gVCCC))";
 		return "//";
 		/*
 		return "if (/[abc]/.test (thisValue)) {
@@ -450,8 +504,19 @@ public static function getHint () {
 } // end class conscrypto
 
 class conscustomsql extends constraint {
+	protected $type;
+
+  protected function init () {
+			$this -> type = $_GET["cutype" . $this->num];
+	}
+
 	public function parse() {
-		return $this->parseWhere(' AND ' . $this->spec);
+		$spec = str_replace ('pw', 'PW', $this->spec); // restore case because MySQL treats aliases case-specifically
+		if ($this->type == 'IJ') {
+			return array ('pre' => $spec);
+		} else {
+			return $this->parseWhere(' AND ' . $spec);
+		}
 	}
 
 	public static function getLabel () {
@@ -462,12 +527,126 @@ class conscustomsql extends constraint {
 		return "// We'll let you put anything in SQL, at least for now";
 	}
 
+	public static function getButtonCode () {
+		$ret ['add'] = "
+				// If Custom, make subsidiary buttons available
+				if (theForm['rcustij' + thisOption] === undefined) {
+					var here = theForm['rcustomsql' + thisOption].nextSibling.nextSibling; // For some reason, can't access tcustomsql directly
+					var myParent = here.parentNode;
+
+					myParent.insertBefore (newSpan ('tcustob' + thisOption, ' ['), here);
+					myParent.insertBefore (newRadio ('rcustij' + thisOption, 'cutype' + thisOption, '', 'IJ', ''), here);
+					myParent.insertBefore (newSpan ('tcustij' + thisOption, ' join '), here);
+
+					myParent.insertBefore (newRadio ('rcustw' + thisOption, 'cutype' + thisOption, 'C', 'W', ''), here);
+					myParent.insertBefore (newSpan ('tcustw' + thisOption, ' where] '), here);
+				}";
+			$ret ['del'] = "		noCustomSub (thisOption);";
+			return $ret;
+	}
+
+	public static function getMoreCode () {
+	return "
+		// remove subsidiary radio buttons for Custom SQL, if present
+		function noCustomSub (thisOption) {
+			if (document.forms['search']['rcustij' + thisOption] !== undefined) {
+				removeChildren (thisOption, 'tcustob rcustij tcustij rcustw tcustw');
+			}
+		}\n";
+	}
+
+	public function rebuildForm($realNumber) {
+		parent::rebuildForm($realNumber);
+		if ($this->type == 'IJ') {
+			Echo "theForm['rcustij$realNumber'].checked = true;\n";
+		} // else it is Where, which is set by default.
+	}
+
 	public static function getHint () {
 		return "Enter a constraint to appear in the WHERE clause, most likely referencing PW.text (the candidate word, letters only,
 			such as INTHEYEAR for <u>In the Year 2525</u> and/or PW.bank (the list of letters, such as AEHINRTY).";
 		}
+
+	public function explain () {
+		// Show just the condition part
+		$spec = $this -> spec;
+		if ($_GET["cutype{$this->num}"] == 'IJ') {
+			$spec = explode (' on ', $this->spec)[1];
+		}
+		return $spec;
+	}
 } // end class customsql
 
+class consenum extends constraint {
+  protected $counter;
+	protected $pattern;
+
+	public function parse() {
+		$this -> pattern = preg_replace_callback ('/[0-9]+|./', function ($matches) {
+			$match = $matches[0];
+			switch ($match) {
+				case ' ':
+				case '\'':
+				case '-';
+				return $match;
+
+				case '#':
+				return '[0-9]';
+
+				case '*':
+				return '[a-z]+';
+
+				case '?':
+				return '[^-\' 0-9a-z]';
+
+				default: // had better be some digits
+				return "[a-z]" . '{' . $match . '}';
+			}
+		},
+		$this -> spec);
+		comment ($this->pattern = '/^' . $this->pattern . '$/i');
+	}
+
+	public function setlengths(&$consmin, &$consmax) {
+		$this->counter = 0; // Need to use a class variable so it accessible within the anonymous callback function.
+		$spec = $this->spec;
+		preg_replace_callback ('/[0-9]+/', function ($matches) {
+				$this->counter += $matches[0];
+				return '';
+			},
+				$this->spec);
+		if (strpos ($this->spec, '*') === false  &&  $consmax > $this->counter) {
+			$consmax = $this->counter;
+		}
+		if ($this->counter > $consmin) {
+			$consmin = $this->counter;
+		}
+	}
+
+	public function localFilter($oneword, $entry, $entry_id) {
+		return preg_match ($this->pattern, asciitize ($entry));
+	}
+
+	public static function getLabel () {
+		return 'enumeration';
+	}
+
+	public static function getValidateConstraintCode () {
+		return "if (!/^[-' #*?0-9]+$/i.test (thisValue)) {
+			return 'Invalid character in enumeration ' + thisOption;
+		}";
+	}
+
+	public static function getHint () {
+		return "Enter the desired enumeration for the answer.  A simple example would be <font face=Courier>5 4</font>, to represent a five-letter word
+			followed by a four-letter word.  You can also use
+			<B>#</B> to represent any digit (e.g., <font face=Courier>#### 3 3 4</font> would match <u>1776 and All That</u>),
+			<B>\\'</B> and <B>-</B> (quote and hyphen) to represent themselves (<font face=Courier>6 2 \\'##</font> would match <u>Spirit of \\'76</u>),
+			<B>*</B> to represent a word (sequence of letters) of any length (<font face=Courier>6 * 9</font> would match <u>Ludvig van Beethoven</u> or <u>George Albert Boulenger,</u>
+			or <B>?</B> to represent any punctuation mark other than quote and hyphen.";
+			// A few lines up, first \ is to escape the second \ in the PHP string and the second one is to escape the apostrophe in the single-quoted generated code.
+	}
+}
 // A couple of big ones get their own source files
 $type = $_GET['type'];
 include "consweights$type.php";
