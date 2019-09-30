@@ -235,7 +235,7 @@ class conspattern extends constraint {
 	}
 	public static function getValidateConstraintCode () {
 		return "  // Same validation as with the main pattern
-			if (!/^[a-z?*@#&\[\-\]]+$/i.test (thisValue)) {
+			if (!/^[a-z?*@#&\[\-\]]+$/i.test (thisValue)  &&  !theForm['craw' + thisOption].checked) {
 				return 'Invalid character in pattern ' + thisOption;
 			}
 			if (badGroups (thisValue)) {
