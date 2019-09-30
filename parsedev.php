@@ -402,11 +402,11 @@ function corpusInfo ($table, $option) {
 	$flagClause = ''; // for now
 	foreach ($corpusList as $thisCorpus) {
 		if ($nonflags[$thisCorpus]) {
-			$rlike = "{$corpusTable[$corpus]}.flags NOT RLIKE '[{$nonflags[$thisCorpus]}]' ";
+			$rlike = "{$corpusTable[$thisCorpus]}.flags NOT RLIKE '[{$nonflags[$thisCorpus]}]' ";
 			if (count ($corpusList) == 1  &&  !$alias) {
 				$flagClause = " AND $rlike";
 			} else {
-				$flagClause = $flagClause . " AND ({$corpusFilter[$corpus]} OR $rlike) ";
+				$flagClause = $flagClause . " AND ({$corpusFilter[$thisCorpus]} OR $rlike) ";
 			}
 		}
 	}

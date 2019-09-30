@@ -1,92 +1,54 @@
 
 ---------- ASKACCESSSHAREDLISTDEV.PHP
-	$result = SQLQuery($conn, "SELECT corpus_share.id, corpus.name AS cname, user.realname as uname FROM corpus_share
 
 ---------- ASKDELETELISTDEV.PHP
-	$result = SQLQuery($conn, "SELECT id, name FROM corpus WHERE owner = $userid ORDER BY name");
 
 ---------- ASKDELETEWORDDEV.PHP
-	$result = SQLQuery($conn, "SELECT id, name FROM corpus WHERE owner = $userid ORDER BY name");
 
 ---------- ASKLISTPROPERTIESDEV.PHP
-	$result = SQLQuery($conn, "SELECT id, name, url, like_id FROM corpus WHERE owner = $userid ORDER BY name");
-	$result = SQLQuery($conn, "SELECT id, name FROM corpus WHERE like_id = -1 ORDER BY name");
 
 ---------- ASKLOADQUERYDEV.PHP
-	$result = SQLQuery($conn, "SELECT id, name FROM query WHERE owner = $userid ORDER BY name");
 
 ---------- ASKRENAMELISTDEV.PHP
-	$result = SQLQuery($conn, "SELECT id, name FROM corpus WHERE owner = $userid ORDER BY name");
 
 ---------- ASKSAVEQUERYDEV.PHP
-	$result = SQLQuery($conn, "SELECT name FROM query WHERE owner = $userid");
 
 ---------- ASKSAVERESULTSDEV.PHP
-	$result = SQLQuery($conn, "SELECT id, name FROM corpus WHERE owner = $userid ORDER BY name");
-	$current = $conn->query("SELECT count(1) AS current FROM corpus WHERE owner = $userid")->fetch(PDO::FETCH_ASSOC)['current'];
 
 ---------- ASKSHARELISTDEV.PHP
-	$result = SQLQuery($conn, "SELECT id, name FROM corpus WHERE owner = $userid ORDER BY name");
 
 ---------- CATCSSDEV.PHP
 
 ---------- CATSUGGESTDEV.PHP
-    $result = $conn->query("SELECT title, count(*) AS members FROM category INNER JOIN entry_cat ON entry_cat.cat_id = category.id
-    $result = $conn->query("SELECT title, count(*) AS members FROM category INNER JOIN catparent ON catparent.parentcat = category.title
 
 ---------- CONSDEV.PHP
 
 ---------- CONSSUBWORDDEV.PHP
-	$more = " AND " . $this->maybeNot() . " EXISTS (SELECT 1 FROM words SW INNER JOIN word_entry SWE ON SWE.word_id = SW.id " .
 
 ---------- CONSWEIGHTSDEV.PHP
-		$sql = "AND (SELECT sum(weights.weight $times) FROM weights INNER JOIN spandex " .
 
 ---------- CORPUSDEV.PHP
-		$row = SQLQuery ($conn, "SELECT name, url, owner, like_id FROM corpus WHERE id = $corpus ORDER by name")->fetch(PDO::FETCH_ASSOC);
-		$result = SQLQuery ($conn, "SELECT letter, description FROM corpus_flag WHERE corpus_id = $flagCorpus");
-			$result = SQLQuery (openConnection (false), "SELECT like_id FROM corpus WHERE id = $corpus");
-			$result = $conn->query("SELECT user_id FROM session WHERE session_key = '{$_GET['sessionkey']}'");
-				return $conn->query("SELECT 1 FROM corpus_share WHERE user_id = $userid AND corpus_id = $corpus AND display = 'S'")->rowCount() > 0;
-			$row = SQLQuery ($conn, "SELECT id FROM category WHERE title = '$specFix' and corpus_id = $corpus")->fetch(PDO::FETCH_ASSOC);
-		$sql = "SELECT entry_cat.cat_id FROM entry_cat INNER JOIN category ON category.id = entry_cat.cat_id
-				$sql = "SELECT category.id FROM catparent
+		return (" AND ($table.corpus_id $corpusFilter OR $table.flags $not LIKE '%C%') ");
 
 ---------- DOACCESSSHAREDLISTDEV.PHP
-	$stmt = $conn->prepare ("SELECT display FROM corpus_share WHERE id = ? AND user_id = ?");
 
 ---------- DODELETELISTDEV.PHP
-	$username = SQLQuery($connw, "SELECT realname FROM user WHERE id = $userid")->fetch(PDO::FETCH_ASSOC)['realname'];
-	$sql = "SELECT id, user_id FROM corpus_share WHERE corpus_id = $corpusid";
 
 ---------- DODELETEWORDDEV.PHP
-	$stmt = $conn->prepare("SELECT id FROM entry WHERE name = ? AND corpus_id = ?");
 
 ---------- DOLISTPROPERTIESDEV.PHP
 
 ---------- DOLOADQUERYDEV.PHP
-	$stmt = $conn->prepare("SELECT id FROM query WHERE name = ? AND owner = ?");
 
 ---------- DORENAMELISTDEV.PHP
 
 ---------- DOSAVEQUERYDEV.PHP
-	$stmt = $conn->prepare("SELECT id FROM query WHERE name = ? AND owner = ?");
 
 ---------- DOSAVERESULTSDEV.PHP
-	$stmt = $conn->prepare("SELECT id FROM corpus WHERE name = ? AND owner = ?");
-		$sql = "SELECT entry, corpus_id FROM session_words WHERE session_id = '$sessionid'";
-	$row = $conn->query("SELECT sum(1) AS entries, sum(length(name)) AS characters FROM entry WHERE corpus_id = '$corpusid'")->fetch(PDO::FETCH_ASSOC);
 
 ---------- DOSHARELISTDEV.PHP
-	$stmt = $conn->prepare ("SELECT id FROM user WHERE realname = ?");
-	$username = SQLQuery($conn, "SELECT realname FROM user WHERE id = $userid")->fetch(PDO::FETCH_ASSOC)['realname'];
-	$stmt = $conn->prepare ("SELECT id FROM corpus_share WHERE corpus_id = ? AND user_id = ?");
 
 ---------- FORMDEV.PHP
-  $result = $conn->query("SELECT id FROM corpus ORDER BY corpus.id");
-    if ((SQLQuery($conn, "SELECT 1 FROM corpus WHERE owner = {$GLOBALS['userid']}"))->rowCount() > 0) {
-    if ((SQLQuery($conn, "SELECT 1 FROM corpus_share WHERE user_id = $userid"))->rowCount() > 0) {
-    $current = $conn->query("SELECT count(1) AS current FROM query WHERE owner = $userid")->fetch(PDO::FETCH_ASSOC)['current'];
 
 ---------- HELPDEV.HTML
 
@@ -95,32 +57,22 @@
 ---------- INDEXDEV.PHP
 
 ---------- PARSEDEV.PHP
-	$sql = "SELECT PW.text AS word, Min(entry.name) AS entry, entry.id as entry_id," .
-							$ret ['pre'] = $ret ['pre'] . $join; // add outer join to 'like' corpus for main SELECT
+			$rlike = "{$corpusTable[$corpus]}.flags NOT RLIKE '[{$nonflags[$thisCorpus]}]' ";
 
 ---------- PHRASESDEV.PHP
-$sql = "SELECT entry.name AS entry, " .
 
 ---------- RESULTSDEV.PHP
-			if ($row = (SQLQuery ($connw, "SELECT id FROM session WHERE session_key = '{$_GET['sessionkey']}'")->fetch(PDO::FETCH_ASSOC))) {
 
 ---------- SEARCHDEV.PHP
 
 ---------- STYLESDEV.CSS
 
 ---------- USERSUGGESTDEV.PHP
-    $sql = "SELECT user.realname, count(*) AS sessions FROM user INNER JOIN session ON session.user_id = user.id
 
 ---------- UTILITYDEV.JS
 
 ---------- UTILITYDEV.PHP
-			$sql = "SELECT $start, ip_address, session.id, user_id FROM session $middle WHERE session_key = '$session' AND status = 'A' $end";
-	$result = openConnection(false)->query("SELECT email FROM user WHERE id=$touser");
-  $sql = "SELECT max(id) AS session_id FROM session WHERE status = 'A' AND concat('|', ip_address, '|') LIKE '%|$ipaddress|%'";
-    $sql = "SELECT user_id FROM session WHERE id = {$row['session_id']}";
-  $sql = "SELECT DISTINCT corpus.id FROM corpus LEFT OUTER JOIN corpus_share ON corpus_share.corpus_id = corpus.id
 
 ---------- WORDCSSDEV.PHP
 
 ---------- WORDSUGGESTDEV.PHP
-    $result = $conn->query("SELECT name FROM entry
