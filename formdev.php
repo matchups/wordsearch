@@ -219,10 +219,17 @@ if ($level > 0) {
     } else {
       echo "  <span class=disabledmenu>Load</span>\n";
     }
-    echo "    <span class=disabledmenu>Share</span>
-        <span class=disabledmenu>Delete</span>
-        <span class=disabledmenu>Rename</span>
-        </div>\n";
+    if ($current) {
+      echo "<a href='http:asksharequery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Share</a>
+      <a href='http:askdeletequery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
+      <a href='http:askrenamequery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Rename</a>\n";
+    }
+    else {
+      echo "    <span class=disabledmenu>Share</span>
+          <span class=disabledmenu>Delete</span>
+          <span class=disabledmenu>Rename</span>\n";
+    }
+  echo "   </div>\n";
   }
   echo "<button class='dropdown-btn' id='nav-dd'>Navigation
       <span id=nav-arrow>&#9662;</span>
