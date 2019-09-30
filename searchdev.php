@@ -70,6 +70,10 @@ try {
 
 	echo "</span></H2>";
 	$time['beforequery'] = microtime();
+	if (getCheckbox ('norun')) {
+		$result = "Query loaded.";
+		$explain = false;
+	}
 	if ($result == '') {
 		$result = SQLQuery ($conn, $sql);
 		comment ("Got " . $result->rowCount() . " rows");

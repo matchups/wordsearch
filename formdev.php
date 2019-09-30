@@ -205,9 +205,7 @@ if ($level > 0) {
       <span id=query-arrow>&#9662;</span>
       </button>
       <div class='dropdown-container' style='display: none'>\n";
-      comment ("SELECT count(1) AS current FROM query WHERE owner = $userid");
     $current = $conn->query("SELECT count(1) AS current FROM query WHERE owner = $userid")->fetch(PDO::FETCH_ASSOC)['current'];
-    comment ('current=$current');
     $limit = ($level == 3) ? 20 : 5;
     if ($current < $limit) {
       echo "  <a onclick='saveQuery();'>Save</a>\n";
@@ -215,8 +213,13 @@ if ($level > 0) {
       echo "  <span class=disabledmenu>Can't save: at limit of $limit</span>\n";
     }
 
-    echo "  <span class=disabledmenu>Load</span>
-        <span class=disabledmenu>Share</span>
+    $shared = 0; // for now
+    if ($current + $shared) {
+      echo "<a href='http:askloadquery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type'>Load</a>\n";
+    } else {
+      echo "  <span class=disabledmenu>Load</span>\n";
+    }
+    echo "    <span class=disabledmenu>Share</span>
         <span class=disabledmenu>Delete</span>
         <span class=disabledmenu>Rename</span>
         </div>\n";

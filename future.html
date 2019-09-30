@@ -44,18 +44,29 @@
     <LI>Number of incoming links
     <LI>Implement subresource integrity and local copies of libraries
     <LI>Release
-<!--
-* Tell everyone (just Eric Chaikin & Andy Latto unless .#0)
--->
     </OL>
   </UL>
 <LI>0.8 Saving queries--see user types document for limits and features
   <UL>
   <LI>0.81 Save query (done)
   <LI>0.82 Recall query
+  <LI><font color=red>*brownscho* is showing redirects</font>
   <LI>0.83 Delete query
+  <LI><font color=red>Validate needs expansion when raw checked</font>
   <LI>0.84 Share query
+  <LI><font color=red>SQL issues</font>
+  <UL>
+    <LI>Look into why *bombing* dies
+<!--
+ SELECT PW.text AS word, Min(entry.name) AS entry, entry.id as entry_id, word_entry.whole AS whole, entry.corpus_id AS corpus FROM words PW INNER JOIN word_entry ON word_entry.word_id = PW.id INNER JOIN entry ON entry.id = word_entry.entry_id LEFT OUTER JOIN word_entry WE90 ON WE90.word_id = PW.id LEFT OUTER JOIN entry ECP90 ON ECP90.id = WE90.entry_id AND ECP90.corpus_id = 2 INNER JOIN word_four WF ON WF.word_id = word_entry.word_id AND WF.quartet = 'bomb' /* premain */ WHERE 1=1 AND PW.text LIKE '%bombing%' AND PW.text BETWEEN '' AND 'zzz' AND ( ((PW.bank LIKE 'b%g%i%mno%' OR PW.bank LIKE 'ab%g%i%mno%') AND PW.text LIKE '%b%b%') ) AND entry.corpus_id IN (2,3,90,91) AND (entry.corpus_id <> 91 OR entry.flags NOT RLIKE '[R]' ) AND (entry.corpus_id <> 91 OR entry.flags NOT RLIKE '[RF]' ) AND (entry.corpus_id <> 91 OR entry.flags NOT RLIKE '[R]' ) AND PW.length >= 7 GROUP BY PW.text, word_entry.whole , entry.corpus_id ORDER BY PW.text, word_entry.whole DESC, entry.corpus_id
+
+SELECT distinct entry.name AS entry FROM words PW INNER JOIN word_entry ON word_entry.word_id = PW.id INNER JOIN entry ON entry.id = word_entry.entry_id INNER JOIN word_four WF ON WF.word_id = word_entry.word_id AND WF.quartet = 'bomb' /* premain */ WHERE PW.text LIKE '%bombing%' order by entry.name
+-->
+    <LI>Similarly, SVs starting with James
+    <LI>don't include AND PW.text BETWEEN '' AND 'zzz'
+  </UL>
   <LI>0.85 Access shared query
+  <LI>Move Save Query to sidebar
   <LI>0.86 Rename query
   <LI><font color=blue>Release</font>
 <!--
@@ -107,7 +118,8 @@ Future+1: Remove 'dev' from include utility in dev
   <UL>1.04 Security
     <LI>Use form for support e-mail
     <LI>Timeout and update session status
-    <LI>Split database (constant words one and mutile one)
+    <LI><strike>Split database (constant words one and mutile one)</strike>
+    <LI>Share & access word lists--prevent URI hacking
   </UL>
   <LI>1.05 Side ribbon
   <UL>
@@ -149,6 +161,7 @@ Future+1: Remove 'dev' from include utility in dev
 <LI>Validating corpus criteria
 <LI>Signon to display message based on code
 <LI>After timeout, error message sometimes appears stating that the SQL server has gone away
+<LI>Find a way to avoid 500 errors
 <LI>Debug typeahead; keep an eye on <A HREF="https://netsh.pp.ua/en/ask-a-question/">host's blog</A>.
 <LI>Force buttons and labels on the same line by modifying addRadio to bracket the two entities with a <span class=nobr>...</span> and use .nobr { white-space: nowrap } in CSS.  Although that may mess up the parent for deletion and require more changes.
 </LL>
