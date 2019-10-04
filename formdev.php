@@ -213,7 +213,7 @@ if ($level > 0) {
       echo "  <span class=disabledmenu>Can't save: at limit of $limit</span>\n";
     }
 
-    $shared = 0; // for now
+    $shared = $conn->query("SELECT count(1) AS shared FROM query_share WHERE user_id = $userid")->fetch(PDO::FETCH_ASSOC)['shared'];
     if ($current + $shared) {
       echo "<a href='http:askloadquery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type'>Load</a>\n";
     } else {
