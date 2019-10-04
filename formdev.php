@@ -181,6 +181,11 @@ if ($level > 0) {
       </button>
       <div class='dropdown-container' style='display: none'>
       <a href='http:asksaveresults$type.php?sessionkey=$sessionEncoded&level=$level&type=$type&source=upload' target='_blank'>Upload file</a>\n";
+    if (isset ($GLOBALS['ret']['save'])) {
+       $sessionEncoded = urlencode ($_GET['sessionkey']);
+       echo "<A HREF='http://www.alfwords.com/asksaveresults$type.php?sessionkey=$sessionEncoded&type=$type&level=$level&source=results'
+         target='_blank'>Save Results</A>\n";
+     }
     if ((SQLQuery($conn, "SELECT 1 FROM corpus WHERE owner = {$GLOBALS['userid']}"))->rowCount() > 0) {
       echo "<a href='http:asksharelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Share</a>
         <a href='http:askdeletelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
