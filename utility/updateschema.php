@@ -16,17 +16,17 @@ try {
     // set the PDO error mode to exception
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $tname = "query";
+    $tname = "query_share";
 
-/*
     runit ("CREATE TABLE $tname (
 	id int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	owner int,
-	parms varchar(4000))");
-*/
+	query_id int,
+	user_id int)");
 
+/*
     runit ("ALTER TABLE $tname
 	ADD name varchar(100)");
+*/
 //    runit ("CREATE INDEX entrycorpidx ON $tname(corpus_id)");
 //    runit ("UPDATE $tname SET like_id = -1 WHERE id in (2,3)");
     }

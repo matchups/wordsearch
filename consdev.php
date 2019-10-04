@@ -48,6 +48,12 @@ class constraint {
 		// Do nothing by default
 	}
 
+  public function localFilterArray ($row) {
+		// Most classes will use the regular localFilter; this one has been added to provide access to other elements
+		return $this->localFilter ($row['word'], $row['entry'], $row['entry_id']);
+	}
+
+
 	public function localFilter($oneword, $entry, $entry_id) {
 		// Do any additional filtering that can't be done in SQL
 		// $oneword = the word to check

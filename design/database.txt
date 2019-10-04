@@ -38,7 +38,7 @@ query_share
    id, query_id, user_id
 
 question
-   id, query
+   id, question
 user_question
    id, user_id, question_id, answer_SHA
 

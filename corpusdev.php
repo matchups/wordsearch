@@ -70,6 +70,10 @@ class corpus {
 		return $this->corpus;
 	}
 
+  public function likeCorpus () {
+		return $this->flagCorpus <> $this->corpus ? $this->flagCorpus : false;
+	}
+
 	public function allowed () {
 		if ($this->owner == '') {
 			return true;
@@ -226,12 +230,15 @@ class corpus {
 		return '';
 	}
 
+  //!! Delete this
+	/*
 	public function getSpecialEntry (&$table) {
 		if ($this->flagCorpus <> $this->corpus) {
 			$table = $this->getEntryTable();
 			$int = "WE{$this->corpus}";
-			return " LEFT OUTER JOIN word_entry $int ON $int.word_id = PW.id " .
-				"LEFT OUTER JOIN entry $table ON $table.id = $int.entry_id AND $table.corpus_id = " . $this->flagCorpus;
+			return " FROM word_entry $int " .
+				"INNER JOIN entry $table ON $table.id = $int.entry_id AND $table.corpus_id = " . $this->flagCorpus .
+				" WHERE $int.word_id = PW.id ";
 		}
 		return "";
 	}
@@ -239,6 +246,7 @@ class corpus {
 	public function getEntryTable () {
 		return ($this->flagCorpus <> $this->corpus) ? "ECP{$this->corpus}" : 'entry';
 	}
+	*/
 
 } // end base corpus class
 
@@ -681,6 +689,43 @@ class ccWikipedialinks extends ccWikipediaText {
 		$ret = (($count > $target) XOR ($this->relation == '<') XOR ($this->not));
 		return $ret;
 	}
+}
+
+class ccCorpusLikeFlags extends corpusConstraint {
+	function init () {
+		$this->likeCorpus = $this->corpusObject->likeCorpus();
+	}
+
+	function rebuildForm($realNumber) {
+		return '';
+	}
+
+	function explain() {
+		return '';
+	}
+
+	function parse () {}
+
+	function localFilterArray ($row) {
+		$corpus = $row['corpus'];
+		$valid = true;
+		if ($corpus == $this->corpusObject->getCorpusNum()) {
+			$word_id = $row['pw_id'];
+			$sql = "SELECT DISTINCT entry.flags FROM word_entry INNER JOIN entry ON entry.id = word_entry.entry_id AND
+					entry.corpus_id = {$this->likeCorpus}
+					WHERE word_entry.word_id = $word_id";
+			$result = SQLQuery (openConnection(false), $sql);
+			while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+				if (preg_match ("/[{$row['flags']}]/i", $this->spec)) {
+					$valid = false;
+				} else {
+					break;
+				}
+			}
+		}
+		return $valid;
+	}
+
 }
 
 class corpusDev extends corpus {
