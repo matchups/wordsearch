@@ -4,6 +4,7 @@ function comment ($text) {
 	if (is_array ($text)) {
 		foreach ($text as $key => $value) {
 			if (isset ($temp)) {$temp .= ' ^ ';}
+			if ($class = get_class ($value)) {$value = "<$class>";}
 			$temp .= "$key => $value";
 		}
 		$text = $temp;

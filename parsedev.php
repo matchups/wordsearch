@@ -358,12 +358,16 @@ function corpusInfo ($table, $option, &$consObjects) {
 				}
       }
     } else if (preg_match ('/^c([0-9]+)flag(.)(.*)$/', $key, $matches)  &&  $option == 'W') {
+			comment ($matches);
 			$corpus = $matches[1];
 			if ($matches [2] == '@') { // fake item set in code
-				if ($useWhere[$corpus]) {
-					$moreSQL .= " /* need to try a different approach for $corpus */";
-				} else {
-					$moreSQL .= $GLOBALS['corpusObjects'][$corpus] -> moreSQL ($table, $matches[3], $parm);
+				$ret = $GLOBALS['corpusObjects'][$corpus] -> moreSQL ($table, $matches[3], $parm);
+				comment ($ret);
+				if (isset ($ret ['where'])) {
+					$moreSQL .= $ret ['where'];
+				}
+				if (isset ($ret ['cons']) && $table == 'entry') {
+					$consObjects["clfa$thisCorpus"] = $ret ['cons'];
 				}
 			} else {
 				$flags[$corpus] = ($flags[$corpus] ?? '') . $matches [2];
@@ -396,7 +400,7 @@ function corpusInfo ($table, $option, &$consObjects) {
 			$corpusObject = $GLOBALS['corpusObjects'][$thisCorpus];
 			if ($corpusObject->likeCorpus()) {
 				if ($table == 'entry') {
-					$consObjects["clf$thisCorpus"] = new ccCorpusLikeFlags ($nonflags[$thisCorpus], 0, flags, $corpusObject);
+					$consObjects["clfb$thisCorpus"] = new ccCorpusLikeFlags ($nonflags[$thisCorpus], 0, false, $corpusObject);
 					$likeFlags = true;
 				}
 			} else {

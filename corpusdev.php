@@ -386,13 +386,15 @@ class corpusWiktionary extends corpusWikipedia {
 
 	public function moreSQL ($table, $type, $value) {
 		// $type always 'cap' for now
+		$cap = strtolower ($value) == 'c';
+		comment ("$value $cap");
 		if ($this->corpus == $this->flagCorpus) {
 			$corpusFilter = "<> {$this->corpus}";
+			$not = ($cap ? '' : 'NOT');
+			return array ('where' => " AND ($table.corpus_id $corpusFilter OR $table.flags $not LIKE '%C%') ");
 		} else {
-			$corpusFilter = "IS NULL";
+			return array ('cons' => new ccCorpusLikeFlags ('C', 0, $cap, $this));
 		}
-		$not = ($value == 'C' ? '' : 'NOT');
-		return (" AND ($table.corpus_id $corpusFilter OR $table.flags $not LIKE '%C%') ");
 	}
 
 	public function getValidateCorpusCode () {
@@ -708,13 +710,17 @@ class ccCorpusLikeFlags extends corpusConstraint {
 					entry.corpus_id = {$this->likeCorpus}
 					WHERE word_entry.word_id = $word_id";
 			$result = SQLQuery (openConnection(false), $sql);
-			while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-				if (preg_match ("/[{$row['flags']}]/i", $this->spec)) {
+			// If all hits match, it's invalid, but if there are no hits or if one does not match, it's okay
+			while ($innerRow = $result->fetch(PDO::FETCH_ASSOC)) {
+				if (preg_match ("/[{$innerRow['flags']}]/i", $this->spec)) {
 					$valid = false;
 				} else {
+					$valid = true;
 					break;
 				}
 			}
+			$msg = "$valid XOR {$this->not}";
+			$valid = ($valid XOR $this->not); // Must be inside corpus-matching block
 		}
 		return $valid;
 	}
