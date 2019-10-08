@@ -50,11 +50,11 @@ class constraint {
 
   public function localFilterArray ($row) {
 		// Most classes will use the regular localFilter; this one has been added to provide access to other elements
-		return $this->localFilter ($row['word'], $row['entry'], $row['entry_id']);
+		return $this->localFilter ($row['word'], $row['entry']);
 	}
 
 
-	public function localFilter($oneword, $entry, $entry_id) {
+	public function localFilter($oneword, $entry) {
 		// Do any additional filtering that can't be done in SQL
 		// $oneword = the word to check
 		// $entry = external name; useful for literal or source checks
@@ -278,7 +278,7 @@ class consregex extends constraint {
 		}
 	}
 
-	public function localFilter($oneword, $entry, $entry_id) {
+	public function localFilter($oneword, $entry) {
 		if ($this->local) {
 			$matched = preg_match ($this->regex, $this->raw ? entry : $oneword);
 			if ($this->not) {
@@ -629,7 +629,7 @@ class consenum extends constraint {
 		}
 	}
 
-	public function localFilter($oneword, $entry, $entry_id) {
+	public function localFilter($oneword, $entry) {
 		return preg_match ($this->pattern, asciitize ($entry));
 	}
 

@@ -1,6 +1,13 @@
 <?php
 // Insert a comment into the output page.
 function comment ($text) {
+	if (is_array ($text)) {
+		foreach ($text as $key => $value) {
+			if (isset ($temp)) {$temp .= ' ^ ';}
+			$temp .= "$key => $value";
+		}
+		$text = $temp;
+	}
 	if ($GLOBALS ['level'] < 3) {
 		// For regular users, don't provide full plaintext comment as a security measure,
 		// but create a digest of the comment so I can tell if I'm on the right track when trying to reproduce an issue.
@@ -9,6 +16,18 @@ function comment ($text) {
 	$text = str_replace (array ('<!--', '-->'), array ('<! --', '-- >'), $text); // avoid prematurely closing comments in funny cases
 	Echo "<!-- $text -->";
 	}
+
+function commentTime ($text) {
+	$ourTime = timeDiff ($GLOBALS['time']['top'], microtime ());
+	if (is_array ($text)) {$text ['time'] = $ourTime;}
+	else {$text .= " time=$ourTime";}
+	comment ($text);
+	if ($ourTime > 180000) {
+		$msg = " *** Execution exceeds three minutes ***";
+		echo " (($msg))";
+		Throw new Exception ($msg);
+	}
+}
 
 function errorMessage ($text) {
   echo "<span class='error'>Sorry, unable to process your request.  Please <A HREF='mailto:error@alfwords.com'>let us know</A>.</span>\n";
