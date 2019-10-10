@@ -1,0 +1,9 @@
+/* Error messages */
+.error {
+  color: red;
+}
+
+/* Hint text */
+.internal {
+  color: blue;
+}

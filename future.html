@@ -1,6 +1,7 @@
 <HTML>
 <HEAD>
 <TITLE>Word Search Plans</TITLE>
+<link rel='stylesheet' href='future.css'>
 </HEAD>
 
 <BODY>
@@ -54,24 +55,22 @@
   <LI>0.83 Delete query (done)
   <LI>Validate needs expansion when raw checked (done)
   <LI>0.84 Share query (done)
-  <LI><font color=red>SQL issues</font>
+  <LI>SQL issues (all done)
   <OL type=a>
-    <LI>Look into why *bombing* dies (done)
+    <LI>Look into why *bombing* dies
     <LI>Similarly, SVs starting with James (same)
-    <LI>Once that's fixed, support categories on LIKE corpora again (done)
-    <LI>Support C and U on LIKE corpora as well (done)
-    <LI>don't include AND PW.text BETWEEN '' AND 'zzz' (done)
+    <LI>Once that's fixed, support categories on LIKE corpora again
+    <LI>Support C and U on LIKE corpora as well
+    <LI>don't include AND PW.text BETWEEN '' AND 'zzz'
     <LI>Don't add fours & pairs unless they help
   </OL>
   <LI>0.85 Access shared query (done)
   <LI>Move Save Query to sidebar (done)
-  <LI>See above
-  <LI>0.86 Rename query
+  <LI>0.86 Rename query (done)
   <LI>Try to switch to https://cdnjs.com/libraries/jquery-typeahead
-  <LI><font color=blue>Release</font>
+  <LI><span class=internal>Release</span>
 <!--
-Look for 'dev' references in beta after vup
-vup new stuff to beta; remove 'dev' from include utility in base
+remove 'dev' from include utility in base
 Future+1: Remove 'dev' from include utility in dev
 -->
   </UL>
@@ -87,7 +86,7 @@ Future+1: Remove 'dev' from include utility in dev
   </OL>
   <LI>0.91 Show letters in anagram/bank order
   <LI>0.92 Links
-    <LI>
+    <OL type=a>
     <LI>suppress
     <LI>source
     <LI>Google
@@ -96,7 +95,7 @@ Future+1: Remove 'dev' from include utility in dev
     <LI>nGram viewer
     <LI>IMDB
     <LI>custom
-    </UL>
+    </OL>
   <LI>0.93 Display letters only
   <LI>0.94 Number of answers per page
   <LI>0.95 Show subwords, weights, etc.
@@ -110,29 +109,30 @@ Future+1: Remove 'dev' from include utility in dev
 <UL>
   <LI>Poll testers on features/bug fixes
   <LI>1.01 User settings
-  <UL>
+  <OL type=a>
 	<LI>Start page
 	<LI>Corpus: for each, default on, off, or invisible
 	<LI>Constraints: visible/invisible (list, descriptions, & permissions as static methods)
 	<LI>Filters: default on/off
 	<LI>Session timeout (defaults to an hour)
-  </UL>
+  </OL>
   <LI>1.02 Track queries
   <LI>1.03 Fix some bugs, including UI weaknesses
-  <UL>1.04 Security
+  <LI>1.04 Security
+  <OL type=a>
     <LI>Use form for support e-mail
     <LI>Timeout and update session status
     <LI><strike>Split database (constant words one and mutile one)</strike>
     <LI>Share & access word lists--prevent URI hacking
-  </UL>
+  </OL>
   <LI>1.05 Side ribbon
-  <UL>
+  <OL type=a>
 	<LI>Contact Us link (done)
 	<LI>copyright notice
 	<LI>Help: search, features, account types, known issues & future plans
-  </UL>
+  </OL>
   <LI>1.06 Self-service account management
-  <UL>
+  <OL type=a>
 	<LI>Create account (easy choice among gmail, outlook, yahoo, hotmail, oberlin.edu)
 	<LI>Confirm e-mail address
 	<LI><A HREF="https://stackoverflow.com/questions/75057/what-is-the-best-way-to-check-the-strength-of-a-password">Password strength</A> feedback
@@ -143,13 +143,18 @@ Future+1: Remove 'dev' from include utility in dev
 	<LI>EULA
 	<LI>robot detection
 	<LI>E-mail on shares/unshares
-  </UL>
+  </OL>
   <LI>1.07 Web 2.0
-  <UL>
+  <OL type=a>
     <LI>FB page
     <LI>Bug tracker with voting for premium+ users
-  </UL>
-  <LI>1.08 Accepting payment (discount for active NPL, MIT Hunt, AlfHunt composers)
+  </OL>
+  <LI>1.08 Accepting payment
+  <OL type=a>
+    <LI>Paypal demo
+    <LI>discount for active NPL, MIT Hunt, AlfHunt composers
+    <LI>Paypal for real
+  </OL>
   <LI>1.09 Admin dashboard with transaction download & e-mail blast
   <LI><font color="#FFFFFF">9.99 </font>Actual release
 </UL>
@@ -188,6 +193,8 @@ Future+1: Remove 'dev' from include utility in dev
 * Test
 * Increment version number
 * vup; compare beta to dev
+* vup new stuff to beta
+* Look for 'dev' references in beta after vup
 * Copy everything to network (with hide)
 * Retest
 * git push
