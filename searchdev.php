@@ -32,6 +32,7 @@ $pattern - Word Search $type $version
 </HEAD>\n";
 
 $time['top'] = microtime();
+$time['top.int'] = microtime(true);
 include "results" . $type . ".php";
 include "parse" . $type . ".php";
 // Initialize cache (used in fetchUrl)
@@ -98,6 +99,9 @@ try {
 		}
 		$time['end'] = microtime();
 		foreach ($time as $key => $value) {
+			if (strpos ($key, '.int')) {
+				continue;
+			}
 			if ($key <> 'top') {
 		 		comment ("$prevkey-$key=" . timeDiff ($previous, $value));
 			}

@@ -6,11 +6,11 @@ function showResults ($result, $consObjects, $corpusObjects) {
 	$counter = 0;
 	$timedOut = false;
 	if ($level == 3) {
-		$timeout = 200;
+		$timeout = 110;
 	} else {
 		$timeout = 30;
 	}
-	$timeout = $timeout + microtime (true);
+	$timeout = $timeout + $GLOBALS['time']['top.int'];
 
 	if (get_class ($result) <> "PDOStatement") {
 		echo "<span class='error'>$result</span>"; // Error message
