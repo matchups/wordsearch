@@ -215,33 +215,6 @@ function getUserFromIP () {
   return $userid;
 }
 
-function suggestStyleFromCorpus ($prefix, $userid, $shared) {
-  // Get list of corpora, regardless of whether they have categories
-  $sql = "SELECT DISTINCT corpus.id FROM corpus LEFT OUTER JOIN corpus_share ON corpus_share.corpus_id = corpus.id
-    WHERE corpus.owner = $userid";
-	if ($shared) {
-		$sql .= " OR corpus_share.user_id = $userid OR owner IS NULL";
-	}
-  $result = openConnection(false)->query($sql);
-  $ret = '';
-  while($row = $result->fetch(PDO::FETCH_ASSOC)) {
-    $ret .= ".{$prefix}{$row['id']}, ";
-  }
-
-  // Provide lookup CSS
-  return $ret . ".{$prefix}end {
-              border: 2px solid #CCCCCC;
-              border-radius: 8px 8px 8px 8px;
-              font-size: 24px;
-              height: 45px;
-              line-height: 30px;
-              outline: medium none;
-              padding: 8px 12px;
-              width: 400px;
-          }
-  ";
-}
-
 function getCheckbox ($id) {
 	if (isset($_GET[$id])) {
 		if ($_GET[$id] == 'on') {
@@ -251,15 +224,24 @@ function getCheckbox ($id) {
 	return false;
 }
 
-function scriptRefs ($typeahead, $utility) {
-	return ($typeahead ? "<script src='https://code.jquery.com/jquery-2.1.4.min.js'
-	integrity='sha384-R4/ztc4ZlRqWjqIuvf6RX5yb/v90qNGx6fS48N0tRxiGkqveZETq72KgDVJCp2TC'
-	crossorigin='anonymous'></script>
-<script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'
-	integrity='sha384-pPttEvTHTuUJ9L2kCoMnNqCRcaMPMVMsWVO+RLaaaYDmfSP5//dP6eKRusbPcqhZ'
-	crossorigin='anonymous'></script>
-<script src='typeahead.js'></script>\n" : '') .
-($utility ? "<script src='utility$utility.js'></script>\n" : '');
+function scriptStyleRefs ($typeahead, $utility, $wide) {
+$dotMin = $GLOBALS['minify'] ?? true;
+return ($typeahead ? "<script src='https://code.jquery.com/jquery-3.3.1.min.js'
+			integrity='sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=' crossorigin='anonymous'></script>
+		<script src='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js'
+			integrity='sha256-VsEqElsCHSGmnmHXGQzvoWjWwoznFSZc6hs7ARLRacQ=' crossorigin='anonymous'></script>" .
+		($dotmin ? "<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery-typeahead/2.10.6/jquery.typeahead.min.js'
+			integrity='sha256-W+Cxk9exgjON2p73M4RcoKvCpQUZ+IjXhEzZk6rlg9M=' crossorigin='anonymous'></script>"
+			: "<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery-typeahead/2.10.6/jquery.typeahead.js'></script>")
+		 : '') .
+
+	($utility ? "<script src='utility$utility.js'></script>\n" : '') . "
+	<meta name='viewport' content='width=device-width, initial-scale=1'>
+	" . ($typeahead ? ($dotMin ? "<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/jquery-typeahead/2.10.6/jquery.typeahead.min.css'
+		integrity='sha256-CU0/rbxVB3Eixd3bbIuJxHJLDnXriJS9cwp/BfcgpLw=' crossorigin='anonymous'>"
+		: "https://cdnjs.cloudflare.com/ajax/libs/jquery-typeahead/2.10.6/jquery.typeahead.css") : '') . "
+	<link rel='stylesheet' href='styles$type.css'>
+	". ($wide ? "<link rel='stylesheet' href='wideleft.css'>" : '');
 }
 
 ?>

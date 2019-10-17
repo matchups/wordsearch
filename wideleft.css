@@ -1,3 +1,9 @@
 body {
   margin-left: 200px; /* Same as the width of the sidenav */
 }
+
+.wizard-content {
+  margin-right: 390px;
+  margin-left: 3px;
+  background-color: #e0e0ff;
+}

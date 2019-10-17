@@ -336,6 +336,7 @@ class corpusWikipedia extends corpus {
 	protected function formCatLookup() {
 		$corpus = $this -> corpus;
 		$flagCorpus = $this -> flagCorpus;
+		$type = $GLOBALS['type'];
 		echoUnique ("\n<script>
 			function categoryLookup (thisOption, thisCorpus) {
 				categoryOption = thisOption; // global
@@ -351,15 +352,24 @@ class corpusWikipedia extends corpus {
 				document.getElementById('catlookup').style.display = 'none';
 				document.getElementById('category' + currentCorpus).style.display = 'none';
 			}
-			</script>\n");
-		echo "<script>
-			$(document).ready(function() {
-				$('input.category$corpus').typeahead({
-					name: 'category$corpus',
-					remote: 'catsuggest{$_GET['type']}.php?query=%QUERY&corpus=$flagCorpus'
-				});
-			})
-			</script>\n";
+
+$.typeahead({
+    dynamic: true,
+		input: '.js-typeahead-category',
+    delay: 500,
+    source: {
+      ajax: {
+        url: 'catsuggest$type.php',
+        data: {
+           query: '{{query}}',
+           corpus: '2'
+       },
+       path: 'data'
+      }
+    }
+});
+</script>
+");
 	}
 } // end Wikipedia
 

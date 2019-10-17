@@ -14,14 +14,11 @@ if ($code = securityCheck ($level, $userid, $sessionid)) {
 <HEAD>
 <TITLE>Word Search</TITLE>
 <?php
-echo scriptRefs (true, $type);
+echo scriptStylRefs (true, $type, true);
 include "cons$type.php";
 include "corpus$type.php";
 
-echo "<meta name='viewport' content='width=device-width, initial-scale=1'>
-<link rel='stylesheet' href='styles.css'>
-<link rel='stylesheet' href='catcss$type.php'>
-<link rel='stylesheet' href='wideleft.css'>
+echo "
 </HEAD>
 
 <BODY>\n";

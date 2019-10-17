@@ -14,7 +14,7 @@ try {
     // set the PDO error mode to exception
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-runit ("insert corpus_flag (corpus_id, letter, description) values (2, 'R', 'redirects')");
+runit ("delete from query where owner < 0");
 
     }
 catch(PDOException $e)
@@ -31,4 +31,3 @@ function runit ($sql) {
 ?>
 <BR>
 bottom
-

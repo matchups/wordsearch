@@ -19,16 +19,13 @@ if (isset($_GET['hacktest'])) {
 // <script src='//{$foo}netsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>
 echo "<HTML>
 <HEAD>\n";
-echo scriptRefs (true, $type);
+echo scriptStyleRefs (true, $type, true);
 include "cons$type.php";
 include "corpus$type.php";
 
 $pattern = $_GET['pattern'];
 $version = $_GET['version'];
-echo "<meta name='viewport' content='width=device-width, initial-scale=1'>
-<link rel='stylesheet' href='styles$type.css'>
-<link rel='stylesheet' href='catcss$type.php'>
-<link rel='stylesheet' href='wideleft.css'>
+echo "
 <TITLE>
 $pattern - Word Search $type $version
 </TITLE>

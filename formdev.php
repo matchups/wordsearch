@@ -31,16 +31,22 @@ catch (PDOException $e) {
 // Set up lookups for any corpus which supports categories
 echo "<div id='catlookup' class='wizard'>
   <div class='wizard-content'>
-  <div class='csswarning'>Error building CSS.  This lookup may not look or function correctly.</div>
 	<form name='catwiz' id='catwiz'>\n";
 foreach ($corpusObjects as $corpusObject) {
   if (isset ($corpusObject->optionButtonList ()['category'])) {
     $corpus = $corpusObject->getCorpusNum();
-    echo "    <input type='text' name=category$corpus id=category$corpus class=category$corpus style='display: none'/>\n";
+    //     <input type='text' name=category$corpus id=category{$corpus}old class=category$corpus style='display: none'/>
+    echo "<div class='typeahead__container'>
+            <div class='typeahead__field'>
+              <div class='typeahead__query'>
+                <input class='js-typeahead-category' name=category$corpus[query] id=category$corpus type='search'
+                    placeholder='Search' autocomplete='off' style='display: none'/>
+              </div>
+            </div>
+          </div>";
   }
 }
 echo "</form>
-  <font color=white><P>.<P>.</font><!-- Invisible spacing so that buttons are not hidden-->
 	<button type='button' id='catclose' onclick='closeCatWizard(true);'>OK</button>
 	<button type='button' id='catcancel' onclick='closeCatWizard(false);'>Cancel</button>
   </div>
@@ -58,6 +64,7 @@ if ($level == 0) {
 	}
 }
 Echo "<BR>\n";
+
 Echo "<form name='search' id='search' action='search$type.php' onsubmit='return validateForm()' method='get'>\n";
 Echo "<input type=hidden id='simple' name='simple' value='" . ($advanced ? 'off' : 'on') . "' />\n";
 if ($advanced) {

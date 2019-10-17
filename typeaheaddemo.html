@@ -1,0 +1,49 @@
+<HTML>
+<head>
+<TITLE>Typeahead Test</TITLE>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-typeahead/2.10.6/jquery.typeahead.css">
+
+  <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-typeahead/2.10.6/jquery.typeahead.js"></script>
+</head>
+
+<BODY>
+<form id="form-country_v1" name="form-country_v1">
+  <div class="typeahead__container">
+    <div class="typeahead__field">
+      <div class="typeahead__query">
+        <input class="js-typeahead-country_v1" name="country_v1[query]" type="search" placeholder="Search" autocomplete="off">
+      </div>
+      <div class="typeahead__button">
+        <button type="submit">
+          <i class="typeahead__search-icon"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
+
+<script>
+$.typeahead({
+    input: '.js-typeahead-country_v1',
+    dynamic: true,
+    delay: 500,
+    debug: true,
+    source: {
+      ajax: {
+        url: "http://8wheels.org/wordsearch/catsuggestdev.php",
+        data: {
+           query: "{{query}}",
+           corpus: "2"
+       },
+       path: "data"
+      }
+    },
+    callback: {
+        onInit: function (node) {
+            console.log('Typeahead Initiated on ' + node.selector);
+        }
+    }
+});
+</script>
+</BODY>

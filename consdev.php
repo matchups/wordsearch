@@ -170,7 +170,7 @@ class conspattern extends constraint {
 		// Convert to regular expression
 		$spec = patternToRegex (expandSpecial ($this->spec), 'S');
 		$column = ($this->raw ? 'entry.name' : 'PW.text');
-		return $this->parseWhere ("AND $column " . $this->maybeNot() . " RLIKE '$spec' ");
+		return $this->parseWhere (" AND $column " . $this->maybeNot() . " RLIKE '$spec' ");
 	}
 
 	public function position() {

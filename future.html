@@ -62,12 +62,17 @@
     <LI>Once that's fixed, support categories on LIKE corpora again
     <LI>Support C and U on LIKE corpora as well
     <LI>don't include AND PW.text BETWEEN '' AND 'zzz'
-    <LI>Don't add fours & pairs unless they help
+    <LI><span class=error>Don't add fours & pairs unless they help</span>
   </OL>
   <LI>0.85 Access shared query (done)
   <LI>Move Save Query to sidebar (done)
   <LI>0.86 Rename query (done)
-  <LI>Try to switch to https://cdnjs.com/libraries/jquery-typeahead
+  <LI>switch to https://cdnjs.com/libraries/jquery-typeahead
+<!--
+And add integrity check
+Then see 84'f again
+-->
+  <LI><A HREF="http://8wheels.org/wordsearch/searchdev.php?simple=off&pattern=Allen*&query2=%5E.....+%5Ba-z%5D*%24&craw2=on&radio2=regex&count=2&sessionkey=8%3Cd9fxoh%29bl1&level=3&minlen=9&maxlen=18&whole=on&single=on&phrase=on&corpus2=on&query2_1=%3E50&radio2_1=links&count2=1&c3cap=on&c3uncap=on&count3=0&c90cap=on&c90uncap=on&count90=0&morecbx=+corpus2+c2flagR+corpus3+c3flagR+c3flagF+c3cap_dc+c3uncap_dc+corpus90+c90flagR+c90flagF+c90cap_dc+c90uncap_dc+corpus91&type=dev&version=0.71f">Allen search</A> <span class=error>filtering on category "people" has no hits</span>
   <LI><span class=internal>Release</span>
 <!--
 remove 'dev' from include utility in base
@@ -82,9 +87,9 @@ Future+1: Remove 'dev' from include utility in dev
     <LI><A HREF="https://tools.qhex.org/">Qhex</A>
     <LI><A HREF="https://nutrimatic.org/">Nutrimatic</A>
     <LI><A HREF="http://wordsmith.org/anagram/index.html">IAS</A>
-    <LI>Ask dimitri
+    <LI>Ask dmitri
   </OL>
-  <LI>0.91 Show letters in anagram/bank order
+  <LI>0.91 Show letters in anagram/bank order (with links); test with "Upper Bank" query
   <LI>0.92 Links
     <OL type=a>
     <LI>suppress
@@ -98,12 +103,22 @@ Future+1: Remove 'dev' from include utility in dev
     </OL>
   <LI>0.93 Display letters only
   <LI>0.94 Number of answers per page
-  <LI>0.95 Show subwords, weights, etc.
+  <LI>0.95 Show subwords, weights, etc. with tabular option
   <LI>0.96 Answers in anagram, bank, length, subword, weight, popularity [# incoming links] order
   <LI>0.97 Force upper/lower case
   <LI>0.98 Choice of fonts
   <LI>0.99 Multiple hits per line
-  <LI>0.9A Use italics, bold, color to differentiate corpuses and flags
+  <LI>0.9A Use italics, bold, color (F & B), font to differentiate corpuses, flags, & stuff from .95
+  </UL>
+<LI>0.A More projects
+  <UL>
+  <LI>0.A1 Break up long-running queries
+  <LI>0.A2 Gooch
+  <LI>0.A3 Source processing
+  <LI>0.A4 Filter on number of distinct letters
+  <LI>0.A5 Filter on instances of a particular letter or group or equal to another
+  <LI>0.A6 Instead of filtering, apply .9A
+  <LI>0.A7 Recursive queries on results
   </UL>
 <LI>1.0 Public release
 <UL>
@@ -115,6 +130,7 @@ Future+1: Remove 'dev' from include utility in dev
 	<LI>Constraints: visible/invisible (list, descriptions, & permissions as static methods)
 	<LI>Filters: default on/off
 	<LI>Session timeout (defaults to an hour)
+	<LI>Output option defaults
   </OL>
   <LI>1.02 Track queries
   <LI>1.03 Fix some bugs, including UI weaknesses
