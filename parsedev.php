@@ -79,19 +79,21 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 
 	$sql = $sql . doWordTypes ();
 	$sql = $sql . doLength ('PW', $minlen, $maxlen, true);
-	foreach (array (doPairs ($required . patternRequired ($pattern)),
-					doPosition ($position, $minlen, $maxlen)) as $join) {
-		if ($join > '') {
-			$sql = str_replace ($prewhere, "$join $prewhere", $sql);
-		}
-	}
 	$fourlist = $anyorder ? '' : $pattern;
 	foreach ($consObjects as $thisConsObject) {
 		$fourlist .= '|' . $thisConsObject->fourPattern();
 	}
 
-	if ($fourjoin = doFour ($fourlist, '')) {
-		$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
+  $cost = getCost ($baseSQL = $sql);
+	foreach (array (doPairs ($required . patternRequired ($pattern)),
+					doPosition ($position, $minlen, $maxlen), doFour ($fourlist, '')) as $join) {
+		if ($join > '') {
+			$sqlTest = str_replace ($prewhere, "$join $prewhere", $baseSQL);
+			if (($costTest = getCost ($sqlTest)) < $cost) {
+				$sql = $sqlTest;
+				$cost = $costTest;
+			}
+		}
 	}
 
 	$by = "PW.text, word_entry.whole DESC, entry.corpus_id";

@@ -54,7 +54,7 @@ try {
 			$sql = 'EXPLAIN ' . $sql;
 		} else if ($level < 3) {
 			if ($rows == 0) {
-				$rows = getWidth ($sql);
+				$rows = getCost ($sql);
 			}
 			if (($level < 2 && $rows > 80000) || $rows > 1000000) {
 				$result = "Your query may take too long to run.  Please add more letters.";
@@ -174,7 +174,7 @@ function buildReloadQuery ($consObjects) {
 // Force an index on bank if possible and no other index is being used
 function refineQuery ($sql, &$rows) {
 	if (strpos ($sql, 'PW.bank') !== false) {
-		$result = $GLOBALS['conn']->query("EXPLAIN $sql")->fetch(PDO::FETCH_ASSOC);
+		$result = openConnection(false)->query("EXPLAIN $sql")->fetch(PDO::FETCH_ASSOC);
 		if (isset ($result['key'])) {// key used by SQL for outer loop
 			$rows = $result['rows'];
 		} else {
@@ -185,7 +185,7 @@ function refineQuery ($sql, &$rows) {
 	return str_replace (array ("\n", "\t"), ' ', $sql);
 }
 
-function getWidth ($sql) {
-	return ($GLOBALS['conn']->query("EXPLAIN $sql")->fetch(PDO::FETCH_ASSOC))['rows'];
+function getCost ($sql) {
+	return (openConnection(false)->query("EXPLAIN $sql")->fetch(PDO::FETCH_ASSOC))['rows'];
 }
 ?>
