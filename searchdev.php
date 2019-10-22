@@ -16,10 +16,9 @@ if (isset($_GET['hacktest'])) {
 } else {
 	$foo = 'x';
 }
-// <script src='//{$foo}netsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>
 echo "<HTML>
 <HEAD>\n";
-echo scriptStyleRefs (true, $type, true);
+echo scriptStyleRefs (true, true, true);
 include "cons$type.php";
 include "corpus$type.php";
 

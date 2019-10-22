@@ -1,0 +1,292 @@
+<HTML>
+<HEAD>
+<TITLE>Word Search</TITLE>
+<script type='text/javascript'>
+var optionNumber = 1;
+
+function validateForm() {
+    var minlen = document.forms["search"]["minlen"].value;
+    var maxlen = document.forms["search"]["maxlen"].value;
+    var single = document.forms["search"]["single"].checked;
+    var phrase = document.forms["search"]["phrase"].checked;
+    var wikipedia = document.forms["search"]["wikipedia"].checked;
+    var gettysburg = document.forms["search"]["gettysburg"].checked;
+    var wiktionary = document.forms["search"]["wiktionary"].checked;
+
+    var pattern = document.forms["search"]["pattern"].value;
+    if (badGroups (pattern)) {
+        alert("Invalid letter group in main pattern");
+        return false;
+    }
+
+    if (document.forms["search"]["anyorder"].checked  &&  /[\[@#&].*[\[@#&]/.test(pattern)) {
+	alert ("Only one character group is allowed when 'any order' is specified.");
+	return false;
+    } 
+
+    for (thisOption = 2; thisOption <= optionNumber; thisOption++) {
+	thispattern = document.forms["search"]["query" + thisOption].value;
+	if (document.forms["search"]["rpattern" + thisOption].checked) {
+            if (!/^[a-z?*@#&\[\-\]]+$/i.test (thispattern)) {
+        	alert("Invalid character in pattern " + thisOption);
+        	return false;
+	    }
+	    if (badGroups (thispattern)) {
+        	alert("Invalid letter group in pattern " + thisOption);
+        	return false;
+	    }
+        } else if (document.forms["search"]["rsubword" + thisOption].checked) {
+	    if (/[^a-z0-9:{},\-]/i.test(thispattern)) {
+        	alert("Invalid character in subword specification " + thisOption);
+        	return false;
+	    }
+        } else if (document.forms["search"]["rweight" + thisOption].checked) {
+	    if (/[^0-9\-+<=>]/i.test(thispattern) || /[\-+].*[\-+]/.test(thispattern) ||
+		    /[<=>].*[<=>]/.test(thispattern) || !(/[<=>][1-9][0-9]*$/.test(thispattern))) {
+        	alert("Invalid weight specification " + thisOption);
+        	return false;
+	    }
+	}
+    }
+
+    if ((maxlen > 0) && (+maxlen < +minlen)) {
+        alert("Minimum is greater than maximum");
+        return false;
+    }
+
+    if (!single && !phrase) {
+	alert ("Must choose Single words and/or Phrases");
+	return false;
+    }	
+
+    if (!gettysburg && !wikipedia) {
+	alert ("Must choose at least one source");
+	return false;
+    }	
+}
+
+function badGroups (pattern) {
+    var inside = false;
+    var pos;
+    for (pos = 0; pos < pattern.length; pos++) {
+	var onechar = pattern.substring (pos, pos + 1);
+	if (onechar == "[") {
+	    if (inside) {return true;}
+	    inside = true;
+	} else if (onechar == "]") {
+	    if (!inside) {return true;}
+	    inside = false;
+	} else if (onechar == "!") {
+	    if (pattern.substring (pos - 1, pos) != "[") {return true;}
+	} else if (onechar == "-") {
+	    if (!/[a-z]-[a-z]/i.test(pattern.substring (pos-1, pos+2))) {return true;}
+	    if (pattern.substring (pos-1, pos) >= pattern.substring (pos+1, pos+2)) {return true;}
+	}
+    }
+    if (inside) {return true;}
+    return false;
+}
+
+function addOption () {
+    var theForm = document.getElementById("search"); 
+    optionNumber++;
+    var here = document.getElementById("count");
+    here.value = optionNumber;
+    var myParent = here.parentNode;
+
+    var newOption = document.createElement("span");
+    newOption.id = "label" + optionNumber;
+    newOption.innerHTML = "#" + optionNumber + ": (not)";
+    myParent.insertBefore (newOption, here);
+
+    newOption = document.createElement("input");
+    newOption.name = "not" + optionNumber;
+    newOption.type = "checkbox";
+    newOption.id = "not" + optionNumber;
+    myParent.insertBefore (newOption, here);
+
+    newOption = document.createElement("input"); 
+    newOption.name = "query" + optionNumber;
+    newOption.type = "text";
+    newOption.required = true;
+    newOption.id = "query" + optionNumber;
+    myParent.insertBefore (newOption, here);
+
+    newOption = document.createElement("input");
+    newOption.type = "radio";
+    newOption.name = "radio" + optionNumber;
+    newOption.value = "pattern";
+    newOption.checked = true;
+    newOption.id = "rpattern" + optionNumber;
+    myParent.insertBefore (newOption, here);
+
+    newOption = document.createElement("span");
+    newOption.id = "tpattern" + optionNumber;
+    newOption.innerHTML = " pattern ";
+    myParent.insertBefore (newOption, here);
+
+    newOption = document.createElement("input");
+    newOption.type = "radio";
+    newOption.name = "radio" + optionNumber;
+    newOption.value = "regex";
+    newOption.id = "rregex" + optionNumber;
+    myParent.insertBefore (newOption, here);
+
+    newOption = document.createElement("span");
+    newOption.id = "tregex" + optionNumber;
+    newOption.innerHTML = " regex ";
+    myParent.insertBefore (newOption, here);
+
+    newOption = document.createElement("input");
+    newOption.type = "radio";
+    newOption.name = "radio" + optionNumber;
+    newOption.value = "subword";
+    newOption.id = "rsubword" + optionNumber;
+    myParent.insertBefore (newOption, here);
+
+    newOption = document.createElement("span");
+    newOption.id = "tsubword" + optionNumber;
+    newOption.innerHTML = " subword ";
+    myParent.insertBefore (newOption, here);
+
+    newOption = document.createElement("input");
+    newOption.type = "radio";
+    newOption.name = "radio" + optionNumber;
+    newOption.value = "weights";
+    newOption.id = "rweight" + optionNumber;
+    myParent.insertBefore (newOption, here);
+
+    newOption = document.createElement("span");
+    newOption.id = "tweight" + optionNumber;
+    newOption.innerHTML = " weight ";
+    myParent.insertBefore (newOption, here);
+
+    newOption = document.createElement ("button");
+    newOption.id = "delcons" + optionNumber;
+    newOption.innerHTML = "Remove";
+    newOption.setAttribute('onclick','removeConstraint(' + optionNumber + ')');
+    myParent.insertBefore (newOption, here);
+
+    newOption = document.createElement ("br");
+    newOption.id = "br" + optionNumber;
+    myParent.insertBefore (newOption, here);
+}
+
+function removeConstraint(thisOption)
+{
+    var theForm = document.getElementById("search"); 
+
+    var child = document.getElementById("label" + thisOption);
+    theForm.removeChild(child);
+    child = document.getElementById("not" + thisOption);
+    theForm.removeChild(child);
+    child = document.getElementById("query" + thisOption);
+    theForm.removeChild(child);
+    child = document.getElementById("rpattern" + thisOption);
+    theForm.removeChild(child);
+    child = document.getElementById("rregex" + thisOption);
+    theForm.removeChild(child);
+    child = document.getElementById("rsubword" + thisOption);
+    theForm.removeChild(child);
+    child = document.getElementById("rweight" + thisOption);
+    theForm.removeChild(child);
+    child = document.getElementById("tpattern" + thisOption);
+    theForm.removeChild(child);
+    child = document.getElementById("tregex" + thisOption);
+    theForm.removeChild(child);
+    child = document.getElementById("tsubword" + thisOption);
+    theForm.removeChild(child);
+    child = document.getElementById("tweight" + thisOption);
+    theForm.removeChild(child);
+    child = document.getElementById("delcons" + thisOption);
+    theForm.removeChild(child);
+    child = document.getElementById("br" + thisOption);
+    theForm.removeChild(child);
+
+    var here = document.getElementById("count");
+    if (here.value == thisOption) {
+	optionNumber--;
+	here.value = optionNumber;
+    }
+
+    return false;
+}
+
+function mainChange () 
+{
+    var lb = false;
+    if (document.forms["search"]["anyorder"].checked) {
+	var pattern = document.forms["search"]["pattern"].value;
+	// check for any duplicate letter
+        lb = ! (new RegExp(/(.).*\1/).test(pattern)) &
+	    pattern.indexOf ("*") < 0; // and no wildcard
+    }
+
+    document.forms["search"]["repeat"].disabled = !lb;
+    if (!lb) {
+	document.forms["search"]["repeat"].checked = false;
+    }
+}
+</script>
+</HEAD>
+
+<BODY>
+<H2>Word Search <font color="#000080">0.47</font></H2>
+<H3>Control</H3>
+<A href="simple.html">Basic search</A>
+<BR>
+<form name="search" action="wsback.php" id="search"
+   onsubmit="return validateForm()" method="get">
+<input type="submit" value="Submit" id="yyy"/>
+<input type=hidden id="type" name="type" value="" />
+
+<H3>Pattern</H3>
+<label>Basic Pattern: </label>
+   <input type=text name=pattern placeholder="PRE?O*" 
+   required=true pattern="[a-zA-Z\*\?\[\]\-\!]+" oninput="mainChange();"/>
+   <br>
+<label>Any order?</label>
+   <input name=anyorder type=checkbox onchange="mainChange();"/>
+<label>Repeat letters? <input name=repeat type=checkbox disabled=true
+   /></label><br>
+<input type=hidden id="count" name="count" value="1" />
+<button id="addbut" onclick="addOption();return false;">Add 
+   Constraint</button>
+
+<H3>Filters</H3>
+<label>Minumum length: <input type=number name=minlen min=3 
+   step=1 /></label><br>
+<label>Maximum length: <input type=number name=maxlen min=3 
+   step=1 /></label><br>
+<label>Whole entry only? <input name=whole type=checkbox 
+/></label><br>
+<label>Single words? <input name=single type=checkbox 
+   checked /></label><br>
+<label>Phrases? <input name=phrase type=checkbox checked /></label><br>
+
+<H3>Source</H3>
+<label>Wikipedia: <input name=wikipedia type=checkbox 
+   checked /></label><br>
+   <font color="#808080">
+   &nbsp; &nbsp; <label>Redirects okay? <input name=redir type=checkbox 
+   /></label><br>
+   </font>
+<label>Gettysburg: <input name=gettysburg type=checkbox 
+   checked /></label><br>
+<font color="#808080">
+<label>Wiktionary (English): <input name=wiktionary type=checkbox 
+   /></label><br>
+<label>Wiktionary (foreign): <input name=foreign disabled=true type=checkbox /></label><br>
+</font>
+<P>
+<input name=again type=hidden value="index.html" />
+<input type=hidden id="type" name="type" value="" />
+<input type="submit" value="Submit" id="xxx"/>
+</form>
+
+<form action="help.html">
+<input type="submit" value="Help" />
+</form>
+<A HREF="indexback.html">Previous</A><BR>
+<A HREF="indexbeta.html">Beta</A><BR>
+</BODY>

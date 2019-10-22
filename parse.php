@@ -86,14 +86,14 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 			$sql = str_replace ($prewhere, "$join $prewhere", $sql);
 		}
 	}
-	if (!$anyorder) {
-		$fourjoin = doFour ($pattern, '');
+	$fourlist = $anyorder ? '' : $pattern;
+	foreach ($consObjects as $thisConsObject) {
+		$fourlist .= '|' . $thisConsObject->fourPattern();
+	}
+
+	if ($fourjoin = doFour ($fourlist, '')) {
 		$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
 	}
-	foreach ($consObjects as $thisConsObject) {
-		$fourjoin = doFour ($thisConsObject->fourPattern(), ++$counter);
-		$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
-	} // end foreach
 
 	$by = "PW.text, word_entry.whole DESC, entry.corpus_id";
 	$orderby = " GROUP BY " . str_replace('DESC', '', $by) . " ORDER BY $by";
@@ -250,19 +250,35 @@ function doPosition ($position, $minlen, $maxlen) {
 // Filter on a tetragram or trigram, if possible
 function doFour ($pattern, $suffix) {
 	$pattern = groupToWildcard ($pattern);
-	foreach (array (4, 3) as $length) {
-		if (preg_match ('/[a-z]{' . $length . '}/', $pattern, $matches)) {
-			$substring = $matches[0];
-			if ($length == 4) {
-				$verb = '=';
-			} else {
-				$verb = 'LIKE';
-				$substring = $substring . '_';
+	$ret = '';
+	$bestScore = 0;
+	for ($first = 0; $first + 2 < strlen ($pattern); ++$first) {
+		for ($length = 3; $length < 5; ++$length) {
+			if (preg_match ('/^[a-z]*$/', $substring = substr ($pattern, $first, $length))) {
+				$newScore = 1;
+				foreach (str_split (strtoupper ($substring)) as $char) {
+					$newScore *= (strpos ("..ETAOINSRHDLUCMFYWGPBVKXQJZ", $char));
+				}
+				if (strpos (strtoupper ($substring), 'QU')) {
+					$newscore /= 10; // Don't overvalue this based on high scores of both letters.
+				} else if (preg_match ('/[^aeious][^aeiohlrs]/i', $substring)) {
+					$newScore *= 2;
+				}
+				if ($newScore > $bestScore) {
+					$bestScore = $newScore;
+					if ($length == 4) {
+						$verb = '=';
+						$target = "'$substring'";
+					} else {
+						$verb = 'BETWEEN';
+						$target = "'$substring' AND '$substring~'";
+					}
+					$ret = "INNER JOIN word_four WF$suffix ON WF$suffix.word_id = word_entry.word_id AND WF$suffix.quartet $verb $target";
+				}
 			}
-			return "INNER JOIN word_four WF$suffix ON WF$suffix.word_id = word_entry.word_id AND WF$suffix.quartet $verb '$substring'";
 		}
 	}
-	return '';
+	return $ret;
 }
 
 // Handle filtering by whole words, phrases, etc.
@@ -404,15 +420,6 @@ function expandSpecial ($string) {
 	return str_replace (array ('#', '@', '&'), array ('[aeiou]', '[^aeiou]', '[cdilmvx]'), $string);
 }
 
-function getCheckbox ($id) {
-	if (isset($_GET[$id])) {
-		if ($_GET[$id] == 'on') {
-			return true;
-		}
-	}
-	return false;
-}
-
 // Replace groups and repeat counts with wildcards when we only care about fixed letters
 function groupToWildcard ($pattern) {
 	$debug = 0;
@@ -451,7 +458,7 @@ function noDupes ($pat) {
 // Convert a pattern, as entered by the user, into a regular expression suitable for
 // the selected language (P for PHP or S for SQL).  Can also pass U for an unarchored pattern.
 function patternToRegex ($pat, $lang) {
-	$letterpat = '[a-z]';
+	$letterpat = '.';
 	$regex = str_replace ('?', $letterpat, str_replace ('*', $letterpat . '*', $pat));
 	if (strpos ($lang, 'U') === false) {
 		$regex = '^' . $regex . '$';

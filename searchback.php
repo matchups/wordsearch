@@ -1,54 +1,11 @@
+
 <?php
 $type = $_GET['type']; // beta, dev, etc.
 include "utility" . $type . ".php";
 
-// Need to check for a valid session before creating *any* output
-$valid = false;
-$code = '1';
-if (isset ($_GET['sessionkey'])  &&  isset ($_GET['level'])) { // make sure session info is passed to us
-	$session = $_GET['sessionkey'];
-	try {
-		$conn = openConnection (false);
-		$getLevel = $_GET ['level'];
-		if ($getLevel > 0) {
-			$start = "user.level";
-			$middle = "INNER JOIN user ON user.id = session.user_id";
-			$end = '';
-		} else {
-			$start = '0 AS level';
-			$middle = '';
-			$end = " AND session.user_id = 0";
-		}
-		$sql = "SELECT $start, ip_address FROM session $middle WHERE session_key = '$session' AND status = 'A' $end";
-		$result = $conn->query($sql);
-		if ($result->rowCount() > 0) { // make sure it is an active session
-			$row = $result->fetch(PDO::FETCH_ASSOC);
-			$level = $row['level'];
-			if ($level == $getLevel) {
-				if ($level < 2 && $type > '') {
-					$code = '4'; // basic not authorized for anything other than base
-				} else if ($level < 3 && $type == 'dev') {
-					$code = '5'; // only pro authorized for dev
-				} else if ($level == 0 && isset($_GET['query2'])) {
-					$code = '6'; // guest can't use additional criteria
-				} else if (explode ('|', $row['ip_address'])[0] == $_SERVER['REMOTE_ADDR']) {
-					$valid = true;
-				} else {
-					$code = '7';
-				}
-			} else {
-				$code = '2'; // URL lies about the user's level
-			}
-		} else {
-			$code = '3';
-		}
-	}
-	catch(PDOException $e) {
-		$code = $e->getCode ();
-	}
-}
+$conn = openConnection (false); // get into a global for subsequent use
 
-if (!$valid) {
+if ($code = securityCheck ($level, $userid, $sessionid)) {
 	header("Location: http://www.8wheels.org/wordsearch/index.html?code=$code"); // No valid session, so ask user to sign on
 		// and provide a general indication of the error type for our use
 	exit();
@@ -66,7 +23,9 @@ include "corpus$type.php";
 $pattern = $_GET['pattern'];
 $version = $_GET['version'];
 echo "<meta name='viewport' content='width=device-width, initial-scale=1'>
-<link rel='stylesheet' href='styles.css'>
+<link rel='stylesheet' href='styles$type.css'>
+<link rel='stylesheet' href='styles$type.php'>
+<link rel='stylesheet' href='wideleft.css'>
 <TITLE>
 $pattern - Word Search $type $version
 </TITLE>
@@ -82,9 +41,6 @@ $cache['body'] = '';
 try {
 	echo '<BODY onload="reloadQuery();">';
 	echo "<H2>Word Search $type $version Results: <span class='specs'>$pattern";
-
-	// Connect briefly in write mode to update the session
-	openConnection (true)->exec ("UPDATE session SET last_active = UTC_TIMESTAMP() WHERE session_key = '$session'");
 
   try {
 		$sql = parseQuery ($pattern, $consObjects, $corpusObjects);
@@ -116,6 +72,7 @@ try {
 		comment ("Got " . $result->rowCount() . " rows");
 	}
 	$time['afterquery'] = microtime();
+
 	if ($explain) {
 		echo "<div class='code'>$sql</div><br>";
 		showExplain ($result);
@@ -123,10 +80,21 @@ try {
 		// Loop through words and display results
 		comment ($sql);
 		$ret = showResults ($result, $consObjects, $corpusObjects);
-		if (preg_match ("/^time\^(.*)$/", $ret, $matches)) {
-			$url = preg_replace ('/&from=.*$/', '', $_SERVER['REQUEST_URI']) . "&from={$matches[1]}";
+		if ($ret['code'] == 'none') {
+			echo "No matches found.<BR>";
+		}
+		if ($ret ['code'] == 'time') {
+			$url = preg_replace ('/&from=.*$/', '', $_SERVER['REQUEST_URI']) . "&from={$ret['restart']}";
 			$url = substr ($url, 12); // remove /wordsearch/
-			echo "<P>Request timed out.  Select <A HREF=http://www.alfwords.com/$url>more</A> to see additional results.<BR>";
+			echo "<P>Request timed out.  Select <A HREF=http://www.alfwords.com/$url>more</A> to see additional results.  ";
+			if (isset ($ret['save'])) {
+				echo "You will be able to save the results once all results have been displayed.";
+			}
+			echo "<BR>\n";
+		} else if (isset ($ret['save'])) {
+			$sessionEncoded = urlencode ($_GET['sessionkey']);
+			echo "<P><A HREF='http://www.alfwords.com/asksaveresults$type.php?sessionkey=$sessionEncoded&type=$type&level=$level&source=results'
+				target='_blank'>Save Results</A><BR>\n";
 		}
 		$time['end'] = microtime();
 		foreach ($time as $key => $value) {
@@ -141,13 +109,15 @@ try {
 catch(PDOException $e) {
 	errorMessage ("SQL failed: {$GLOBALS['lastSQL']}... " . $e->getMessage());
 } // end main code block
+catch(Exception $e) {
+	errorMessage ($e->getMessage());
+} // end main code block
 
 // Some stuff outside try/catch block so the rest of the page won't suffer.
 echo "<P>";
 
 // Display form to allow user to edit and resubmit query
 include "form$type.php";
-preserveInfo ($type, $version);
 buildReloadQuery ($consObjects);
 
 echo '</BODY>';
@@ -173,13 +143,8 @@ function buildReloadQuery ($consObjects) {
 	}
 
 	foreach (explode (' ', $fieldlist) as $name) {
-		if (strpos ($name, '_dc') !== false) {
-			$checked = 'true';
-		} else	if (getCheckbox ($name)) {
-			$checked = 'true';
-		} else {
-			$checked = 'false';
-		}
+		// use explode to get the first _ piece so that, foe example, c3cap_dc --> c3cap
+		$checked = getCheckbox (explode ('_', $name)[0]) ? 'true' : 'false';
 		echo "theForm['$name'].checked = $checked;\n";
 	}
 
@@ -217,16 +182,10 @@ function refineQuery ($sql, &$rows) {
 		}
 	}
 
-	return $sql;
+	return str_replace (array ("\n", "\t"), ' ', $sql);
 }
 
 function getWidth ($sql) {
 	return ($GLOBALS['conn']->query("EXPLAIN $sql")->fetch(PDO::FETCH_ASSOC))['rows'];
-}
-
-function timeDiff ($begin, $end) {
-	$beginArray = explode (' ', $begin);
-	$endArray = explode (' ', $end);
-	return intval ((($endArray[1] - $beginArray[1]) + ($endArray[0] - $beginArray[0])) * 1000 + 0.5);
 }
 ?>

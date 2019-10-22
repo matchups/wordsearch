@@ -144,7 +144,7 @@ class corpus {
 		$name = $this->name;
 		Echo "&nbsp;&nbsp;<button type='button' id='add$corpus' onclick='addOption$corpus();return false;'>More</button><BR>
 			<script>
-			function addOption$corpus() {;
+			function addOption$corpus() {
 			// add a new constraint when user presses that button
 			var theForm = document.getElementById('search');
 			var corpusOptionNumber = ++(theForm['$key'].value);
@@ -397,7 +397,6 @@ class corpusWiktionary extends corpusWikipedia {
 	public function moreSQL ($table, $type, $value) {
 		// $type always 'cap' for now
 		$cap = strtolower ($value) == 'c';
-		comment ("$value $cap");
 		if ($this->corpus == $this->flagCorpus) {
 			$corpusFilter = "<> {$this->corpus}";
 			$not = ($cap ? '' : 'NOT');

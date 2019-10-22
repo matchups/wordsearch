@@ -9,12 +9,11 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 
 	// Prepare for anagram search
 	$prewhere = '/* premain */';
-	$postwhere = '/* postmain */';
 	$sql = "SELECT PW.text AS word, Min(entry.name) AS entry, entry.id as entry_id," .
 			   " word_entry.whole AS whole, entry.corpus_id AS corpus FROM words PW" .
 			   " INNER JOIN word_entry ON word_entry.word_id = PW.id " .
 			   " INNER JOIN entry ON entry.id = word_entry.entry_id " .
-			   " $prewhere WHERE $postwhere ";
+			   " $prewhere WHERE 1=1 "; // End with dummy condition so we can keep appending AHD clauses
 
 	regexBounds (patternToRegex ($pattern, 'P'), $minlen, $maxlen);
 
@@ -62,7 +61,7 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 	}
 
   // WHERE clause for corpus and flags
-	$sql = str_replace ($postwhere, $postwhere . corpusInfo('entry', 'W'), $sql);
+	$sql = insertSql ($sql, corpusInfo ('entry', 'W'));
 
 	$counter = 0;
 	// Handle additional constraints
@@ -73,13 +72,7 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 		if ($explain = $thisConsObject->explain ()) {
 			echo " </span>and<span class='specs'> $explain ";
 		}
-		$more = $thisConsObject->parse ();
-		if (isset ($more['pre'])) {
-			$sql = str_replace ($prewhere, "{$more['pre']} $prewhere", $sql);
-		}
-		if (isset ($more['where'])) {
-			$sql = $sql . $more['where'];
-		}
+		$sql = insertSql ($sql, $thisConsObject->parse ());
 		$thisConsObject->setlengths ($minlen, $maxlen);
 		$position += $thisConsObject->position();
 		// keep object around for post-filtering and for rebuilding form
@@ -87,24 +80,20 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 
 	$sql = $sql . doWordTypes ();
 	$sql = $sql . doLength ('PW', $minlen, $maxlen, true);
-	$filtered = false;
 	foreach (array (doPairs ($required . patternRequired ($pattern)),
 					doPosition ($position, $minlen, $maxlen)) as $join) {
 		if ($join > '') {
 			$sql = str_replace ($prewhere, "$join $prewhere", $sql);
-			$filtered = true;
 		}
 	}
-	if (!$filtered) {
-		if (!$anyorder) {
-			$fourjoin = doFour ($pattern, '');
-			$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
-		}
-		foreach ($consObjects as $thisConsObject) {
-			$fourjoin = doFour ($thisConsObject->fourPattern(), ++$counter);
-			$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
-		} // end foreach
-	} // end filtered
+	if (!$anyorder) {
+		$fourjoin = doFour ($pattern, '');
+		$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
+	}
+	foreach ($consObjects as $thisConsObject) {
+		$fourjoin = doFour ($thisConsObject->fourPattern(), ++$counter);
+		$sql = str_replace ($prewhere, "$fourjoin $prewhere", $sql);
+	} // end foreach
 
 	$by = "PW.text, word_entry.whole DESC, entry.corpus_id";
 	$orderby = " GROUP BY " . str_replace('DESC', '', $by) . " ORDER BY $by";
@@ -341,31 +330,47 @@ function corpusInfo ($table, $option) {
 	// $option is either L for a list of corpora ($table is ignored)
 	// or W for a WHERE clause relating to $table.
 	$moreSQL = '';
+	$ret ['pre'] = '';
+	$alias = false;
 	foreach ($_GET as $key => $parm) {
     if (substr ($key, 0, 6) == 'corpus') {
-      if ($parm == 'on') {
-        $number = substr ($key, 6);
-        $corpus [$number] = $number;
-				if (!isset($flags [$number])) {
-					$flags [$number] = '';
-					$nonflags [$number] = '';
+	    if ($parm == 'on') {
+        $corpus = substr ($key, 6);
+        $corpusList [$corpus] = $corpus;
+				if (!isset($flags [$corpus])) {
+					$flags [$corpus] = '';
+					$nonflags [$corpus] = '';
+				}
+				if ($option == 'W') {
+					if ($join = $GLOBALS['corpusObjects'][$corpus] -> getSpecialEntry ($newTable)) {
+						$corpusFilter[$corpus] = "$newTable.corpus_id IS NULL";
+						$corpusTable [$corpus] = $newTable;
+						$alias = true;
+						if ($table == 'entry') {
+							$ret ['pre'] = $ret ['pre'] . $join; // add outer join to 'like' corpus for main SELECT
+						}
+					} else {
+						$corpusFilter[$corpus] = "$table.corpus_id <> $corpus";
+						$corpusTable [$corpus] = $table;
+					}
 				}
       }
-    } else if (preg_match ('/^c([0-9])+flag(.)(.*)$/', $key, $matches)) {
+    } else if (preg_match ('/^c([0-9]+)flag(.)(.*)$/', $key, $matches)  &&  $option == 'W') {
+			$corpus = $matches[1];
 			if ($matches [2] == '@') { // fake item set in code
-				$moreSQL = $moreSQL . $GLOBALS['corpusObjects'][$matches[1]] -> moreSQL ($table, $matches[3], $parm);
+				$moreSQL = $moreSQL . $GLOBALS['corpusObjects'][$corpus] -> moreSQL ($corpusTable [$corpus], $matches[3], $parm);
 			} else {
-				$flags[$matches[1]] = ($flags[$matches[1]] ?? '') . $matches [2];
+				$flags[$corpus] = ($flags[$corpus] ?? '') . $matches [2];
 			}
 		}
   }
 
 	if ($option == 'L') {
-		return $corpus;
+		return $corpusList;
 	}
 
-	$list = implode (',', $corpus);
-	if (count ($corpus) == 1) {
+	$list = implode (',', $corpusList);
+	if (count ($corpusList) == 1) {
 		$clause = " = $list";
 	} else {
 		$clause = " IN ($list)";
@@ -378,21 +383,20 @@ function corpusInfo ($table, $option) {
 		}
 	}
 
-  comment ("count(C)=" . count($corpus));
 	$flagClause = ''; // for now
-	foreach ($corpus as $thisCorpus) {
-		comment ("$thisCorpus Y={$flags[$thisCorpus]} N={$nonflags[$thisCorpus]}");
+	foreach ($corpusList as $thisCorpus) {
 		if ($nonflags[$thisCorpus]) {
-			$rlike = "$table.flags NOT RLIKE '[{$nonflags[$thisCorpus]}]' ";
-			if (count ($corpus) == 1) {
+			$rlike = "{$corpusTable[$corpus]}.flags NOT RLIKE '[{$nonflags[$thisCorpus]}]' ";
+			if (count ($corpusList) == 1  &&  !$alias) {
 				$flagClause = " AND $rlike";
 			} else {
-				$flagClause = $flagClause . " AND ($table.corpus_id <> $thisCorpus OR $rlike) ";
+				$flagClause = $flagClause . " AND ({$corpusFilter[$corpus]} OR $rlike) ";
 			}
 		}
 	}
 
-	return "$table.corpus_id $clause $flagClause $moreSQL ";
+	$ret ['where'] = " AND $table.corpus_id $clause $flagClause $moreSQL";
+	return $ret;
 }
 
 // Convert special characters to letter groups
@@ -543,5 +547,17 @@ function stringSort ($string) {
 	$strarray = str_split ($string);
 	sort ($strarray);
 	return implode ($strarray);
+}
+
+// Insert two-forked SQL into appropriate places
+function insertSql ($sql, $more) {
+	$prewhere = '/* premain */';
+	if (isset ($more['pre'])) {
+		$sql = str_replace ($prewhere, "{$more['pre']} $prewhere", $sql);
+	}
+	if (isset ($more['where'])) {
+		$sql = $sql . $more['where'];
+	}
+	return $sql;
 }
 ?>

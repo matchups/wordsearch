@@ -4,9 +4,7 @@ include "utility" . $type . ".php";
 
 echo "<HTML>
 <HEAD>
-" . scriptRefs (true, false) . "	<meta name='viewport' content='width=device-width, initial-scale=1'>
-	<link rel='stylesheet' href='styles.css'>
-	<TITLE>
+" . scriptStyleRefs (true, false, false) . "	<TITLE>
 	Share Word List
 	</TITLE>
 </HEAD>
@@ -31,7 +29,13 @@ try {
 		<input type=hidden name=type value='$type'>
 		<input type=hidden name=listname id=listname>
 		Share with:<BR>
-		<input type=text name=sharewith id=sharewith required=true class=userlook><P>
+		<div class='typeahead__container'>
+			<div class='typeahead__field'>
+				<div class='typeahead__query'>
+					<input type=text name=sharewith[query] id=sharewith required=true class=sharewith><P>
+				</div>
+			</div>
+		</div>
 		<input type=radio name=share id=shareit value=S checked=yes /> Share
 		<input type=radio name=share id=unshareit value=U /> Unshare
 		<BR>
@@ -50,12 +54,21 @@ function validateForm () {
 	document.getElementById('listname').value = listname;
 }
 
-$(document).ready(function() {
-	$('input.userlook').typeahead({
-		name: 'userlook',
-		remote: 'usersuggest{$_GET['type']}.php?query=%QUERY&userid=$userid'
-	});
-})
+$.typeahead({
+		dynamic: true,
+		input: '.sharewith',
+		delay: 500,
+		source: {
+			ajax: {
+				url: 'usersuggest{$_GET['type']}.php',
+				data: {
+					 query: '{{query}}',
+					 userid: '$userid'
+			 },
+			 path: 'data'
+			}
+		}
+});
 </script>
 </BODY>";
 // End of main script

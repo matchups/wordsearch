@@ -280,3 +280,24 @@ function wizInsert (newOption) {
 	}
 	fieldlist += newOption.id;
 }
+
+//* Loop through all dropdown buttons to toggle between hiding and showing its dropdown content - This allows the user to have multiple dropdowns without any conflict */
+function dropInit () {
+	var dropdown = document.getElementsByClassName("dropdown-btn");
+	var i;
+
+	for (i = 0; i < dropdown.length; i++) {
+	  dropdown[i].addEventListener("click", function() {
+	    this.classList.toggle("active");
+			var arrow = document.getElementById (this.id.substring(0, this.id.length - 2) + 'arrow');
+	    var dropdownContent = this.nextElementSibling;
+	    if (dropdownContent.style.display === "block") {
+	      dropdownContent.style.display = "none";
+				arrow.innerHTML = '&#9662;';
+	    } else {
+	      dropdownContent.style.display = "block";
+				arrow.innerHTML = '&#9652;';
+	    }
+	  });
+	}
+}

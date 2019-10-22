@@ -24,11 +24,12 @@ Constraint# button and enter f[aeiou]+f and select Regular Expression, you'll
 get all words starting with B and containing two F's separated by one or more vowels.  If you check the
 Not box at the beginning of the line, it will allow only words which do
 not meet the criterion.  For example, if you check the box and use a
-pattern of *E*, it will find only words with no letter E.  (You can also
+regex of e, it will find only words with no letter E.  (You can also
 do this with a regex of ^[a-df-z]*$.)
+Normally, these searches are done against just the letters in the result.  For example, <i>Jos&eacute; M. Rodr&iacute;guez</i> would be considered as <font face=Courier>JOSEMRODRIGUEZ</font>.  If you check the Raw box, the original text would be searched.
 <H4>Pattern</H5>
 You can also intersect with another pattern, using the same syntax as in
-the basic pattern field.
+the basic pattern field.  The Raw checkbox works the same way as described above.
 <H4>Subword</H5>
 You can filter by a subword or secondary word.  Enter a series of
 specifications of the following forms:
@@ -65,6 +66,14 @@ You can press the Wizard button to get a popup form to help you with this.
 The option allows you to specify a pattern of matching and nonmatching letters: a word which might be a solution in a
 cryptogram for the other word.  For example, ELLISVILLE would match REENGINEER and ABCABC would match words such as
 ATLATL, BONBON, and TSETSE.  Use * to specify that the word has no matching letters.;
+<H4>Enumeration</H4>
+This option allows you to specify a pattern of word lengths and punctuation.  A simple example would be <font face=Courier>5 4</font>, to represent a five-letter word
+followed by a four-letter word.  You can also use
+<B>#</B> to represent any digit (e.g., <font face=Courier>#### 3 3 4</font> would match <i>1776 and All That</i>),
+<B>'</B> and <B>-</B> (quote and hyphen) to represent themselves (<font face=Courier>6 2 '##</font> would match <i>Spirit of '76</i>),
+<B>*</B> to represent a word (sequence of letters) of any length (<font face=Courier>6 * 9</font> would match <i>Ludvig van Beethoven</i> or <i>George Albert Boulenger,</i>
+or <B>?</B> to represent any punctuation mark other than quote and hyphen.
+Note that all Unicode quote-like and hyphen-like characters are interpreted as ordinary quotes and hyphens here.
 <H3>Other Filters</H4>
 You can filter the final list of results with the minimum and maximum
 length boxes.
@@ -80,8 +89,10 @@ In this case, queries may time out and display only partial results with a "more
 You can also search for categories in one of three ways: an exact match, the category and descendants (to five levels), or contains, which is
 normally the most useful.  Exact matches and contains are faster.  There is a lookup button which allows you to search for categories.
 It is currently a bit slow because it tries to give you more useful matches.
+<P>
+Finally, you can filter based on the number of incoming links.  This feature a useful proxy for finding well-known answers.  Links which are not in the main namespace count as only ⅓.
 <H4>Wikipedia</H5>
-The download is approaching the end, with 0, A-Hul, and M-Tek complete as of September 13.
+The download is approaching the end, with 0, A-Iso, and M-Th complete as of September 26.
 <H4>Wiktionary</H5>
 I have done only a very little bit of the download, enough to test the code.  By default, only English terms are searched;
 there is a checkbox to allow foreign words as well.  If you want a specific foreign language, you can search for categories

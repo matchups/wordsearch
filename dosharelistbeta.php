@@ -42,8 +42,8 @@ try {
 	if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 		if ($share == 'S') {
 			throw new Exception ("Word list $listname is already shared with $sharewith");
-			openConnection (true)->prepare ("DELETE FROM corpus_share WHERE id = ?")->execute (array ($row['id']));
 		} else {
+			openConnection (true)->prepare ("DELETE FROM corpus_share WHERE id = ?")->execute (array ($row['id']));
 			Echo "Word list <i>$listname</i> share with <i>$sharewith</i> has been removed.";
 			mailUser ($touserid, "Alfwords: List unshared", "$username has removed the share on list $listname with you.");
 		}

@@ -1,6 +1,6 @@
 <?php
 // Called by user lookup field in various forms to provide a list of potential matches
-$maxsuggest = 5; // value used by typeahead tool
+$maxsuggest = 5;
 try {
   if ($query = $_REQUEST['query'] ?? ($_GET['query'] ?? '')) {
     include "/usr/home/adf/credentials.php";
@@ -34,5 +34,5 @@ try {
   $finalResult = array ($e.getMessage());
 }
 //Return JSON array
-echo json_encode ($finalResult);
+echo json_encode (array ("data" => $finalResult));
 ?>

@@ -1,19 +1,15 @@
 <?php
 $type = $_GET['type']; // beta, dev, etc.
 include "utility" . $type . ".php";
-
 echo "<HTML>
 <HEAD>
-" . scriptRefs (true, false) . "	<meta name='viewport' content='width=device-width, initial-scale=1'>
-		<link rel='stylesheet' href='styles.css'>
-		<link rel='stylesheet' href='wordcss$type.php'>
+" . scriptStyleRefs (true, false, false) . "
 	<TITLE>
 	Delete Word from List
 	</TITLE>
 </HEAD>
 <BODY>
 	<H2>Delete Word from List</H2>\n";
-
 try {
 	$conn = OpenConnection (false);
 	if ($code = securityCheck ($level, $userid, $sessionid)) {
@@ -30,14 +26,31 @@ try {
 		echo "<option value=$corpus>{$row['name']}</option>\n";
 		// $more = $more . "<span id=wordspan$corpus style='display: none'><input type='text' name=word$corpus id=word$corpus class=word$corpus /></span>
 		$style = $first ? 'inline' : 'none';
-		$more = $more . "<input type='text' name=word$corpus id=word$corpus class=word$corpus style='display: $style' />
+		$more = $more . "
+				<div class='typeahead__container'>
+	        <div class='typeahead__field'>
+            <div class='typeahead__query'>
+							<input type='text' name=word{$corpus}[query] id=word$corpus class=word$corpus style='display: $style' />
+						</div>
+					</div>
+				</div>
 		<script>
-		$(document).ready(function() {
-			$('input.word$corpus').typeahead({
-				name: 'word$corpus',
-				remote: 'wordsuggest{$_GET['type']}.php?query=%QUERY&corpus=$corpus'
-			});
-		})\n";
+		$.typeahead({
+		    dynamic: true,
+				input: '.word$corpus',
+		    delay: 500,
+		    source: {
+		      ajax: {
+		        url: 'wordsuggest{$_GET['type']}.php',
+		        data: {
+		           query: '{{query}}',
+							 corpus: '$corpus'
+		       },
+		       path: 'data'
+		      }
+		    }
+		});
+		\n";
 		if ($first) {
 			$more = $more . "currentCorpus = $corpus;\n";
 			$first = false;

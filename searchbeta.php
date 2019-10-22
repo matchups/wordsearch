@@ -19,22 +19,20 @@ if (isset($_GET['hacktest'])) {
 // <script src='//{$foo}netsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>
 echo "<HTML>
 <HEAD>\n";
-echo scriptRefs (true, $type);
+echo scriptStyleRefs (true, $type, true);
 include "cons$type.php";
 include "corpus$type.php";
 
 $pattern = $_GET['pattern'];
 $version = $_GET['version'];
-echo "<meta name='viewport' content='width=device-width, initial-scale=1'>
-<link rel='stylesheet' href='styles$type.css'>
-<link rel='stylesheet' href='catcss$type.php'>
-<link rel='stylesheet' href='wideleft.css'>
+echo "
 <TITLE>
 $pattern - Word Search $type $version
 </TITLE>
 </HEAD>\n";
 
 $time['top'] = microtime();
+$time['top.int'] = microtime(true);
 include "results" . $type . ".php";
 include "parse" . $type . ".php";
 // Initialize cache (used in fetchUrl)
@@ -57,7 +55,7 @@ try {
 			$sql = 'EXPLAIN ' . $sql;
 		} else if ($level < 3) {
 			if ($rows == 0) {
-				$rows = getWidth ($sql);
+				$rows = getCost ($sql);
 			}
 			if (($level < 2 && $rows > 80000) || $rows > 1000000) {
 				$result = "Your query may take too long to run.  Please add more letters.";
@@ -70,6 +68,10 @@ try {
 
 	echo "</span></H2>";
 	$time['beforequery'] = microtime();
+	if (getCheckbox ('norun')) {
+		$result = "Query loaded.";
+		$explain = false;
+	}
 	if ($result == '') {
 		$result = SQLQuery ($conn, $sql);
 		comment ("Got " . $result->rowCount() . " rows");
@@ -94,13 +96,12 @@ try {
 				echo "You will be able to save the results once all results have been displayed.";
 			}
 			echo "<BR>\n";
-		} else if (isset ($ret['save'])) {
-			$sessionEncoded = urlencode ($_GET['sessionkey']);
-			echo "<P><A HREF='http://www.alfwords.com/asksaveresults$type.php?sessionkey=$sessionEncoded&type=$type&level=$level&source=results'
-				target='_blank'>Save Results</A><BR>\n";
 		}
 		$time['end'] = microtime();
 		foreach ($time as $key => $value) {
+			if (strpos ($key, '.int')) {
+				continue;
+			}
 			if ($key <> 'top') {
 		 		comment ("$prevkey-$key=" . timeDiff ($previous, $value));
 			}
@@ -177,7 +178,7 @@ function buildReloadQuery ($consObjects) {
 // Force an index on bank if possible and no other index is being used
 function refineQuery ($sql, &$rows) {
 	if (strpos ($sql, 'PW.bank') !== false) {
-		$result = $GLOBALS['conn']->query("EXPLAIN $sql")->fetch(PDO::FETCH_ASSOC);
+		$result = openConnection(false)->query("EXPLAIN $sql")->fetch(PDO::FETCH_ASSOC);
 		if (isset ($result['key'])) {// key used by SQL for outer loop
 			$rows = $result['rows'];
 		} else {
@@ -188,7 +189,7 @@ function refineQuery ($sql, &$rows) {
 	return str_replace (array ("\n", "\t"), ' ', $sql);
 }
 
-function getWidth ($sql) {
-	return ($GLOBALS['conn']->query("EXPLAIN $sql")->fetch(PDO::FETCH_ASSOC))['rows'];
+function getCost ($sql) {
+	return (openConnection(false)->query("EXPLAIN $sql")->fetch(PDO::FETCH_ASSOC))['rows'];
 }
 ?>

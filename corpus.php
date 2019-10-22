@@ -132,12 +132,15 @@ class corpus {
 	}
 
 	protected function formAddRepeat () {
+		if (getCheckbox ('simple')) {
+			return; // Can't add constraints in simple UI
+		}
 		$corpus = $this->corpus;
 		$key = "count$corpus";
 		$name = $this->name;
 		Echo "&nbsp;&nbsp;<button type='button' id='add$corpus' onclick='addOption$corpus();return false;'>More</button><BR>
 			<script>
-			function addOption$corpus() {;
+			function addOption$corpus() {
 			// add a new constraint when user presses that button
 			var theForm = document.getElementById('search');
 			var corpusOptionNumber = ++(theForm['$key'].value);
@@ -283,7 +286,7 @@ class corpusWikipedia extends corpus {
 	}
 
 	function optionButtonList () {
-		return array ('pattern' => 'pattern', 'regex' => 'regular expression', 'category' => 'category', 'size' => 'size');
+		return array ('pattern' => 'pattern', 'regex' => 'regular expression', 'category' => 'category', 'size' => 'size', 'links' => 'incoming links');
 	}
 
 	protected function buildOne ($spec, $radio, $not, $num) {
@@ -297,7 +300,7 @@ class corpusWikipedia extends corpus {
 		$code = "
 		notbox = document.getElementById('not{$corpus}_' + thisOption);
 		if (theForm['r{$corpus}_category' + thisOption].checked) {
-			if (theForm['r{$corpus}_contains' + thisOption] === undefined) {
+			if (theForm['rc{$corpus}_contains' + thisOption] === undefined) {
 				var here = theForm['r{$corpus}_size' + thisOption];
 				var myParent = here.parentNode;
 
@@ -417,9 +420,20 @@ class ccWikipediaText extends corpusConstraint {
 		return ''; // Nothing in SQL; we'll check it locally
 	}
 
-  protected function getAPI ($entry, $action, $keyname, $prop) {
+	protected function getAPI ($entry, $action, $keyname, $prop) {
+		return $this->getAPIInner ($entry, $action, $keyname, 'prop', $prop, '');
+  }
+
+	protected function getAPIList ($entry, $action, $keyname, $prop, $continue) {
+		return $this->getAPIInner ($entry, $action, $keyname, 'list', $prop, $continue);
+  }
+
+	protected function getAPIInner ($entry, $action, $keyname, $proplabel, $prop, $continue) {
 		$entry = urlencode ($this->corpusObject->titleFix ($entry));
-		$url = "https://en.wikipedia.org/w/api.php?action=$action&$keyname=$entry&prop=$prop&format=json";
+		$url = "https://en.wikipedia.org/w/api.php?action=$action&$keyname=$entry&$proplabel=$prop&format=json";
+		if ($continue) {
+			$url .= "&{$continue['key']}=" . urlencode ($continue['value']);
+		}
 		$ret = fetchUrl($url);
 		return json_decode ($ret, true);
   }
@@ -625,6 +639,46 @@ class ccWikipediasize extends ccWikipediaText {
 			$size = $page['length'];
 		}
 		$ret = (($size > $this->size) XOR ($this->relation == '<') XOR ($this->not));
+		return $ret;
+	}
+}
+
+class ccWikipedialinks extends ccWikipediaText {
+  protected $relation;
+	protected $count;
+
+	function explainSub () {
+		return "Wikipedia Links $this->spec";
+	}
+
+	function init () {
+		$this->relation = substr ($this->spec, 0, 1);
+		$this->count = substr ($this->spec, 1);
+	}
+
+	function localFilter($oneword, $entry, $entry_id) {
+		$count = 0;
+		$nonMainFactor = 3;  // if nonzero namespace (e.g., Talk, User), only counts a third
+		$target = $this->count * $nonMainFactor;
+		// Ask Wikipedia for a list of incoming links
+		$continue = '';
+	  do {
+			$apiReturn = $this->getAPIList ($entry, 'query', 'bltitle', 'backlinks', $continue);
+			$backlinkArray = $apiReturn['query']['backlinks'];
+			if (isset ($apiReturn ['continue'])) {
+				$continue = array ('key' => 'blcontinue', 'value' => $apiReturn ['continue']['blcontinue']);
+			} else {
+				$continue = '';
+			}
+			foreach ($backlinkArray as $backlink) {
+				$count += $backlink['ns'] ? 1 : $nonMainFactor;
+				if ($count > $target) {
+					$continue = '';
+					break;
+				}
+			}
+		} while ($continue);
+		$ret = (($count > $target) XOR ($this->relation == '<') XOR ($this->not));
 		return $ret;
 	}
 }

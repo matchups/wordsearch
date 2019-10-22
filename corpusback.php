@@ -1,41 +1,57 @@
 <?php
 class corpus {
 	protected $corpus;
-	protected $urlpattern;
+	protected $urlPattern;
 	protected $name;
   protected $flags;
+	protected $flagCorpus;
+	protected $owner;
 
 	public function __construct ($corpus) {
 		$this->corpus = $corpus;
 		$conn = openConnection (false);
 
 		// get name, URL
-		$row = SQLQuery ($conn, "SELECT name, url FROM corpus WHERE id = $corpus")->fetch(PDO::FETCH_ASSOC);
+		$row = SQLQuery ($conn, "SELECT name, url, owner, like_id FROM corpus WHERE id = $corpus ORDER by name")->fetch(PDO::FETCH_ASSOC);
 		$this->urlpattern = $row['url'];
 		$this->name = $row['name'];
+		$this->owner = $row['owner'];
 
 		// get flags
-		$result = SQLQuery ($conn, "SELECT letter, description FROM corpus_flag WHERE corpus_id = $corpus");
+		if ($row['like_id'] > 0) {
+			$this->flagCorpus = $row['like_id'];
+		} else {
+			$this->flagCorpus = $corpus;
+		}
+		$flagCorpus = $this->flagCorpus;
+		$result = SQLQuery ($conn, "SELECT letter, description FROM corpus_flag WHERE corpus_id = $flagCorpus");
 		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 			$this->flags [$row['letter']]=$row['description'];
 		}
 	} // end constructor
 
 	public static function factory ($corpus) {
+		$name = corpus::className ($corpus);
+		return new $name($corpus);
+	}
+
+	private static function className ($corpus) {
 		// Alas, PHP does not support ranges in switches
-		if ($corpus == 1) {
-			$name = "WikiFeatured";
+		if ($corpus == 1  ||  $corpus == 87) {
+			$name = "Dev";
 		} else if ($corpus == 2) {
 			$name = "Wikipedia";
 		} else if ($corpus == 3) {
 			$name = "Wiktionary";
-		} else if ($corpus == 87) {
-			$name = "Dev";
 		} else if ($corpus > 87) {
-			$name = "User";
+			$result = SQLQuery (openConnection (false), "SELECT like_id FROM corpus WHERE id = $corpus");
+			$row = $result->fetch(PDO::FETCH_ASSOC);
+			if ($row ['like_id']) {
+				return corpus::className ($row ['like_id']);
+			}
+			$name = 'User';
 		} // Wiktionary TBD
-		$name = "corpus$name";
-		return new $name($corpus);
+		return "corpus$name";
 	}
 
 	public function answerLink ($entry) {
@@ -55,7 +71,26 @@ class corpus {
 	}
 
 	public function allowed () {
-		return true;
+		if ($this->owner == '') {
+			return true;
+		}
+		try {
+			$conn = openConnection (false);
+			$result = $conn->query("SELECT user_id FROM session WHERE session_key = '{$_GET['sessionkey']}'");
+			if ($result->rowCount() > 0) { // make sure it is an active session
+				$userid = $result->fetch(PDO::FETCH_ASSOC)['user_id'];
+				if ($userid == $this->owner) {
+					return true;
+				}
+				$corpus = $this->corpus;
+				return $conn->query("SELECT 1 FROM corpus_share WHERE user_id = $userid AND corpus_id = $corpus AND display = 'S'")->rowCount() > 0;
+			}
+			comment ("No rows!");
+		}
+		catch (PDOException $e) {
+			comment ("Can't figure allowed: " . $e->getMessage);
+		}
+		return false;
 	}
 
 	public function phrases () {
@@ -187,6 +222,21 @@ class corpus {
 	public function getValidateCorpusCode () {
 		return '';
 	}
+
+	public function getSpecialEntry (&$table) {
+		if ($this->flagCorpus <> $this->corpus) {
+			$table = $this->getEntryTable();
+			$int = "WE{$this->corpus}";
+			return " LEFT OUTER JOIN word_entry $int ON $int.word_id = PW.id " .
+				"LEFT OUTER JOIN entry $table ON $table.id = $int.entry_id AND $table.corpus_id = " . $this->flagCorpus;
+		}
+		return "";
+	}
+
+	public function getEntryTable () {
+		return ($this->flagCorpus <> $this->corpus) ? "ECP{$this->corpus}" : 'entry';
+	}
+
 } // end base corpus class
 
 class corpusConstraint extends constraint {
@@ -293,6 +343,7 @@ class corpusWikipedia extends corpus {
   // Use wizard to allow user to look up category
 	protected function formCatLookup() {
 		$corpus = $this -> corpus;
+		$flagCorpus = $this -> flagCorpus;
 		echoUnique ("\n<script>
 			function categoryLookup (thisOption, thisCorpus) {
 				categoryOption = thisOption; // global
@@ -313,7 +364,7 @@ class corpusWikipedia extends corpus {
 			$(document).ready(function() {
 				$('input.category$corpus').typeahead({
 					name: 'category$corpus',
-					remote: 'catsuggest{$_GET['type']}.php?query=%QUERY&corpus=$corpus'
+					remote: 'catsuggest{$_GET['type']}.php?query=%QUERY&corpus=$flagCorpus'
 				});
 			})
 			</script>\n";
@@ -343,14 +394,19 @@ class corpusWiktionary extends corpusWikipedia {
 
 	public function moreSQL ($table, $type, $value) {
 		// $type always 'cap' for now
+		if ($this->corpus == $this->flagCorpus) {
+			$corpusFilter = "<> {$this->corpus}";
+		} else {
+			$corpusFilter = "IS NULL";
+		}
 		$not = ($value == 'C' ? '' : 'NOT');
-		return (" AND ($table.corpus_id <> {$this->corpus} OR $table.flags $not LIKE '%C%') ");
+		return (" AND ($table.corpus_id $corpusFilter OR $table.flags $not LIKE '%C%') ");
 	}
 
 	public function getValidateCorpusCode () {
 		$corpus = $this->corpus;
-		return "if (!theForm['c{$corpus}cap'].checked && !theForm['c{$corpus}uncap'].checked) {
-		 return 'Must selected either Capitalized or Uncapitalized for Wiktionary';
+		return "if (!theForm['c{$corpus}cap_dc'].checked && !theForm['c{$corpus}uncap_dc'].checked) {
+		 return 'Must select either Capitalized or Uncapitalized for Wiktionary';
 	 }";
 	}
 } // end Wiktionary
@@ -456,8 +512,9 @@ class ccWikipediacategory extends ccWikipediaText {
 	function parse () {
 		$this -> style = 'D'; // by default, do things with database-side filtering
 		if ($this->range == 'contains') {
-			$suffix = $this -> corpusObject -> getCorpusNum() . "_{$this->num}";
-			$more ['pre'] = " INNER JOIN entry_cat EC$suffix ON EC$suffix.entry_id = entry.id
+			$suffix = $this->corpusObject -> getCorpusNum() . "_{$this->num}";
+			$table = $this->corpusObject->getEntryTable();
+			$more ['pre'] = " INNER JOIN entry_cat EC$suffix ON EC$suffix.entry_id = $table.id
 			 		INNER JOIN category C$suffix ON C$suffix.id = EC$suffix.cat_id";
 			$spec = str_replace ("'", "\'", $this -> spec);
 			$more ['where'] = " AND C$suffix.title LIKE '%$spec%'";
@@ -572,16 +629,6 @@ class ccWikipediasize extends ccWikipediaText {
 	}
 }
 
-class corpusWikiFeatured extends corpusWikipedia {
-	function allowed () {
-		return false;
-	}
-
-	function form () {
-		return corpus::form ();  // don't run Wikipedia method
-	}
-} // end WikiFeatured
-
 class corpusDev extends corpus {
 	public function allowed () {
 		return false;
@@ -589,9 +636,5 @@ class corpusDev extends corpus {
 } // end Dev
 
 class corpusUser extends corpus {
-	// allowed will check user & shared stuff
-	public function allowed () {
-		return false;
-	}
 } // end corpusUser
 ?>

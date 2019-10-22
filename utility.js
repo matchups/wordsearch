@@ -97,11 +97,10 @@ function removeChildrenCorpus (corpusOptionNumber, nameList) {
 }
 
 function removeChildrenGeneric (containerField, thisOption, nameList) {
-	var container = document.getElementById(containerField);
 	var oneChild;
 	nameList.split (" ").forEach(function (baseName) {
 		if ((oneChild = document.getElementById(baseName + thisOption)) !== null) {
-			container.removeChild(oneChild);
+			oneChild.parentNode.removeChild(oneChild);
 		}
 	});
 }
