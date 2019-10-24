@@ -38,6 +38,10 @@ class constraint {
 		throw new Exception ("Base parse--needs to be overridden");
 	}
 
+  public function getRegex () {
+		return false;
+	}
+
 	protected function parseWhere ($more) {
 		return array ('where' => $more);
 	}
@@ -173,6 +177,10 @@ class conspattern extends constraint {
 		return $this->parseWhere (" AND $column " . $this->maybeNot() . " RLIKE '$spec' ");
 	}
 
+	public function getRegex () {
+		return $this->not ? '' : patternToRegex (expandSpecial ($this->spec), 'U');
+	}
+
 	public function position() {
 		if ($this->not) {
 			return array();
@@ -265,6 +273,10 @@ class consregex extends constraint {
 			$this->regex = '/' . $this->regex . '/';
 		}
 		$this->raw = getCheckbox ("craw" . $this->num);
+	}
+
+  function getRegex () {
+		return $this->not ? '' : '.*' . expandSpecial ($this->spec) . '.*';
 	}
 
 	public function parse() {

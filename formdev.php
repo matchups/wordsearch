@@ -207,11 +207,8 @@ if ($level > 0) {
         <span class=disabledmenu>Properties</span>\n";
     }
     $userid = $GLOBALS['userid'];
-    if ((SQLQuery($conn, "SELECT 1 FROM corpus_share WHERE user_id = $userid"))->rowCount() > 0) {
-      echo "<a href='http:askaccesssharedlist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Access Shared</a>\n";
-    } else {
-      echo "<span class=disabledmenu>Access Shared</span>\n";
-    }
+    navLink ('Access Shared', "http:askaccesssharedlist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type",
+        (SQLQuery($conn, "SELECT 1 FROM corpus_share WHERE user_id = $userid"))->rowCount() > 0);
     echo "</div>
       <button class='dropdown-btn' id='query-dd'>Queries
       <span id=query-arrow>&#9662;</span>
@@ -226,11 +223,7 @@ if ($level > 0) {
     }
 
     $shared = $conn->query("SELECT count(1) AS shared FROM query_share WHERE user_id = $userid")->fetch(PDO::FETCH_ASSOC)['shared'];
-    if ($current + $shared) {
-      echo "<a href='http:askloadquery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type'>Load</a>\n";
-    } else {
-      echo "  <span class=disabledmenu>Load</span>\n";
-    }
+    navLink ('Load', "http:askloadquery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type", $current + $shared);
     if ($current) {
       echo "<a href='http:asksharequery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Share</a>
       <a href='http:askdeletequery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
@@ -260,10 +253,15 @@ if ($level > 0) {
       array ('id' => 'beta', 'minlev' => 2, 'name' => 'Beta'),
       array ('id' => 'dev', 'minlev' => 3, 'name' => 'Development')) as $typeinfo) {
     if ($level >= $typeinfo['minlev']) {
-      if ($type == $typeinfo ['id']) {
-        Echo "<span class=disabledmenu>{$typeinfo['name']}</span>\n";
-      } else {
-        Echo "<A HREF='index{$typeinfo['id']}.php$security&type={$typeinfo['id']}'>{$typeinfo['name']}</A>\n";
+      navLink ($typeinfo['name'], "index{$typeinfo['id']}.php$security&type={$typeinfo['id']}", $type != $typeinfo ['id']);
+    }
+  }
+  if ($level > 0) {
+    include "thirdparty$type.php";
+    foreach (thirdParty::list() as $thirdParty) {
+      $helper = new $thirdParty ();
+      if ($helper->allowed()) {
+        navLink ($helper->name(), $helper->link(), $helper->enabled());
       }
     }
   }
@@ -435,6 +433,15 @@ function validateConstraint (thisOption) {
       }
 		}
   echo "} // end validateCorpus\n";
+
+function navLink ($name, $link, $enabled) {
+  if ($enabled) {
+    Echo "<A HREF='$link' target='_blank'>$name</A>\n";
+  } else {
+    Echo "<span class=disabledmenu>$name</span>\n";
+  }
+}
+
 ?>
 // This needs to be at the end, after controls have been created
 var modal = document.getElementById('wizard');

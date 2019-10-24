@@ -23,7 +23,7 @@ echo "
 
 <BODY>\n";
 
-$version = "0.85";
+$version = "0.90";
 echo "<H2>Word Search <span class='specs'>$version</span></H2>";
 $level = $_GET['level'];
 include "form$type.php";

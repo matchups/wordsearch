@@ -13,24 +13,7 @@
   <LI>0.72 Content search (text & categories) (done)
   <LI>0.73 Miscellaneous internal (done)
   <LI>0.74 Wiktionary (done)
-  <LI>0.75 User-specific word lists <b>(all done)</b>
-    <OL type=a>
-    <LI>Save result as list
-    <LI>Move addmain to main folder
-    <LI>Consolidate security checking
-    <LI>Handle "more" feature
-    <LI>Upload list
-    <LI>corpus index on entry
-    <LI>Access saved
-    <LI>Menu
-    <LI>Manage
-    <LI>List management help
-    <LI>Review query help: update for categories & Wiktionary; remove Not Working
-    <LI>Limit to 5 for premium to 50K entries (2M characters), 20 for professional to 200K entries (20M characters); message about general interest
-    <LI>Separate CSS by $type
-    <LI>Query may take too long (*yearwar at level 2)
-    <LI>Retire preserveinfo
-    </OL>
+  <LI>0.75 User-specific word lists (done)
   <LI>0.76 Other search capabilities <b>(all done)</b>
     <OL type=a>
     <LI>Custom SQL with PW. (converted to lowercase)
@@ -47,15 +30,15 @@
     <LI>Release
     </OL>
   </UL>
-<LI>0.8 Saving queries--see user types document for limits and features
+<LI>0.8 Saving queries--see user types document for limits and features <b>(all done)</b>
   <UL>
-  <LI>0.81 Save query (done)
-  <LI>0.82 Recall query (done)
-  <LI>*brownscho* is showing redirects (done)
-  <LI>0.83 Delete query (done)
-  <LI>Validate needs expansion when raw checked (done)
-  <LI>0.84 Share query (done)
-  <LI>SQL issues (all done)
+  <LI>0.81 Save query
+  <LI>0.82 Recall query
+  <LI>*brownscho* is showing redirects
+  <LI>0.83 Delete query
+  <LI>Validate needs expansion when raw checked
+  <LI>0.84 Share query
+  <LI>SQL issues
   <OL type=a>
     <LI>Look into why *bombing* dies
     <LI>Similarly, SVs starting with James (same)
@@ -64,29 +47,21 @@
     <LI>don't include AND PW.text BETWEEN '' AND 'zzz'
     <LI>Don't add fours & pairs unless they help
   </OL>
-  <LI>0.85 Access shared query (done)
-  <LI>Move Save Query to sidebar (done)
-  <LI>0.86 Rename query (done)
-  <LI>switch to https://cdnjs.com/libraries/jquery-typeahead (done)
+  <LI>0.85 Access shared query
+  <LI>Move Save Query to sidebar
+  <LI>0.86 Rename query
+  <LI>switch to https://cdnjs.com/libraries/jquery-typeahead
   <LI><span class=internal>Release</span>
-<!--
-* Retest
-Problem: More button fails in base because utility.js is not getting included because $type is nil.
-Fixed; git it
-* git push
-* pull back from temp
-* Tell everyone (just Eric Chaikin & Andy Latto unless .#0)
--->
   </UL>
 <LI>0.9 Output options
   <UL>
   <LI>0.90 Links to
   <OL type=a>
-    <LI><A HREF="www.quinapalus.com/cgi-bin/qat">Qat</A>
-    <LI><A HREF="https://tools.qhex.org/">Qhex</A>
-    <LI><A HREF="https://nutrimatic.org/">Nutrimatic</A>
-    <LI><A HREF="http://wordsmith.org/anagram/index.html">IAS</A>
-    <LI>Ask dmitri
+    <LI><A HREF="www.quinapalus.com/cgi-bin/qat">Qat</A> (done)
+    <LI><A HREF="https://tools.qhex.org/">Qhex</A> <i>query out to developer</i>
+    <LI><A HREF="https://nutrimatic.org/">Nutrimatic</A> (done)
+    <LI><A HREF="http://wordsmith.org/anagram/index.html">IAS</A> (done)
+    <LI><A HREF="http://stufffromhell.com/dmitri">Ask dmitri</A> <i>started; query out to developer</i>
   </OL>
   <LI>0.91 Show letters in anagram/bank order (with links); test with "Upper Bank" query
   <LI>0.92 Links
@@ -108,6 +83,7 @@ Fixed; git it
   <LI>0.98 Choice of fonts
   <LI>0.99 Multiple hits per line
   <LI>0.9A Use italics, bold, color (F & B), font to differentiate corpuses, flags, & stuff from .95
+  <LI>0.9B Show/hide output options (always hide for guests)
   </UL>
 <LI>0.A More projects
   <UL>
