@@ -28,6 +28,35 @@ function showResults ($result, $consObjects, $corpusObjects) {
 		return;
 	}
 
+	switch ($_GET['linkoption']) {
+		// foreach (array ('suppress', 'source', 'Google', 'Bing', 'Yahoo', 'nGram viewer', 'IMDB', 'custom') as $linkOption) {
+		case 'suppress':
+		  $link = '';
+			break;
+		case 'source':
+		  $link = '*';
+			break;
+		case 'google':
+		  $link = 'https://www.google.com/search?q=@';
+			break;
+		case 'bing':
+		  $link = 'https://www.bing.com/search?q=@';
+			break;
+	  case 'yahoo':
+		  $link = 'https://search.yahoo.com/search?p=@';
+			break;
+		case 'ngramviewer':
+		  $link = 'https://books.google.com/ngrams/graph?content=@&year_start=1800&year_end=2000';
+			break;
+		case 'imdb':
+		  $link = 'https://www.imdb.com/find?q=@&s=all';
+			break;
+		case 'custom':
+		  $link = $_GET['customlink'];
+			break;
+	}
+	$linkencoded = urlencode ($link);
+
 		// Loop through results from database
 	while($row = $result->fetch(PDO::FETCH_ASSOC)) {
 		$oneword = $row['word'];
@@ -73,15 +102,27 @@ function showResults ($result, $consObjects, $corpusObjects) {
 			$found [++$counter] = array ('text' => $entry, 'corpus' => $corpus);
 			if ($row['whole'] == 'Y') {
 				// If this is the whole entry, set up a link
-				echo $corpusObjects[$corpus]->answerLink ($entry) . ' ';
+				if ($link == '*') {
+					echo $corpusObjects[$corpus]->answerLink ($entry) . ' ';
+				} else if ($link) {
+					$entryLink = str_replace ('@', $entry, $link);
+					Echo "<A HREF='$entryLink' target='_blank'>$entry</A>  ";
+				} else {
+					Echo "$entry  ";
+				}
 			} else {
 				// Else if part of an entry name, set up a link to our page to list phrases
 				if (!$same) {
-					Echo "$oneword  ";
+					if ($link) {
+						$entryLink = str_replace ('@', urlencode ($oneword), $link);
+						Echo "<A HREF='$entryLink' target='_blank'>$oneword</A>  ";
+					} else {
+						Echo "$oneword  ";
+					}
 				}
 				if ($corpusObjects[$corpus]->phrases()) {
 					Echo "<A target='_blank'
-						HREF='phrases$type.php?base=$oneword&corpus=$corpus&type=$type&level=$level'><i>phrases</i></A>";
+						HREF='phrases$type.php?base=$oneword&corpus=$corpus&type=$type&level=$level&link=$linkencoded'><i>phrases</i></A>";
 				}
 			}
 			$prevword = strtolower ($oneword);

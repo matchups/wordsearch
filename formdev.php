@@ -127,7 +127,7 @@ Show letters in " . inputCheckbox ('letteralpha'). "alphabetical order
 " . inputCheckbox ('letteralinks'). "with links
 <BR>Link option: ";
 foreach (array ('suppress', 'source', 'Google', 'Bing', 'Yahoo', 'nGram viewer', 'IMDB', 'custom') as $linkOption) {
-  $name = "lo" . strtolower (str_replace (' ', '', $linkOption));
+  $name = strtolower (str_replace (' ', '', $linkOption));
   if (getCheckbox ($name)) {
     $checked = true;
   } else if ($linkOption == 'source'  &&  !getCheckbox ('losuppress')) {
@@ -136,7 +136,7 @@ foreach (array ('suppress', 'source', 'Google', 'Bing', 'Yahoo', 'nGram viewer',
     $checked = false;
   }
   $more = $checked ? 'checked ' : '' . "onclick='loClick(\"$name\");'";
-  echo "<input type=radio name=linkOption id=$name $more>&nbsp$linkOption&nbsp&nbsp ";
+  echo "<input type=radio name=linkoption id=lo$name value=$name $more>&nbsp$linkOption&nbsp&nbsp ";
   if ($linkOption == 'custom') {
     echo "<input type=text placeholder='http://somewhere.com&title=@' name=customLink id=customLink style='display: none' size=50>";
   }

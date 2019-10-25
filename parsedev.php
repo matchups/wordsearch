@@ -360,7 +360,6 @@ function corpusInfo ($table, $option, &$consObjects) {
 				}
       }
     } else if (preg_match ('/^c([0-9]+)flag(.)(.*)$/', $key, $matches)  &&  $option == 'W') {
-			comment ($matches);
 			$corpus = $matches[1];
 			if ($matches [2] == '@') { // fake item set in code
 				$ret = $GLOBALS['corpusObjects'][$corpus] -> moreSQL ($table, $matches[3], $parm);

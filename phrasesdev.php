@@ -39,8 +39,18 @@ try {
   $corpusObject = corpus::factory($corpus); // need to handle multiple corpora
 
   // Loop through words and display results
+  $link = $_GET['link'];
   while($row = $result->fetch(PDO::FETCH_ASSOC)) {
-    echo $corpusObject->answerLink ($row['entry']) . "<BR>\n";
+    $entry = $row['entry'];
+    if ($link == '*') {
+      echo $corpusObject->answerLink ($entry);
+    } elseif ($link) {
+      $entryLink = str_replace ('@', urlencode ($entry), $link);
+      Echo "<A HREF='$entryLink' target='_blank'>$entry</A>  ";
+    } else {
+      echo $entry;
+    }
+    echo "<BR>\n";
   } // end while
 }
 catch(PDOException $e) {
