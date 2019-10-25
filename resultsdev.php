@@ -3,6 +3,17 @@
 function showResults ($result, $consObjects, $corpusObjects) {
 	$type = $_GET['type'];
 	$level = $_GET['level'];
+	$urlkey = urlencode ($_GET['sessionkey']);
+	$security = "sessionkey=$urlkey&level=$level&type=$type&version={$_GET['version']}";
+	$moreParms = '';
+	foreach ($_GET as $key => $parm) {
+		if (substr ($key, 0, 6) == 'corpus'  ||  preg_match ('/^c([0-9]+)flag(.)(.*)$/', $key)  ||
+				$key == 'phrase' || $key == 'single' || $key == 'whole') {
+			if ($parm == 'on') {
+				$moreParms .= "&$key=on";
+				}
+			}
+		}
 	$counter = 0;
 	$timedOut = false;
 	if ($level == 3) {
@@ -38,6 +49,23 @@ function showResults ($result, $consObjects, $corpusObjects) {
 			} else {
 				if ($previous <> '') {
 					echo "<BR>";
+				}
+				$sorted = stringSort ($oneword);
+				$baseURL = "http://alfwords.com/search$type.php";
+				if (getCheckbox ('letteralpha')) {
+					if (getCheckbox ('letteralinks')) {
+						echo "<A HREF='$baseURL?pattern=$sorted&anyorder=on&$security$moreParms' target='_blank'>$sorted</A> ";
+					} else {
+						echo $sorted . ' ';
+					}
+				}
+				if (getCheckbox ('letterabank')) {
+					$sorted = noDupes ($sorted);
+					if (getCheckbox ('letteralinks')) {
+						echo "<A HREF='$baseURL?pattern=$sorted&anyorder=on&repeat=on&$security$moreParms' target='_blank'>$sorted</A> ";
+					} else {
+						echo $sorted . ' ';
+					}
 				}
 				$previous = $oneword;
 				$same = false;

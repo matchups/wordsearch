@@ -15,6 +15,11 @@ body {
   font-size: small;
 }
 
+/* Fixed-width */
+.fixed {
+  font-family: courier new, courier, monospace;
+}
+
 /* Error messages */
 .error {
   color: red;

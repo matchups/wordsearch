@@ -121,6 +121,13 @@ foreach ($corpusObjects as $corpusObject) {
 }
 echo "<input type=hidden name=morecbx value='$checklist' />\n";
 
+echo "<H3>Output</H3>
+Show letters in " . inputCheckbox ('letteralpha'). "alphabetical order
+" . inputCheckbox ('letterabank'). "without duplication
+" . inputCheckbox ('letteralinks'). "with links
+";
+
+// Start Javascript
 echo "<script>
 function resetCorporaMore () {
 var count;\n";
@@ -433,6 +440,7 @@ function validateConstraint (thisOption) {
       }
 		}
   echo "} // end validateCorpus\n";
+// end main
 
 function navLink ($name, $link, $enabled) {
   if ($enabled) {
@@ -440,6 +448,11 @@ function navLink ($name, $link, $enabled) {
   } else {
     Echo "<span class=disabledmenu>$name</span>\n";
   }
+}
+
+function inputCheckbox ($name) {
+  $check = getCheckbox ($name) ? 'checked' : '';
+  return "<input type=checkbox id=$name name=$name $check />";
 }
 
 ?>

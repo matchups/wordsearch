@@ -11,11 +11,6 @@ if ($code = securityCheck ($level, $userid, $sessionid)) {
 	exit();
 }
 
-if (isset($_GET['hacktest'])) {
-	$foo = '';
-} else {
-	$foo = 'x';
-}
 echo "<HTML>
 <HEAD>\n";
 echo scriptStyleRefs (true, true, true);

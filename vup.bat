@@ -20,7 +20,7 @@ if %2==base set to=.
 
 Echo on
 for %%i in (form index search cons conssubword consweights corpus parse results phrases utility asksaveresults dosaveresults askaccesssharedlist askdeletelist askdeleteword asklistproperties askrenamelist asksharelist catsuggest doaccesssharedlist dodeletelist dodeleteword dolistproperties dorenamelist dosharelist catcss styles usersuggest wordcss wordsuggest ) do %command% %%i%from%php %%i%to%php
-for %%i in (askloadquery askrenamequery asksavequery asksharequery dorenamequery dosavequery dosharequery ) do %command% %%i%from%php %%i%to%php
+for %%i in (askloadquery askrenamequery asksavequery asksharequery dorenamequery dosavequery dosharequery thirdparty ) do %command% %%i%from%php %%i%to%php
 for %%i in (utility )  do %command% %%i%from%js %%i%to%js
 for %%i in (help helpmanage ) do %command% %%i%from%html %%i%to%html
 %command% styles%from%css styles%to%css

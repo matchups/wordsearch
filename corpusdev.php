@@ -142,7 +142,7 @@ class corpus {
 		$corpus = $this->corpus;
 		$key = "count$corpus";
 		$name = $this->name;
-		Echo "&nbsp;&nbsp;<button type='button' id='add$corpus' onclick='addOption$corpus();return false;'>More</button><BR>
+		Echo "&nbsp;&nbsp;<button type='button' id='add$corpus' onclick='addOption$corpus();return false;'>More</button>
 			<script>
 			function addOption$corpus() {
 			// add a new constraint when user presses that button
