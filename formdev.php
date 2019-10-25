@@ -125,10 +125,28 @@ echo "<H3>Output</H3>
 Show letters in " . inputCheckbox ('letteralpha'). "alphabetical order
 " . inputCheckbox ('letterabank'). "without duplication
 " . inputCheckbox ('letteralinks'). "with links
-";
-
+<BR>Link option: ";
+foreach (array ('suppress', 'source', 'Google', 'Bing', 'Yahoo', 'nGram viewer', 'IMDB', 'custom') as $linkOption) {
+  $name = "lo" . strtolower (str_replace (' ', '', $linkOption));
+  if (getCheckbox ($name)) {
+    $checked = true;
+  } else if ($linkOption == 'source'  &&  !getCheckbox ('losuppress')) {
+    $checked = true;
+  } else {
+    $checked = false;
+  }
+  $more = $checked ? 'checked ' : '' . "onclick='loClick(\"$name\");'";
+  echo "<input type=radio name=linkOption id=$name $more>&nbsp$linkOption&nbsp&nbsp ";
+  if ($linkOption == 'custom') {
+    echo "<input type=text placeholder='http://somewhere.com&title=@' name=customLink id=customLink style='display: none' size=50>";
+  }
+}
 // Start Javascript
 echo "<script>
+function loClick (linkOption) {
+  document.getElementById('customLink').style.display = (linkOption == 'locustom') ? 'inline' : 'none';
+}
+
 function resetCorporaMore () {
 var count;\n";
 foreach ($corpusObjects as $corpusObject) {
