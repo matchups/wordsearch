@@ -122,6 +122,9 @@ try {
     foreach ($json["query"]["pages"] as $page) {
       echo '<BR><B>' . ++$counter . ' ' . $page['title'];
       echo '</B>';
+      if (preg_match ('/^Lists? of/i', $page['title'])) {
+        throw new Exception ("Skip list articles");
+      }
       $ret = newEntry ($conn, $page['title'], $helper -> getFlags ($page), $corpus, $helper);
       echo '<BR>';
     }

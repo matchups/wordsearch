@@ -126,26 +126,24 @@ Show letters in " . inputCheckbox ('letteralpha'). "alphabetical order
 " . inputCheckbox ('letterabank'). "without duplication
 " . inputCheckbox ('letteralinks'). "with links
 <BR>Link option: ";
+$default = $_GET['linkoption'] ?? 'source';
 foreach (array ('suppress', 'source', 'Google', 'Bing', 'Yahoo', 'nGram viewer', 'IMDB', 'custom') as $linkOption) {
   $name = strtolower (str_replace (' ', '', $linkOption));
-  if (getCheckbox ($name)) {
-    $checked = true;
-  } else if ($linkOption == 'source'  &&  !getCheckbox ('losuppress')) {
-    $checked = true;
-  } else {
-    $checked = false;
-  }
-  $more = $checked ? 'checked ' : '' . "onclick='loClick(\"$name\");'";
-  echo "<input type=radio name=linkoption id=lo$name value=$name $more>&nbsp$linkOption&nbsp&nbsp ";
+  $more = ($name == $default) ? 'checked ' : '';
+  echo "<input type=radio name=linkoption id=lo$name value=$name $more onclick='loClick(\"$name\");'>&nbsp$linkOption&nbsp&nbsp ";
   if ($linkOption == 'custom') {
-    echo "<input type=text placeholder='http://somewhere.com&title=@' name=customLink id=customLink style='display: none' size=50>";
+    $urlChars = "-A-Za-z0-9._~:/?#\[\]!$&\'()*+,;%=";
+//    $urlChars = "-A-Za-z0-9._~:/?#!$&()*+,;%=";
+    echo "<input type=text placeholder='http://somewhere.com&title=@' name=customlink id=customlink value='{$_GET['customlink']}'
+        size=50 pattern='https?://[$urlChars]*@[$urlChars]*'>";
   }
 }
 // Start Javascript
 echo "<script>
 function loClick (linkOption) {
-  document.getElementById('customLink').style.display = (linkOption == 'locustom') ? 'inline' : 'none';
+  document.getElementById('customLink').style.display = (linkOption == 'custom') ? 'inline' : 'none';
 }
+loClick ('$default');
 
 function resetCorporaMore () {
 var count;\n";

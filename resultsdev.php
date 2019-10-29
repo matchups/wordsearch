@@ -105,7 +105,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				if ($link == '*') {
 					echo $corpusObjects[$corpus]->answerLink ($entry) . ' ';
 				} else if ($link) {
-					$entryLink = str_replace ('@', $entry, $link);
+					$entryLink = str_replace ('@', urlencode ($entry), $link);
 					Echo "<A HREF='$entryLink' target='_blank'>$entry</A>  ";
 				} else {
 					Echo "$entry  ";
