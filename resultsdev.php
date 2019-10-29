@@ -100,15 +100,16 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				$same = false;
 			}
 			$found [++$counter] = array ('text' => $entry, 'corpus' => $corpus);
+			$echo = getCheckbox ('lettersonly') ? $oneword : $entry;
 			if ($row['whole'] == 'Y') {
 				// If this is the whole entry, set up a link
 				if ($link == '*') {
-					echo $corpusObjects[$corpus]->answerLink ($entry) . ' ';
+					echo $corpusObjects[$corpus]->answerLink ($entry, $echo) . ' ';
 				} else if ($link) {
 					$entryLink = str_replace ('@', urlencode ($entry), $link);
-					Echo "<A HREF='$entryLink' target='_blank'>$entry</A>  ";
+					Echo "<A HREF='$entryLink' target='_blank'>$echo</A>  ";
 				} else {
-					Echo "$entry  ";
+					Echo "$echo  ";
 				}
 			} else {
 				// Else if part of an entry name, set up a link to our page to list phrases
@@ -128,7 +129,11 @@ function showResults ($result, $consObjects, $corpusObjects) {
 			$prevword = strtolower ($oneword);
 		}
 		if (microtime (true) > $timeout) {
-			$timedOut = true;
+			$timedOut = 'T';
+			break;
+		}
+		if ($counter == ($_GET['pagelen'] ?? 1E9)) {
+			$timedOut = 'C';
 			break;
 		}
 	} // end while
@@ -159,7 +164,8 @@ function showResults ($result, $consObjects, $corpusObjects) {
 	}
 
   if ($timedOut) {
-		$ret ['code'] = 'time';
+		$ret ['code'] = 'limit';
+		$ret ['subcode'] == $timedOut;
 		$ret ['restart'] = $oneword;
 	} else if ($counter > 0) {
 		$ret ['code'] = 'ok';

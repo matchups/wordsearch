@@ -54,9 +54,9 @@ class corpus {
 		return "corpus$name";
 	}
 
-	public function answerLink ($entry) {
+	public function answerLink ($entry, $echo) {
 		if ($this->urlpattern != '') {
-			return "<A target='_blank' HREF='" . $this->getURL ($entry) . "'>$entry</A>";
+			return "<A target='_blank' HREF='" . $this->getURL ($entry) . "'>$echo</A>";
 		} else {
 			return $entry;
 		}
@@ -252,6 +252,10 @@ class corpusConstraint extends constraint {
 		echo "theForm['query{$corpusNum}_$realNumber'].value = '" . addslashes ($this->spec) . "';\n";
 		// Set the radio button corresponding to the selected option
 		echo "theForm['r{$corpusNum}_" . $_GET["radio{$corpusNum}_$this->num"] . "$realNumber'].checked = true;\n";
+	}
+
+	function isLocalFilter () {
+		return true;
 	}
 } // end class corpusConstraint
 

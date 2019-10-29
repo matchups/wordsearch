@@ -82,10 +82,15 @@ try {
 		if ($ret['code'] == 'none') {
 			echo "No matches found.<BR>";
 		}
-		if ($ret ['code'] == 'time') {
+		if ($ret ['code'] == 'limit') {
 			$url = preg_replace ('/&from=.*$/', '', $_SERVER['REQUEST_URI']) . "&from={$ret['restart']}";
 			$url = substr ($url, 12); // remove /wordsearch/
-			echo "<P>Request timed out.  Select <A HREF=http://www.alfwords.com/$url>more</A> to see additional results.  ";
+			if ($ret ['subcode'] == 'T') {
+				echo "<P>Request timed out.";
+			} else {
+				echo "<P>Page limit of {$_GET['pagelen']} reached.";
+			}
+			echo "  Select <A HREF=http://www.alfwords.com/$url>more</A> to see additional results.  ";
 			if (isset ($ret['save'])) {
 				echo "You will be able to save the results once all results have been displayed.";
 			}

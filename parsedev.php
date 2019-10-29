@@ -98,7 +98,18 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 
 	$by = "PW.text, word_entry.whole DESC, entry.corpus_id";
 	$orderby = " GROUP BY " . str_replace('DESC', '', $by) . " ORDER BY $by";
-	return $sql . $orderby;
+	if ($_GET['pagelen']) {
+		$localFilter = false;
+		foreach ($consObjects as $thisConsObject) {
+			if ($thisConsObject->isLocalFilter()) {
+				$localFilter = true;
+			}
+		}
+		if (!$localFilter) {
+			$limit = " LIMIT {$_GET['pagelen']}";
+		}
+	}
+	return $sql . $orderby . $limit;
 }
 
 // Processing of "any order" searches

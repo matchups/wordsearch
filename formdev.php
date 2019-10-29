@@ -122,6 +122,7 @@ foreach ($corpusObjects as $corpusObject) {
 echo "<input type=hidden name=morecbx value='$checklist' />\n";
 
 echo "<H3>Output</H3>
+" . inputCheckbox ('lettersonly') . "Show letters only&nbsp;&nbsp;&nbsp;
 Show letters in " . inputCheckbox ('letteralpha'). "alphabetical order
 " . inputCheckbox ('letterabank'). "without duplication
 " . inputCheckbox ('letteralinks'). "with links
@@ -138,10 +139,11 @@ foreach (array ('suppress', 'source', 'Google', 'Bing', 'Yahoo', 'nGram viewer',
         size=50 pattern='https?://[$urlChars]*@[$urlChars]*'>";
   }
 }
+echo "<BR><input type=number name=pagelen id=pagelen value={$_GET['pagelen']}> Number of answers per page";
 // Start Javascript
 echo "<script>
 function loClick (linkOption) {
-  document.getElementById('customLink').style.display = (linkOption == 'custom') ? 'inline' : 'none';
+  document.getElementById('customlink').style.display = (linkOption == 'custom') ? 'inline' : 'none';
 }
 loClick ('$default');
 
@@ -211,7 +213,7 @@ if ($level > 0) {
       </button>
       <div class='dropdown-container' style='display: none'>
       <a href='http:asksaveresults$type.php?sessionkey=$sessionEncoded&level=$level&type=$type&source=upload' target='_blank'>Upload file</a>\n";
-    if (isset ($GLOBALS['ret']['save'])) {
+    if (isset ($GLOBALS['ret']['save'])  &&  $ret ['code'] != 'limit') {
        $sessionEncoded = urlencode ($_GET['sessionkey']);
        echo "<A HREF='http://www.alfwords.com/asksaveresults$type.php?sessionkey=$sessionEncoded&type=$type&level=$level&source=results'
          target='_blank'>Save Results</A>\n";

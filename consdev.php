@@ -66,6 +66,10 @@ class constraint {
 		return true;
 	}
 
+	public function isLocalFilter () {
+		return false;
+	}
+
 	public function position() {
 		// Array of letters in known positions
 		return array();
@@ -300,6 +304,10 @@ class consregex extends constraint {
 		} else {
 			return true; // done on the DB side; no filtering here
 		}
+	}
+
+	function isLocalFilter () {
+		return $this->local;
 	}
 
 	public function position() {
@@ -643,6 +651,10 @@ class consenum extends constraint {
 
 	public function localFilter($oneword, $entry) {
 		return preg_match ($this->pattern, asciitize ($entry));
+	}
+
+	function isLocalFilter () {
+		return true;
 	}
 
 	public static function getLabel () {
