@@ -79,6 +79,7 @@ try {
 		// Loop through words and display results
 		comment ($sql);
 		$ret = showResults ($result, $consObjects, $corpusObjects);
+		comment ($ret);
 		if ($ret['code'] == 'none') {
 			echo "No matches found.<BR>";
 		}

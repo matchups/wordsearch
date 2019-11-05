@@ -4,7 +4,16 @@ class conssubword extends constraint {
 	// boilerplate to look for subword
 	$more = " AND " . $this->maybeNot() . " EXISTS (SELECT 1 FROM words SW INNER JOIN word_entry SWE ON SWE.word_id = SW.id " .
 		   " INNER JOIN entry SE ON SE.id = SWE.entry_id " .
-		   " WHERE SW.text = ";
+		   " WHERE SW.text = " . $this->columnSyntax ();
+	$more = insertSql ($more, corpusInfo('SE', 'W', $dummy)) . ')'; // subword has to be in same corpus as main word
+	return $this->parseWhere ($more);
+} // end function
+
+public static function isColumnSyntax () {
+	return true;
+}
+
+public function columnSyntax () {
 	$mode = '';
 	$substr = '';
 	$fromend = false;
@@ -31,7 +40,7 @@ class conssubword extends constraint {
 			$newmode = 'N';
 			if ($start != "") { // Is this the end of a range where a start was already established?
 				if (($here > 0 && $here < $start) ||
-					   ($start < 0 && $here < $start)) { // Backwards range, so swap start and end
+						 ($start < 0 && $here < $start)) { // Backwards range, so swap start and end
 					$swap = $here;
 					$here = $start;
 					$start = $swap;
@@ -44,7 +53,7 @@ class conssubword extends constraint {
 				// Figure the length, which depends on whether the string spans from a left-based spot to a right-based
 				// spot, or if both termini are on the same side.
 				if ($startcount * $herecount > 0) {
-				   $piece = $piece .
+					 $piece = $piece .
 						($herecount - $startcount + 1) . ')';
 				} else {
 					$piece = $piece . "$here - $startcount + 1)";
@@ -91,11 +100,8 @@ class conssubword extends constraint {
 			$mode = $newmode;
 		}
 	} // end while
-	$more = $more . ' concat(' . substr ($substr, 2) . ')'; // Combine all the pieces on the database side.
-	$more = insertSql ($more, corpusInfo('SE', 'W', $dummy)) . ')'; // subword has to be in same corpus as main word
-	return $this->parseWhere ($more);
-} // end function
-
+	return 'concat(' . substr ($substr, 2) . ')'; // Combine all the pieces on the database side.
+}
 	public static function getLabel () {
 		return 'subword';
 	}

@@ -84,7 +84,7 @@ if ($type == 'dev') {
    <input name=anyorder type=checkbox onchange="mainChange();"/>
 <?php
 if ($advanced) {
-	echo "<span id=trepeat style='disabled'>Repeat letters? <input name=repeat type=checkbox disabled=true /></span>\n";
+	echo "<span id=trepeat style='disabled'>Repeat letters? <input name=repeat type=checkbox disabled=true /></span><br>\n";
 }
 echo '<input type=hidden id="count" name="count" value="1" /><BR>';
 if ($advanced) {
@@ -278,10 +278,10 @@ if ($level > 0) {
       array ('id' => 'beta', 'minlev' => 2, 'name' => 'Beta'),
       array ('id' => 'dev', 'minlev' => 3, 'name' => 'Development')) as $typeinfo) {
     if ($level >= $typeinfo['minlev']) {
-      navLink ($typeinfo['name'], "index{$typeinfo['id']}.php$security&type={$typeinfo['id']}", $type != $typeinfo ['id']);
+      navLink ($typeinfo['name'], "!index{$typeinfo['id']}.php$security&type={$typeinfo['id']}", $type != $typeinfo ['id']);
     }
   }
-  if ($level > 0) {
+  if ($level > 0  &&  isset($_GET['pattern'])) {
     include "thirdparty$type.php";
     foreach (thirdParty::list() as $thirdParty) {
       $helper = new $thirdParty ();
@@ -292,8 +292,28 @@ if ($level > 0) {
   }
 
   echo "<a href='http:logout.php?sessionkey=$sessionEncoded'>Log out</a>
-    </div>
-  </div>\n";
+    </div>\n";
+
+  if ($level == 3) {
+    echo "<button class='dropdown-btn' id='nav-dd'>Debug
+        <span id=nav-arrow>&#9662;</span>
+      </button>
+      <div class='dropdown-container' style='display: none'>
+      <button type='button' onclick='showParms();'>Parameters</button>
+      </div>
+      <script>
+      function showParms () {
+        alert ('";
+      foreach ($_GET as $key => $value) {
+        $value = str_replace (array ('\n', '\''), array (' <lf> ', '\\\''), $value);
+        echo "$key => $value\\n";
+      }
+    echo "');
+      }
+      </script>";
+    }
+
+  echo "</div>\n";
 }
 
 // Wizard stuff
@@ -377,7 +397,9 @@ echo "function addOption () {
     }
 	}
 
-echo "	myParent.insertBefore (newButton ('delcons' + optionNumber, 'Remove', 'removeConstraint(' + optionNumber + ')'), here);
+echo "  myParent.insertBefore (newInput ('details' + optionNumber, 'checkbox', ''), here);
+  myParent.insertBefore (newSpan ('tdetails' + optionNumber, 'Show details '), here);
+	myParent.insertBefore (newButton ('delcons' + optionNumber, 'Remove', 'removeConstraint(' + optionNumber + ')'), here);
 	myParent.insertBefore (newSpan ('butspace' + optionNumber, '&nbsp;&nbsp;'), here);
   myParent.insertBefore (newButton ('wizard' + optionNumber, 'Wizard', 'openWizard(' + optionNumber + ')'), here);
 	myParent.insertBefore (newBreak ('br' + optionNumber), here);
@@ -392,6 +414,7 @@ function radioClicked (thisOption) {
 	var theForm = document.forms['search'];
 	var hint;
   var newOption;
+  var details;
 	var wizard;\n";
   $delcode = '';
   foreach (constraint::list () as $classname) {
@@ -407,12 +430,16 @@ function radioClicked (thisOption) {
     $fieldlist = "{$fieldlist} r$suffix t$suffix";
     echo "if (theForm['r$suffix' + thisOption].checked) {
       hint = '" . str_replace ("\n", "", $classname::getHint()) . "';
-      wizard = " . ($classname::wizard() ? 'true' : 'false'). ";
+      wizard = " . ($classname::wizard() ? 'true' : 'false'). "
+      details = " . ($classname::isColumnSyntax() ? 'true' : 'false'). ";
     }\n";
   }
   $fieldlist = substr ($fieldlist, 1); // remove initial space
 
-	echo "theForm['wizard' + thisOption].disabled = !wizard;
+  echo " var display = details ? 'inline' : 'none';
+  document.getElementById('details' + thisOption).style.display = display;
+  document.getElementById('tdetails' + thisOption).style.display = display;
+  theForm['wizard' + thisOption].disabled = !wizard;
 
 	// Get rid of old hint and display new one.
 	if (wizard) {
@@ -462,7 +489,13 @@ function validateConstraint (thisOption) {
 
 function navLink ($name, $link, $enabled) {
   if ($enabled) {
-    Echo "<A HREF='$link' target='_blank'>$name</A>\n";
+    if (substr ($link, 0, 1) == '!') {
+      $link = substr ($link, 1);
+      $target = '';
+    } else {
+      $target = "target='_blank'";
+    }
+    Echo "<A HREF='$link' $target>$name</A>\n";
   } else {
     Echo "<span class=disabledmenu>$name</span>\n";
   }

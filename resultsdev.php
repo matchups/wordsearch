@@ -6,6 +6,9 @@ function showResults ($result, $consObjects, $corpusObjects) {
 	$urlkey = urlencode ($_GET['sessionkey']);
 	$security = "sessionkey=$urlkey&level=$level&type=$type&version={$_GET['version']}";
 	$moreParms = '';
+	if (!$pagelimit = ($_GET['pagelen'] ?? 0)) {
+		$pagelimit = 1E9;
+	}
 	foreach ($_GET as $key => $parm) {
 		if (substr ($key, 0, 6) == 'corpus'  ||  preg_match ('/^c([0-9]+)flag(.)(.*)$/', $key)  ||
 				$key == 'phrase' || $key == 'single' || $key == 'whole') {
@@ -122,17 +125,26 @@ function showResults ($result, $consObjects, $corpusObjects) {
 					}
 				}
 				if ($corpusObjects[$corpus]->phrases()) {
-					Echo "<A target='_blank'
-						HREF='phrases$type.php?base=$oneword&corpus=$corpus&type=$type&level=$level&link=$linkencoded'><i>phrases</i></A>";
+					Echo " <A target='_blank'
+						HREF='phrases$type.php?base=$oneword&corpus=$corpus&type=$type&level=$level&link=$linkencoded'><i>phrases</i></A> ";
 				}
 			}
+
+			if (!$same) {
+				foreach ($consObjects as $rowNumber => $thisConsObject) {
+					if ($thisConsObject->detailsEnabled()) {
+						echo ' ' . $row["cv$rowNumber"] . ' ';
+					}
+				}
+			}
+
 			$prevword = strtolower ($oneword);
 		}
 		if (microtime (true) > $timeout) {
 			$timedOut = 'T';
 			break;
 		}
-		if ($counter == ($_GET['pagelen'] ?? 1E9)) {
+		if ($counter == $pagelimit) {
 			$timedOut = 'C';
 			break;
 		}
@@ -165,7 +177,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 
   if ($timedOut) {
 		$ret ['code'] = 'limit';
-		$ret ['subcode'] == $timedOut;
+		$ret ['subcode'] = $timedOut;
 		$ret ['restart'] = $oneword;
 	} else if ($counter > 0) {
 		$ret ['code'] = 'ok';

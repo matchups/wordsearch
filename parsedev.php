@@ -9,8 +9,9 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 
 	// Prepare for anagram search
 	$prewhere = '/* premain */';
+	$select = '/* select */';
 	$sql = "SELECT PW.text AS word, Min(entry.name) AS entry, entry.id as entry_id," .
-			   " word_entry.whole AS whole, entry.corpus_id AS corpus FROM words PW" .
+			   " word_entry.whole AS whole, entry.corpus_id AS corpus $select FROM words PW" .
 			   " INNER JOIN word_entry ON word_entry.word_id = PW.id " .
 			   " INNER JOIN entry ON entry.id = word_entry.entry_id " .
 			   " $prewhere WHERE 1=1 "; // End with dummy condition so we can keep appending AHD clauses
@@ -24,7 +25,7 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 				continue;
 		}
 		$classname = "cons" . $_GET["radio$num"]; // subclass name based on user choice of constraint type
-		$consObjects[$num] = new $classname($_GET["query$num"], $num, getCheckbox ("not$num"));
+		$consObjects[$num] = new $classname($_GET["query$num"], $num, getCheckbox ("not$num"), getCheckbox ("details$num"));
 		$required = $required . $consObjects[$num]->required(); // Do this now because needed below
 		// Not done for corpus ones, but they shouldn't ever need it.
 	} // end for
@@ -64,7 +65,7 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 
 	$counter = 0;
 	// Handle additional constraints
-	foreach ($consObjects as $thisConsObject) {
+	foreach ($consObjects as $rowNumber => $thisConsObject) {
 		if ($explain = $thisConsObject->explain ()) {
 			if (++$counter % 2 == 0) { // Display constraint info, two per line
 					echo "<BR>";
@@ -72,6 +73,10 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 			echo " </span>and<span class='specs'> $explain ";
 		}
 		$sql = insertSql ($sql, $thisConsObject->parse ());
+		if ($thisConsObject -> detailsEnabled()) {
+			$consValue = $thisConsObject -> columnSyntax();
+			$sql = str_replace ($select, ", $consValue AS cv$rowNumber $select", $sql);
+		}
 		$thisConsObject->setlengths ($minlen, $maxlen);
 		$position += $thisConsObject->position();
 		// keep object around for post-filtering and for rebuilding form
@@ -387,7 +392,7 @@ function corpusInfo ($table, $option, &$consObjects) {
 		}
   }
 
-	if ($option == 'L') {
+  if ($option == 'L') {
 		return $corpusList;
 	}
 
@@ -398,7 +403,7 @@ function corpusInfo ($table, $option, &$consObjects) {
 		$clause = " IN ($list)";
 	}
 
-	preg_match_all ('/c([0-9]+)flag(.)/', $_GET['morecbx'], $matches);
+  preg_match_all ('/c([0-9]+)flag(.)/', $_GET['morecbx'], $matches);
 	foreach ($matches[1] as $counter => $thisCorpus) {
 		if (strpos ($flags[$thisCorpus], $matches[2][$counter]) === false) {
 			$nonflags [$thisCorpus] = $nonflags [$thisCorpus] . $matches[2][$counter];
@@ -412,7 +417,8 @@ function corpusInfo ($table, $option, &$consObjects) {
 			$corpusObject = $GLOBALS['corpusObjects'][$thisCorpus];
 			if ($corpusObject->likeCorpus()) {
 				if ($table == 'entry') {
-					$consObjects["clfb$thisCorpus"] = new ccCorpusLikeFlags ($nonflags[$thisCorpus], 0, false, $corpusObject);
+					//@@ need to figure out details
+					$consObjects["clfb$thisCorpus"] = new ccCorpusLikeFlags ($nonflags[$thisCorpus], 0, false, $details, $corpusObject);
 					$likeFlags = true;
 				}
 			} else {

@@ -5,11 +5,13 @@ class constraint {
 	protected $spec; 		// what the user typed
 	protected $num;		// constraint sequence number
 	protected $not;		// true if the "Not" checkbox is checked
+	protected $details; // true if the "details" checkbox is checked
 
-	public function __construct ($spec, $num, $not) {
-		$this->spec = strtolower ($spec);
-		$this->num = $num;
-		$this->not = $not;
+	public function __construct ($_spec, $_num, $_not, $_details) {
+		$this->spec = strtolower ($_spec);
+		$this->num = $_num;
+		$this->not = $_not;
+		$this->details = $_details;
 		$this->init();
 	}
 
@@ -52,11 +54,18 @@ class constraint {
 		// Do nothing by default
 	}
 
-  public function localFilterArray ($row) {
+  public function localFilterArray (&$row) {
 		// Most classes will use the regular localFilter; this one has been added to provide access to other elements
-		return $this->localFilter ($row['word'], $row['entry']);
+		$ret = $this->localFilter ($row['word'], $row['entry']);
+		if ($ret  &&  $this->details) {
+			$this->setMatch ($row, $ret);
+		}
+		return $ret;
 	}
 
+	function setMatch (&$row, $value) {
+		$row['cv' . $this->num] = $value;
+	}
 
 	public function localFilter($oneword, $entry) {
 		// Do any additional filtering that can't be done in SQL
@@ -94,6 +103,9 @@ class constraint {
 		Echo "theForm['query$realNumber'].value = '" . addslashes ($this->spec) . "';\n";
 		// Set the radio button corresponding to the selected option
 		Echo "theForm['r" . $_GET["radio$this->num"] . "$realNumber'].checked = true;\n";
+		if (getCheckbox ("details{$this->num}")) {
+			Echo "theForm['details$realNumber'].checked = true;\n";
+		}
 		Echo "radioClicked ($realNumber);\n";
 	}
 
@@ -108,6 +120,14 @@ class constraint {
   // This value is used to segregate counters
   public function parentID () {
 		return 'F'; // main form
+	}
+
+	public function columnSyntax () {
+		return '';
+	}
+
+	public function detailsEnabled () {
+		return $this->details;
 	}
 
   // ** Begin Static functions **
@@ -161,6 +181,9 @@ class constraint {
 		return 'Dummy hint';
 	}
 
+	public static function isColumnSyntax () {
+		return false;
+	}
 
 	public function debug () {return "[" . get_class() . "#$this->num=$this->spec]";}
 
@@ -284,7 +307,7 @@ class consregex extends constraint {
 	}
 
 	public function parse() {
-		if (strpos ($this->regex, '(') !== false) { // MySQL doesn't support this
+		if (strpos ($this->regex, '(') !== false  ||  $this->details) { // MySQL doesn't support this
 			$this->local = true;
 			return "";
 		} else {// good, we can do it on the database side
@@ -296,11 +319,15 @@ class consregex extends constraint {
 
 	public function localFilter($oneword, $entry) {
 		if ($this->local) {
-			$matched = preg_match ($this->regex, $this->raw ? entry : $oneword);
+			$matched = preg_match ($this->regex, $this->raw ? $entry : $oneword, $matches);
 			if ($this->not) {
-				$matched = !$matched;
+				$ret = !$matched;
+			} else if ($matched) {
+				$ret = implode ('/', $matches);
+			} else {
+				$ret = false;
 			}
-			return $matched;
+			return $ret;
 		} else {
 			return true; // done on the DB side; no filtering here
 		}
@@ -308,6 +335,14 @@ class consregex extends constraint {
 
 	function isLocalFilter () {
 		return $this->local;
+	}
+
+	public function columnSyntax () {
+		return '0';
+	}
+
+	public static function isColumnSyntax () {
+		return true;
 	}
 
 	public function position() {

@@ -280,7 +280,7 @@ class consregex extends constraint {
 
 	public function localFilter($oneword, $entry) {
 		if ($this->local) {
-			$matched = preg_match ($this->regex, $this->raw ? entry : $oneword);
+			$matched = preg_match ($this->regex, $this->raw ? $entry : $oneword);
 			if ($this->not) {
 				$matched = !$matched;
 			}
