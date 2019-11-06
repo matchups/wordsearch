@@ -57,14 +57,23 @@ class constraint {
   public function localFilterArray (&$row) {
 		// Most classes will use the regular localFilter; this one has been added to provide access to other elements
 		$ret = $this->localFilter ($row['word'], $row['entry']);
-		if ($ret  &&  $this->details) {
+		$t = ($ret == true);
+		$nt = !$t;
+		comment ("$ret {$this->details}");
+		if ($ret  &&  $ret !== true  &&  $this->details) {
+			comment ("yes");
 			$this->setMatch ($row, $ret);
 		}
 		return $ret;
 	}
 
 	function setMatch (&$row, $value) {
+		comment ("c:sM(cv{$this->num})=$value");
 		$row['cv' . $this->num] = $value;
+	}
+
+  function tableTitle ($nonUnique) {
+		return $this->explain() . ($nonUnique ? (' #' . $this->num) : '');
 	}
 
 	public function localFilter($oneword, $entry) {
@@ -373,6 +382,10 @@ class consregex extends constraint {
 		return 'regular expression';
 	}
 
+	function tableTitle ($nonUnique) {
+		return $this->spec;
+	}
+
 	public static function getButtonCode () {
 		$ret ['add'] = "insertRawSub ('rregex', thisOption);";
 		$ret ['del'] = "noRawSub (thisOption);";
@@ -635,6 +648,10 @@ class conscustomsql extends constraint {
 			$spec = explode (' on ', $this->spec)[1];
 		}
 		return $spec;
+	}
+
+	function tableTitle ($nonUnique) {
+		return 'Custom' . ($nonUnique ? (' #' . $this->num) : '');
 	}
 } // end class customsql
 

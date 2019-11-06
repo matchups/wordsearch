@@ -3,6 +3,14 @@ body {
   padding: 0px 10px;
 }
 
+table {
+  border-collapse: collapse;
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+
 /* Code display (for development/debugging) */
 .code {
   color: #c000c0;
@@ -24,6 +32,7 @@ body {
 .error {
   color: red;
 }
+
 /* Hint text */
 .hint {
   color: #1030F0;

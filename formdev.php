@@ -139,7 +139,8 @@ foreach (array ('suppress', 'source', 'Google', 'Bing', 'Yahoo', 'nGram viewer',
         size=50 pattern='https?://[$urlChars]*@[$urlChars]*'>";
   }
 }
-echo "<BR><input type=number name=pagelen id=pagelen value={$_GET['pagelen']}> Number of answers per page";
+echo "<BR>" . inputCheckbox ('usetable') . "Use table
+<BR><input type=number name=pagelen id=pagelen value={$_GET['pagelen']}> Number of answers per page";
 // Start Javascript
 echo "<script>
 function loClick (linkOption) {
@@ -304,7 +305,12 @@ if ($level > 0) {
       <script>
       function showParms () {
         alert ('";
+      $counter = 0;
       foreach ($_GET as $key => $value) {
+        if (++$counter == 15) {
+          echo "[more]');\n alert ('";
+          $counter = 0;
+        }
         $value = str_replace (array ('\n', '\''), array (' <lf> ', '\\\''), $value);
         echo "$key => $value\\n";
       }

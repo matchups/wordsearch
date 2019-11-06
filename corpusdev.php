@@ -533,6 +533,10 @@ class ccWikipediaregex extends ccWikipediaText {
 			return $this -> not;
 		}
 	}
+
+	function tableTitle ($nonUnique) {
+		return $this->regex;
+	}
 }
 
 class ccWikipediacategory extends ccWikipediaText {
@@ -671,6 +675,10 @@ class ccWikipediacategory extends ccWikipediaText {
 		$range = $_GET["wc{$corpus}_type{$this->num}"];
 		Echo "theForm['rc{$corpus}_$range$realNumber'].checked = true;\n";
   }
+
+	function tableTitle ($nonUnique) {
+		return ($nonUnique ? ('Cat #' . $this->num) : 'Category');
+	}
 } // end class ccWikipediacategory
 
 class ccWikipediasize extends ccWikipediaText {
@@ -692,6 +700,10 @@ class ccWikipediasize extends ccWikipediaText {
 		}
 		$ret = (($size > $this->size) XOR ($this->relation == '<') XOR ($this->not));
 		return $ret ? $size : false;
+	}
+
+	function tableTitle ($nonUnique) {
+		return 'Size';
 	}
 }
 
@@ -732,6 +744,10 @@ class ccWikipedialinks extends ccWikipediaText {
 		} while ($continue);
 		$ret = (($count > $target) XOR ($this->relation == '<') XOR ($this->not));
 		return $ret ? $count : false;
+	}
+
+	function tableTitle ($nonUnique) {
+		return 'Links';
 	}
 }
 

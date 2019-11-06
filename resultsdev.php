@@ -61,6 +61,28 @@ function showResults ($result, $consObjects, $corpusObjects) {
 	$linkencoded = urlencode ($link);
 
 		// Loop through results from database
+	$tabular = getCheckbox ('usetable');
+	$td = $tabular ? '<td>' : '';
+	$tde = $tabular ? '</td>' : ' ';
+	if ($tabular) {
+		echo '<table>';
+		$header = '<tr>' .
+			(getCheckbox ('letteralpha') ? '<th>Letters in Order</th>' : '') .
+			(getCheckbox ('letterabank') ? '<th>Without Dupes</th>' : '') .
+			'<th />'; // No title for the word itself
+		foreach ($consObjects as $rowNumber => $thisConsObject) {
+			if ($thisConsObject->detailsEnabled()) {
+				$classCounter[get_class ($thisConsObject)]++;
+			}
+		}
+		foreach ($consObjects as $rowNumber => $thisConsObject) {
+			if ($thisConsObject->detailsEnabled()) {
+				$title = $thisConsObject->tableTitle ($classCounter[get_class ($thisConsObject)] > 1);
+				$header .= "<th>$title</th>";
+			}
+		}
+		$header .= '</tr>';
+	}
 	while($row = $result->fetch(PDO::FETCH_ASSOC)) {
 		$oneword = $row['word'];
 		$corpus = $row['corpus'];
@@ -80,23 +102,27 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				$same = true;
 			} else {
 				if ($previous <> '') {
-					echo "<BR>";
+					echo $tabular ? '</tr>' : '<br>';
 				}
+				if ($tabular  &&  $counter % 30 == 0) {
+					echo $header;
+				}
+				echo $tabular ? '<tr>' : '';
 				$sorted = stringSort ($oneword);
 				$baseURL = "http://alfwords.com/search$type.php";
 				if (getCheckbox ('letteralpha')) {
 					if (getCheckbox ('letteralinks')) {
-						echo "<A HREF='$baseURL?pattern=$sorted&anyorder=on&$security$moreParms' target='_blank'>$sorted</A> ";
+						echo "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&$security$moreParms' target='_blank'>$sorted</A>$tde";
 					} else {
-						echo $sorted . ' ';
+						echo "$td$sorted$tde";
 					}
 				}
 				if (getCheckbox ('letterabank')) {
 					$sorted = noDupes ($sorted);
 					if (getCheckbox ('letteralinks')) {
-						echo "<A HREF='$baseURL?pattern=$sorted&anyorder=on&repeat=on&$security$moreParms' target='_blank'>$sorted</A> ";
+						echo "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&repeat=on&$security$moreParms' target='_blank'>$sorted</A>$tde";
 					} else {
-						echo $sorted . ' ';
+						echo "$td$sorted$tde";
 					}
 				}
 				$previous = $oneword;
@@ -104,6 +130,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 			}
 			$found [++$counter] = array ('text' => $entry, 'corpus' => $corpus);
 			$echo = getCheckbox ('lettersonly') ? $oneword : $entry;
+			echo $td;
 			if ($row['whole'] == 'Y') {
 				// If this is the whole entry, set up a link
 				if ($link == '*') {
@@ -131,15 +158,23 @@ function showResults ($result, $consObjects, $corpusObjects) {
 			}
 
 			if (!$same) {
+				echo $tde;
 				foreach ($consObjects as $rowNumber => $thisConsObject) {
 					if ($thisConsObject->detailsEnabled()) {
-						echo ' ' . $row["cv$rowNumber"] . ' ';
+						$value = $row["cv$rowNumber"];
+						if ($tabular  &&  preg_match ('/^[0-9]*$/', $value)) {
+							$tdx = "<td style='text-align:right'>";
+						} else {
+							$tdx = $td;
+						}
+						echo "$tdx$value$tde";
 					}
 				}
 			}
 
 			$prevword = strtolower ($oneword);
 		}
+
 		if (microtime (true) > $timeout) {
 			$timedOut = 'T';
 			break;
@@ -149,6 +184,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 			break;
 		}
 	} // end while
+	echo $tabular ? '</table>' : '';
 
   try {
 		if ($counter > 0  &&  $level > 1){

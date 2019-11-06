@@ -106,6 +106,10 @@ public function columnSyntax () {
 		return 'subword';
 	}
 
+	function tableTitle ($nonUnique) {
+		return $nonUnique ? ('Sub' . $this->spec) : 'Subword';
+	}
+
 	public static function getValidateConstraintCode () {
 		return "	if (/[^-a-z0-9:,]/i.test(thisValue)) {
 			 return 'Invalid character in subword specification ' + thisOption;

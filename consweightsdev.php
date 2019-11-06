@@ -136,6 +136,10 @@ class consweights extends constraint {
 		return 'weight';
 	}
 
+	function tableTitle ($nonUnique) {
+		return $nonUnique ? $this->spec : 'Weight';
+	}
+
 	public static function getValidateConstraintCode () {
 		return "// Left multipliers, optional plus or minus, right multipliers, operator, comparison value
 			if (!(/^[0-9]*([-+][0-9]*)?[<=>][0-9]+$/.test(thisValue))) {
