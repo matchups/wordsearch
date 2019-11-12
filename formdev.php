@@ -151,7 +151,19 @@ echo "<BR>" . inputCheckbox ('usetable') . "Use table
 <BR><input type=number name=pagelen id=pagelen value={$_GET['pagelen']}> Number of answers per page
 <BR>Sort by " . makeSelectSort (1) . "
 and then by " . makeSelectSort (2) . "
-<BR>";
+<BR>
+Font: <input type=radio name=font id=fnormal value=N checked=yes>&nbsp;Normal&nbsp&nbsp</input>
+<input type=radio name=font id=fmono value=M><span style='font-family: monospace'>&nbsp;monospace&nbsp&nbsp</span></input>
+<input type=radio name=font id=fserif value=S><span style='font-family: serif'>&nbsp;serif&nbsp&nbsp</span></input>
+<input type=radio name=font id=fsans value=W><span style='font-family: sans-serif'>&nbsp;sanserif&nbsp;&nbsp;</span></input>
+<input type=radio name=font id=fcustom value=C>&nbsp;other:&nbsp</input>
+<input type=text name=fontname id=fontname />
+<BR>
+Apply to: " . inputCheckbox ('fontlettera') . " alphabetized letters&nbsp;&nbsp;
+" . inputCheckbox ('fontword') . " words found&nbsp;&nbsp;
+" . inputCheckbox ('fontdetails') . " additional values
+<BR>
+";
 // Start Javascript
 echo "<script>
 loClick ('$default');

@@ -136,7 +136,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				// no change to sort key
 			} else {
 				if ($previous <> '') {
-				  $output .= $tde . $details . ($tabular ? '</tr>' : '<br>');
+				  $output .= $tde . font ($details, '+details') . ($tabular ? '</tr>' : '<br>');
 					$found [++$counter] = array ('text' => $entry, 'corpus' => $corpus, 'sort' => $sortkey, 'output' => $output);
 					if (!$oneword) {
 						break;
@@ -150,27 +150,32 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				if (getCheckbox ('letterauc')) {
 					$sorted = strtoupper ($sorted);
 				}
+				$sortedOutput = '';
 				if (getCheckbox ('letteralpha')) {
+					$sortedecho = font ($sorted, '-lettera');
 					if (getCheckbox ('letteralinks')) {
-						$output .= "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&$security$moreParms' target='_blank'>$sorted</A>$tde";
+						$sortedOutput .= "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&$security$moreParms' target='_blank'>$sortedecho</A>$tde";
 					} else {
-						$output .= "$td$sorted$tde";
+						$sortedOutput .= "$td$sortedecho$tde";
 					}
 					$rowMore ['A'] = $sorted;
 				}
 				if (getCheckbox ('letterabank')) {
 					$sorted = noDupes ($sorted);
+					$sortedecho = font ($sorted, '-lettera');
 					if (getCheckbox ('letteralinks')) {
-						$output .= "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&repeat=on&$security$moreParms' target='_blank'>$sorted</A>$tde";
+						$sortedOutput .= "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&repeat=on&$security$moreParms' target='_blank'>$sortedecho</A>$tde";
 					} else {
-						$output .= "$td$sorted$tde";
+						$sortedOutput .= "$td$sortedecho$tde";
 					}
 					$rowMore ['B'] = $sorted;
 				}
+				$output .= font ($sortedOutput, '+lettera');
 				$previous = $oneword;
 				$same = false;
 			}
 			$output .= $same ? ' ' : $td;
+			$echo = font ($echo, 'word');
 			if ($row['whole'] == 'Y') {
 				// If this is the whole entry, set up a link
 				if ($link == '*') {
@@ -207,6 +212,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 						} else {
 							$tdx = $td;
 						}
+						$value = font ($value, '-details');
 						$details .= "$tdx$value$tde";
 					}
 				}
@@ -316,4 +322,39 @@ function sorter ($row, $level) {
 	}
 }
 
+function font ($text, $type) {
+	if ($text == '') {
+		return $text;
+	}
+	$tabular = getCheckbox ('usetable');
+	switch (substr ($type, 0, 1)) {
+		case '-':
+		if (!$tabular) {
+			return $text; // will do font for the whole block
+		}
+		$type = substr ($type, 1);
+		break;
+
+		case '+':
+		if ($tabular) {
+			return $text; // will do font for each cell
+		}
+		$type = substr ($type, 1);
+		break;
+	}
+	if (getCheckbox ("font$type")) {
+		if (($face = $_GET ['font']) == 'N'  ||  $face == '') {
+			return $text;
+		} else {
+			if ($face == 'C') {
+				$family = "\"{$_GET['fontname']}\"";
+			} else {
+				$family = array ('M' => 'monospace', 'S' => 'serif', 'W' => 'sans-serif')[$face];
+			}
+			return "<span style = 'font-family:$family'>$text</span>";
+		}
+	} else {
+		return $text;
+	}
+}
 ?>
