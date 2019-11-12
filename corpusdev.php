@@ -54,8 +54,11 @@ class corpus {
 		return "corpus$name";
 	}
 
-	public function answerLink ($entry, $echo) {
+	public function answerLink ($entry, $echo = false) {
 		if ($this->urlpattern != '') {
+			if (!$echo) {
+				$echo = $entry;
+			}
 			return "<A target='_blank' HREF='" . $this->getURL ($entry) . "'>$echo</A>";
 		} else {
 			return $entry;
