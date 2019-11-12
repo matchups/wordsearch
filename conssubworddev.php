@@ -39,8 +39,8 @@ public function columnSyntax () {
 			}
 			$newmode = 'N';
 			if ($start != "") { // Is this the end of a range where a start was already established?
-				if (($here > 0 && $here < $start) ||
-						 ($start < 0 && $here < $start)) { // Backwards range, so swap start and end
+				if (($herecount > 0 && $herecount < $startcount) ||
+						 ($startcount < 0 && $herecount < $startcount)) { // Backwards range, so swap start and end
 					$swap = $here;
 					$here = $start;
 					$start = $swap;
@@ -53,10 +53,9 @@ public function columnSyntax () {
 				// Figure the length, which depends on whether the string spans from a left-based spot to a right-based
 				// spot, or if both termini are on the same side.
 				if ($startcount * $herecount > 0) {
-					 $piece = $piece .
-						($herecount - $startcount + 1) . ')';
+					$piece .= ($herecount - $startcount + 1) . ')';
 				} else {
-					$piece = $piece . "$here - $startcount + 1)";
+					$piece .= "$here - $startcount + 1)";
 				}
 				if ($reverse) {
 					$piece = "reverse($piece)";
