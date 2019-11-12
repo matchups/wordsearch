@@ -136,13 +136,12 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				// no change to sort key
 			} else {
 				if ($previous <> '') {
-				  $output .= $tde . font ($details, '+details') . ($tabular ? '</tr>' : '<br>');
+				  $output .= $tde . font ($details, '+details');
 					$found [++$counter] = array ('text' => $entry, 'corpus' => $corpus, 'sort' => $sortkey, 'output' => $output);
 					if (!$oneword) {
 						break;
 					}
 				}
-				$output = $tabular ? '<tr>' : '';
 				unset ($rowMore);
 				$rowMore ['L'] = strlen ($oneword);
 				$sorted = stringSort ($oneword);
@@ -150,6 +149,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				if (getCheckbox ('letterauc')) {
 					$sorted = strtoupper ($sorted);
 				}
+				$output = '';
 				$sortedOutput = '';
 				if (getCheckbox ('letteralpha')) {
 					$sortedecho = font ($sorted, '-lettera');
@@ -238,11 +238,33 @@ function showResults ($result, $consObjects, $corpusObjects) {
 
 	// Dump the sorted entries
 	$dumpCounter = 0;
+	$rowMulti = $_GET['rowmulti'];
 	foreach ($found as $entry) {
-		if ($tabular  &&  $dumpCounter++ % 30 == 0) {
+		if ($tabular  &&  $dumpCounter++ % 30 == 0  &&  !rowMulti) {
 			echo $header;
 		}
-		echo $entry ['output'];
+		if ($rowMulti) {
+			if ($tabular) {
+				$before = ($dumpCounter % 3 == 1) ? '<tr>' : '';
+				$after = ($dumpCounter % 3 == 0) ? '</tr>' : '';
+			} else {
+				$before = "";
+				$after = "<span style='color:green'> | </span>";
+			}
+		} else {
+			if ($tabular) {
+				$before = "<tr>";
+				$after = "</tr>";
+			} else {
+				$before = "";
+				$after = "<br>";
+			}
+		}
+		if ($dumpCounter < 5) {comment ("#$dumpCounter $rowMulti $tabular --> $before ^ $after");}
+		echo "$before{$entry ['output']}$after\n";
+	}
+	if ($rowMulti  &&  $tabular  &&  $dumpCounter % 3 > 0) {
+		echo '</tr>';
 	}
 	echo $tabular ? '</table>' : '';
 

@@ -147,7 +147,8 @@ foreach (array ('suppress', 'source', 'Google', 'Bing', 'Yahoo', 'nGram viewer',
 
 // Create dropdowns for sorting.  Include an option for the actual incoming selected item so it won't get lost;
 // the real option list will be generated in later calls to updateSortChoices().
-echo "<BR>" . inputCheckbox ('usetable') . "Use table
+echo "<BR>" . inputCheckbox ('usetable') . "Use table&nbsp;&nbsp;&nbsp;
+" . inputCheckbox ('rowmulti') . "<span id='trowmulti'>Multiple words per line</span>
 <BR><input type=number name=pagelen id=pagelen value={$_GET['pagelen']}> Number of answers per page
 <BR>Sort by " . makeSelectSort (1) . "
 and then by " . makeSelectSort (2) . "

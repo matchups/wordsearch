@@ -308,11 +308,14 @@ function loClick (linkOption) {
 
 function updateSortChoices () {
   var optionList = 'word:word/L:length';
+	var multipleOK = true;
   if (theForm['letteralpha'].checked) {
     optionList += '/A:alphabetized letters';
+		multipleOK = false;
   }
   if (theForm['letterabank'].checked) {
     optionList += '/B:letters without duplication';
+		multipleOK = false;
   }
   var thisOption;
   var here;
@@ -320,6 +323,7 @@ function updateSortChoices () {
     here = theForm['details' + thisOption];
     if (here !== undefined  &&  here.checked) {
       optionList += '/cv' + thisOption + ':constraint #' + thisOption;
+			multipleOK = false;
     }
   }
   optionList += '/' + theForm['morecbx'].value.substring (1).split(' ').map(function (fieldName) {
@@ -336,6 +340,7 @@ function updateSortChoices () {
         for (thisOption = 1; thisOption <= optionCount; thisOption++) {
           if (theForm['details' + corpus + '_' + thisOption].checked) {
             corpusOptions += '/cv' + corpus + '_' + thisOption + ':' + document.getElementById('cn' + corpus).innerHTML + ' constraint #' + thisOption;
+						multipleOK = false;
           }
         }
       }
@@ -365,4 +370,9 @@ function updateSortChoices () {
       }
     })
   }
+	theForm ['rowmulti'].disabled = !multipleOK;
+	if (!multipleOK) {
+		theForm ['rowmulti'].checked = false;
+	}
+	document.getElementById ('trowmulti').style = 'color:' + (multipleOK ? 'black' : 'gray');
 }
