@@ -115,14 +115,15 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				// no change to sort key
 			} else {
 				if ($previous <> '') {
-				  $output .= $tabular ? '</tr>' : '<br>';
+				  $output .= $tde . $details . ($tabular ? '</tr>' : '<br>');
 					$found [++$counter] = array ('text' => $entry, 'corpus' => $corpus, 'sort' => $sortkey, 'output' => $output);
 					if (!$oneword) {
 						break;
 					}
 				}
 				$output = $tabular ? '<tr>' : '';
-				$row ['L'] = strlen ($oneword);
+				unset ($rowMore);
+				$rowMore ['L'] = strlen ($oneword);
 				$sorted = stringSort ($oneword);
 				$baseURL = "http://alfwords.com/search$type.php";
 				if (getCheckbox ('letteralpha')) {
@@ -131,7 +132,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 					} else {
 						$output .= "$td$sorted$tde";
 					}
-					$row ['A'] = $sorted;
+					$rowMore ['A'] = $sorted;
 				}
 				if (getCheckbox ('letterabank')) {
 					$sorted = noDupes ($sorted);
@@ -140,13 +141,13 @@ function showResults ($result, $consObjects, $corpusObjects) {
 					} else {
 						$output .= "$td$sorted$tde";
 					}
-					$row ['B'] = $sorted;
+					$rowMore ['B'] = $sorted;
 				}
 				$previous = $oneword;
 				$same = false;
 			}
 			$echo = getCheckbox ('lettersonly') ? $oneword : $entry;
-			$output .= $td;
+			$output .= $same ? ' ' : $td;
 			if ($row['whole'] == 'Y') {
 				// If this is the whole entry, set up a link
 				if ($link == '*') {
@@ -174,7 +175,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 			}
 
 			if (!$same) {
-				$output .= $tde;
+				$details = '';
 				foreach ($consObjects as $rowNumber => $thisConsObject) {
 					if ($thisConsObject->detailsEnabled()) {
 						$value = $row["cv$rowNumber"];
@@ -183,7 +184,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 						} else {
 							$tdx = $td;
 						}
-						$output .= "$tdx$value$tde";
+						$details .= "$tdx$value$tde";
 					}
 				}
 			}
@@ -197,6 +198,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 		if ($counter == $pagelimit) {
 			$timedOut = 'C';
 		}
+		$row += $rowMore;
 		$sortkey = sorter ($row, 1) . ' ' . sorter ($row, 2);
 	} // end while
 
@@ -212,7 +214,6 @@ function showResults ($result, $consObjects, $corpusObjects) {
 			echo $header;
 		}
 		echo $entry ['output'];
-		comment ($entry ['sort']);
 	}
 	echo $tabular ? '</table>' : '';
 

@@ -326,10 +326,14 @@ function updateSortChoices () {
     var corpusOptions = '';
     var corpus;
     var thisOption;
+		var optionCount;
+		var here;
     if (fieldName.substring (0, 6)=='corpus') {
       if (theForm[fieldName].checked) {
         corpus = fieldName.substring (6);
-        for (thisOption = 1; thisOption <= theForm['count' + corpus].value; thisOption++) {
+				here = theForm['count' + corpus];
+				optionCount = (here === undefined) ? 0 : here.value;
+        for (thisOption = 1; thisOption <= optionCount; thisOption++) {
           if (theForm['details' + corpus + '_' + thisOption].checked) {
             corpusOptions += '/cv' + corpus + '_' + thisOption + ':' + document.getElementById('cn' + corpus).innerHTML + ' constraint #' + thisOption;
           }
