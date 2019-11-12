@@ -170,9 +170,10 @@ function buildReloadQuery ($consObjects) {
 		}
 		$thisConsObj->rebuildForm(++$newCount[$parentID]);
 	}
-	echo "mainChange();\n";
-	echo "}\n";
-	echo "</script>\n";
+	echo "mainChange();
+	updateSortChoices();
+	}
+	</script>\n";
 }
 
 // Force an index on bank if possible and no other index is being used

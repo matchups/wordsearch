@@ -70,7 +70,7 @@ function removeConstraint(thisOption)
 {
 	// noWeightSub (thisOption);
 	removeConsMore (thisOption); // generated code
-	removeChildren (thisOption, "label not query delcons butspace wizard br");
+	removeChildren (thisOption, "label not query delcons butspace wizard br details tetails ");
 
 	// if it is the last one being removed, decrement the count
 	var here = theForm["count"];
@@ -84,6 +84,7 @@ function removeConstraint(thisOption)
 		document.getElementById("hint").innerHTML = "";
 	}
 
+	updateSortChoices ();
 	return false;
 }
 
@@ -299,4 +300,65 @@ function dropInit () {
 	    }
 	  });
 	}
+}
+
+function loClick (linkOption) {
+  document.getElementById('customlink').style.display = (linkOption == 'custom') ? 'inline' : 'none';
+}
+
+function updateSortChoices () {
+  var optionList = 'word:word/L:length';
+  if (theForm['letteralpha'].checked) {
+    optionList += '/A:alphabetized letters';
+  }
+  if (theForm['letterabank'].checked) {
+    optionList += '/B:letters without duplication';
+  }
+  var thisOption;
+  var here;
+  for (thisOption = 2; thisOption <= theForm['count'].value; thisOption++) {
+    here = theForm['details' + thisOption];
+    if (here !== undefined  &&  here.checked) {
+      optionList += '/cv' + thisOption + ':constraint #' + thisOption;
+    }
+  }
+  optionList += '/' + theForm['morecbx'].value.substring (1).split(' ').map(function (fieldName) {
+    var corpusOptions = '';
+    var corpus;
+    var thisOption;
+    if (fieldName.substring (0, 6)=='corpus') {
+      if (theForm[fieldName].checked) {
+        corpus = fieldName.substring (6);
+        for (thisOption = 1; thisOption <= theForm['count' + corpus].value; thisOption++) {
+          if (theForm['details' + corpus + '_' + thisOption].checked) {
+            corpusOptions += '/cv' + corpus + '_' + thisOption + ':' + document.getElementById('cn' + corpus).innerHTML + ' constraint #' + thisOption;
+          }
+        }
+      }
+    }
+    return corpusOptions;
+  }).join ('/'); // Ugly closure of anonymous map function before finishing statement
+  for (sortField = 1; sortField < 3; sortField++) {
+    if (sortField == 2) {
+      optionList = '-:none/' + optionList;
+    }
+    sorter = theForm['sort' + sortField]; // global for access within forEach
+    oldValue = sorter.value; // ditto
+    for (thisOption = sorter.options.length - 1; thisOption >= 0; thisOption--) {
+      sorter.remove (0);
+    }
+    optionList.split('/').forEach (function (optionInfo) {
+      var colon;
+      if ((colon = optionInfo.indexOf (':')) > 0) {
+        var newOption = document.createElement('option');
+        var newValue = optionInfo.substring (0, colon);
+        newOption.value = newValue;
+        newOption.text = optionInfo.substring (colon + 1);
+        sorter.options.add(newOption);
+        if (newValue == oldValue) {
+          sorter.value = oldValue;
+        }
+      }
+    })
+  }
 }

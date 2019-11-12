@@ -123,8 +123,8 @@ echo "<input type=hidden name=morecbx value='$checklist' />\n";
 
 echo "<H3>Output</H3>
 " . inputCheckbox ('lettersonly') . "Show letters only&nbsp;&nbsp;&nbsp;
-Show letters in " . inputCheckbox ('letteralpha'). "alphabetical order
-" . inputCheckbox ('letterabank'). "without duplication
+Show letters in " . inputCheckbox ('letteralpha', 'updateSortChoices();'). "alphabetical order
+" . inputCheckbox ('letterabank', 'updateSortChoices();'). "without duplication
 " . inputCheckbox ('letteralinks'). "with links
 <BR>Link option: ";
 $default = $_GET['linkoption'] ?? 'source';
@@ -139,13 +139,16 @@ foreach (array ('suppress', 'source', 'Google', 'Bing', 'Yahoo', 'nGram viewer',
         size=50 pattern='https?://[$urlChars]*@[$urlChars]*'>";
   }
 }
+
+// Create dropdowns for sorting.  Include an option for the actual incoming selected item so it won't get lost;
+// the real option list will be generated in later calls to updateSortChoices().
 echo "<BR>" . inputCheckbox ('usetable') . "Use table
-<BR><input type=number name=pagelen id=pagelen value={$_GET['pagelen']}> Number of answers per page";
+<BR><input type=number name=pagelen id=pagelen value={$_GET['pagelen']}> Number of answers per page
+<BR>Sort by " . makeSelectSort (1) . "
+and then by " . makeSelectSort (2) . "
+<BR>";
 // Start Javascript
 echo "<script>
-function loClick (linkOption) {
-  document.getElementById('customlink').style.display = (linkOption == 'custom') ? 'inline' : 'none';
-}
 loClick ('$default');
 
 function resetCorporaMore () {
@@ -403,7 +406,9 @@ echo "function addOption () {
     }
 	}
 
-echo "  myParent.insertBefore (newInput ('details' + optionNumber, 'checkbox', ''), here);
+echo "  var newCheck = newInput ('details' + optionNumber, 'checkbox', '');
+	newCheck.setAttribute('onclick','updateSortChoices()');\n
+  myParent.insertBefore (newCheck, here);
   myParent.insertBefore (newSpan ('tdetails' + optionNumber, 'Show details '), here);
 	myParent.insertBefore (newButton ('delcons' + optionNumber, 'Remove', 'removeConstraint(' + optionNumber + ')'), here);
 	myParent.insertBefore (newSpan ('butspace' + optionNumber, '&nbsp;&nbsp;'), here);
@@ -507,9 +512,18 @@ function navLink ($name, $link, $enabled) {
   }
 }
 
-function inputCheckbox ($name) {
+function inputCheckbox ($name, $onclick = '') {
   $check = getCheckbox ($name) ? 'checked' : '';
-  return "<input type=checkbox id=$name name=$name $check />";
+  if ($onclick) {
+    $onclick = "onclick='$onclick'";
+  }
+  return "<input type=checkbox id=$name name=$name $check $onclick/>";
+}
+
+function makeSelectSort ($num) {
+  $value = $_GET["sort$num"];
+  return "<select name='sort$num' id=sort$num value=$value><option value=$value>Dummy</option></select>\n" .
+    inputCheckbox ("desc$num") . "descending  ";
 }
 
 ?>

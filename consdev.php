@@ -59,16 +59,13 @@ class constraint {
 		$ret = $this->localFilter ($row['word'], $row['entry']);
 		$t = ($ret == true);
 		$nt = !$t;
-		comment ("$ret {$this->details}");
 		if ($ret  &&  $ret !== true  &&  $this->details) {
-			comment ("yes");
 			$this->setMatch ($row, $ret);
 		}
 		return $ret;
 	}
 
 	function setMatch (&$row, $value) {
-		comment ("c:sM(cv{$this->num})=$value");
 		$row['cv' . $this->num] = $value;
 	}
 
@@ -682,7 +679,6 @@ class consenum extends constraint {
 			}
 		},
 		$this -> spec);
-		comment ($this->pattern = '/^' . $this->pattern . '$/i');
 	}
 
 	public function setlengths(&$consmin, &$consmax) {

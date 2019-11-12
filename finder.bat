@@ -1,6 +1,7 @@
 echo off
 if x%1==x goto help
 if %1==edit goto edit
+if %1==view goto view
 if not %1==loud goto go
 shift
 echo on
@@ -15,6 +16,7 @@ if not x%2==x set type=%2
 :search
 del temp\found.txt
 for %%i in (*%type%*) do find "%target%" %%i >> temp\found.txt
+:view
 temp\found.txt
 set type=
 set target=

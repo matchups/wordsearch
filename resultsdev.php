@@ -75,6 +75,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				$classCounter[get_class ($thisConsObject)]++;
 			}
 		}
+
 		foreach ($consObjects as $rowNumber => $thisConsObject) {
 			if ($thisConsObject->detailsEnabled()) {
 				$title = $thisConsObject->tableTitle ($classCounter[get_class ($thisConsObject)] > 1);
@@ -82,92 +83,107 @@ function showResults ($result, $consObjects, $corpusObjects) {
 			}
 		}
 		$header .= '</tr>';
-	}
-	while($row = $result->fetch(PDO::FETCH_ASSOC)) {
-		$oneword = $row['word'];
-		$corpus = $row['corpus'];
-		$entry = $row['entry'];
-		$entry_id = $row['entry_id'];
-		$matched = true;
-		// Check any constraints that require client-side work
-		foreach ($consObjects as $thisConsObject) {
-			if (!$thisConsObject->localFilterArray ($row)) {
-				$matched = false;
-				break;
+	} // end $tabular
+
+  // process results one at a time
+  $timedOut = false;
+	while(true) {
+		if (!$timedOut  &&  $row = $result->fetch(PDO::FETCH_ASSOC)) {
+			$oneword = $row['word'];
+			$corpus = $row['corpus'];
+			$entry = $row['entry'];
+			$entry_id = $row['entry_id'];
+			$matched = true;
+			// Check any constraints that require client-side work
+			foreach ($consObjects as $thisConsObject) {
+				if (!$thisConsObject->localFilterArray ($row)) {
+					$matched = false;
+					break;
+				}
 			}
+		} else {
+			$oneword = '';
+			$matched = true;
 		}
 
 		if ($matched) {
 			if ($oneword == $previous) {
 				$same = true;
+				if (!$oneword) {
+					break;
+				}
+				// no change to sort key
 			} else {
 				if ($previous <> '') {
-					echo $tabular ? '</tr>' : '<br>';
+				  $output .= $tabular ? '</tr>' : '<br>';
+					$found [++$counter] = array ('text' => $entry, 'corpus' => $corpus, 'sort' => $sortkey, 'output' => $output);
+					if (!$oneword) {
+						break;
+					}
 				}
-				if ($tabular  &&  $counter % 30 == 0) {
-					echo $header;
-				}
-				echo $tabular ? '<tr>' : '';
+				$output = $tabular ? '<tr>' : '';
+				$row ['L'] = strlen ($oneword);
 				$sorted = stringSort ($oneword);
 				$baseURL = "http://alfwords.com/search$type.php";
 				if (getCheckbox ('letteralpha')) {
 					if (getCheckbox ('letteralinks')) {
-						echo "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&$security$moreParms' target='_blank'>$sorted</A>$tde";
+						$output .= "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&$security$moreParms' target='_blank'>$sorted</A>$tde";
 					} else {
-						echo "$td$sorted$tde";
+						$output .= "$td$sorted$tde";
 					}
+					$row ['A'] = $sorted;
 				}
 				if (getCheckbox ('letterabank')) {
 					$sorted = noDupes ($sorted);
 					if (getCheckbox ('letteralinks')) {
-						echo "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&repeat=on&$security$moreParms' target='_blank'>$sorted</A>$tde";
+						$output .= "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&repeat=on&$security$moreParms' target='_blank'>$sorted</A>$tde";
 					} else {
-						echo "$td$sorted$tde";
+						$output .= "$td$sorted$tde";
 					}
+					$row ['B'] = $sorted;
 				}
 				$previous = $oneword;
 				$same = false;
 			}
-			$found [++$counter] = array ('text' => $entry, 'corpus' => $corpus);
 			$echo = getCheckbox ('lettersonly') ? $oneword : $entry;
-			echo $td;
+			$output .= $td;
 			if ($row['whole'] == 'Y') {
 				// If this is the whole entry, set up a link
 				if ($link == '*') {
-					echo $corpusObjects[$corpus]->answerLink ($entry, $echo) . ' ';
+					$output .= $corpusObjects[$corpus]->answerLink ($entry, $echo) . ' ';
 				} else if ($link) {
 					$entryLink = str_replace ('@', urlencode ($entry), $link);
-					Echo "<A HREF='$entryLink' target='_blank'>$echo</A>  ";
+					$output .= "<A HREF='$entryLink' target='_blank'>$echo</A>  ";
 				} else {
-					Echo "$echo  ";
+					$output .= "$echo  ";
 				}
 			} else {
 				// Else if part of an entry name, set up a link to our page to list phrases
 				if (!$same) {
 					if ($link) {
 						$entryLink = str_replace ('@', urlencode ($oneword), $link);
-						Echo "<A HREF='$entryLink' target='_blank'>$oneword</A>  ";
+						$output .= "<A HREF='$entryLink' target='_blank'>$oneword</A>  ";
 					} else {
-						Echo "$oneword  ";
+						$output .= "$oneword  ";
 					}
 				}
 				if ($corpusObjects[$corpus]->phrases()) {
-					Echo " <A target='_blank'
+					$output .= " <A target='_blank'
 						HREF='phrases$type.php?base=$oneword&corpus=$corpus&type=$type&level=$level&link=$linkencoded'><i>phrases</i></A> ";
 				}
 			}
 
 			if (!$same) {
-				echo $tde;
+				$output .= $tde;
 				foreach ($consObjects as $rowNumber => $thisConsObject) {
 					if ($thisConsObject->detailsEnabled()) {
 						$value = $row["cv$rowNumber"];
-						if ($tabular  &&  preg_match ('/^[0-9]*$/', $value)) {
+						if ($tabular  &&  is_numeric ($value)) {
 							$tdx = "<td style='text-align:right'>";
 						} else {
 							$tdx = $td;
 						}
-						echo "$tdx$value$tde";
+						$output .= "$tdx$value$tde";
 					}
 				}
 			}
@@ -177,13 +193,27 @@ function showResults ($result, $consObjects, $corpusObjects) {
 
 		if (microtime (true) > $timeout) {
 			$timedOut = 'T';
-			break;
 		}
 		if ($counter == $pagelimit) {
 			$timedOut = 'C';
-			break;
 		}
+		$sortkey = sorter ($row, 1) . ' ' . sorter ($row, 2);
 	} // end while
+
+  // We have everything, now sort it
+	usort($found, function($a, $b){
+		return strcmp ($a['sort'], $b['sort']);
+		});
+
+	// Dump the sorted entries
+	$dumpCounter = 0;
+	foreach ($found as $entry) {
+		if ($tabular  &&  $dumpCounter++ % 30 == 0) {
+			echo $header;
+		}
+		echo $entry ['output'];
+		comment ($entry ['sort']);
+	}
 	echo $tabular ? '</table>' : '';
 
   try {
@@ -241,4 +271,25 @@ function showExplain ($result) {
 		}
 	}
 }
+
+function sorter ($row, $level) {
+	$column = "sort$level";
+	if (isset($_GET[$column])) {
+		$value = $row[$_GET[$column]];
+		if (is_numeric ($value)) { // Put a letter in front of numbers so they sort properly
+			$value = chr (strlen ($value) + ord ('a')) . $value;
+		}
+		if (getCheckbox ("desc$level")) {
+			$newValue = '';
+			for ($pos = 0; $pos < strlen ($value); $pos++) {
+				$newValue .= chr (158 - ord (substr ($value, $pos, 1))); // 158 = asc(' ') + highest ASCII value
+			}
+			$value = $newValue;
+		}
+		return $value;
+	} else {
+		return '';
+	}
+}
+
 ?>

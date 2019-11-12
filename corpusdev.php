@@ -104,7 +104,7 @@ class corpus {
   public function form () {
 		$checklist = '';
 		$corpus = $this->corpus;
-		echo "<label>$this->name: <input name=corpus$corpus id=corpus$corpus type=checkbox checked /></label>\n";
+		echo "<label><span id=cn$corpus>$this->name</span>: <input name=corpus$corpus id=corpus$corpus type=checkbox checked /></label>\n";
 		$checklist = $checklist . ' corpus' . $corpus;
 		foreach ($this->flags as $flag => $flagname) {
 			$xname = "c{$corpus}flag$flag";
@@ -179,7 +179,9 @@ class corpus {
 			}
 			echo "myParent.insertBefore (newOption, here);\n";
 		}
-    echo "myParent.insertBefore (newInput ('details{$corpus}_' + corpusOptionNumber, 'checkbox', ''), here);
+		echo "  var newCheck = newInput ('details{$corpus}_' + corpusOptionNumber, 'checkbox', '');
+			newCheck.setAttribute('onclick','updateSortChoices()');\n
+		  myParent.insertBefore (newCheck, here);
 		myParent.insertBefore (newSpan ('tdet{$corpus}_' + corpusOptionNumber, ' Show details '), here);\n";
 
 		// Button to remove constraint
@@ -213,7 +215,8 @@ class corpus {
 		if ($clickedCode) {
 			echo "noSub$corpus (corpusOptionNumber);\n";
 		}
-		echo "} // end removeConstraint$corpus
+		echo "updateSortChoices ();
+		} // end removeConstraint$corpus
 		</script>
 		<input type=hidden id='$key' name='$key' value='0' />\n";
 	}
