@@ -107,6 +107,27 @@ function showResults ($result, $consObjects, $corpusObjects) {
 		}
 
 		if ($matched) {
+			// Figure the display format for the match
+			$echo = (getCheckbox ('lettersonly')  ||  $row['whole'] != 'Y') ? $oneword : $entry;
+			$ascii = preg_match ("/^[-a-z' 0-9]*$/i", $echo);
+			switch ($_GET['wordcase']) {
+				case 'U':
+				if ($ascii) {
+					$echo = strtoupper ($echo); // works fine for ASCII-128 stuff
+				} else {
+					$echo = "<span style='text-transform: uppercase'>$echo</span>"; // better for accented characters than strtoupper
+				}
+				break;
+
+				case 'L':
+				if ($ascii) {
+					$echo = strtolower ($echo);
+				} else {
+					$echo = "<span style='text-transform: lowercase'>$echo</span>";
+				}
+				break;
+			}
+
 			if ($oneword == $previous) {
 				$same = true;
 				if (!$oneword) {
@@ -126,6 +147,9 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				$rowMore ['L'] = strlen ($oneword);
 				$sorted = stringSort ($oneword);
 				$baseURL = "http://alfwords.com/search$type.php";
+				if (getCheckbox ('letterauc')) {
+					$sorted = strtoupper ($sorted);
+				}
 				if (getCheckbox ('letteralpha')) {
 					if (getCheckbox ('letteralinks')) {
 						$output .= "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&$security$moreParms' target='_blank'>$sorted</A>$tde";
@@ -146,7 +170,6 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				$previous = $oneword;
 				$same = false;
 			}
-			$echo = getCheckbox ('lettersonly') ? $oneword : $entry;
 			$output .= $same ? ' ' : $td;
 			if ($row['whole'] == 'Y') {
 				// If this is the whole entry, set up a link
@@ -163,9 +186,9 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				if (!$same) {
 					if ($link) {
 						$entryLink = str_replace ('@', urlencode ($oneword), $link);
-						$output .= "<A HREF='$entryLink' target='_blank'>$oneword</A>  ";
+						$output .= "<A HREF='$entryLink' target='_blank'>$echo</A>  ";
 					} else {
-						$output .= "$oneword  ";
+						$output .= "$echo  ";
 					}
 				}
 				if ($corpusObjects[$corpus]->phrases()) {

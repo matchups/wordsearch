@@ -123,9 +123,14 @@ echo "<input type=hidden name=morecbx value='$checklist' />\n";
 
 echo "<H3>Output</H3>
 " . inputCheckbox ('lettersonly') . "Show letters only&nbsp;&nbsp;&nbsp;
+<input type=radio name=wordcase id=wcaseu value=U><span style='font-variant: small-caps'>&nbsp;Uppercase&nbsp&nbsp</span></input>
+<input type=radio name=wordcase id=wcasel value=L>&nbsp;lowercase&nbsp&nbsp</input>
+<input type=radio name=wordcase id=wcasen value=N>&nbsp;Natural Case</input>
+<BR>
 Show letters in " . inputCheckbox ('letteralpha', 'updateSortChoices();'). "alphabetical order
 " . inputCheckbox ('letterabank', 'updateSortChoices();'). "without duplication
-" . inputCheckbox ('letteralinks'). "with links
+" . inputCheckbox ('letteralinks'). "with links&nbsp;&nbsp;&nbsp;
+" . inputCheckbox ('letterauc'). "<span style='font-variant: small-caps'>Uppercase</span>
 <BR>Link option: ";
 $default = $_GET['linkoption'] ?? 'source';
 foreach (array ('suppress', 'source', 'Google', 'Bing', 'Yahoo', 'nGram viewer', 'IMDB', 'custom') as $linkOption) {
