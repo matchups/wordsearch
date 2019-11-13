@@ -68,9 +68,8 @@ function mainChange ()
 function removeConstraint(thisOption)
 // remove the chosen constraint
 {
-	// noWeightSub (thisOption);
 	removeConsMore (thisOption); // generated code
-	removeChildren (thisOption, "label not query delcons butspace wizard br details tetails ");
+	removeChildren (thisOption, "label not query delcons butspace wizard br details tdetails ");
 
 	// if it is the last one being removed, decrement the count
 	var here = theForm["count"];
