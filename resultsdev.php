@@ -4,60 +4,20 @@ function showResults ($result, $consObjects, $corpusObjects) {
 	$type = $_GET['type'];
 	$level = $_GET['level'];
 	$urlkey = urlencode ($_GET['sessionkey']);
-	$security = "sessionkey=$urlkey&level=$level&type=$type&version={$_GET['version']}";
-	$moreParms = '';
 	if (!$pagelimit = ($_GET['pagelen'] ?? 0)) {
 		$pagelimit = 1E9;
 	}
-	foreach ($_GET as $key => $parm) {
-		if (substr ($key, 0, 6) == 'corpus'  ||  preg_match ('/^c([0-9]+)flag(.)(.*)$/', $key)  ||
-				$key == 'phrase' || $key == 'single' || $key == 'whole') {
-			if ($parm == 'on') {
-				$moreParms .= "&$key=on";
-				}
-			}
-		}
+	$moreParms = getParmsForLinks ();
 	$counter = 0;
 	$timedOut = false;
-	if ($level == 3) {
-		$timeout = 110;
-	} else {
-		$timeout = 30;
-	}
-	$timeout = $timeout + $GLOBALS['time']['top.int'];
+	$timeout = (($level == 3) ? 110 : 30) + $GLOBALS['time']['top.int'];
 
 	if (get_class ($result) <> "PDOStatement") {
 		echo "<span class='error'>$result</span>"; // Error message
 		return;
 	}
 
-	switch ($_GET['linkoption']) {
-		// foreach (array ('suppress', 'source', 'Google', 'Bing', 'Yahoo', 'nGram viewer', 'IMDB', 'custom') as $linkOption) {
-		case 'suppress':
-		  $link = '';
-			break;
-		case 'source':
-		  $link = '*';
-			break;
-		case 'google':
-		  $link = 'https://www.google.com/search?q=@';
-			break;
-		case 'bing':
-		  $link = 'https://www.bing.com/search?q=@';
-			break;
-	  case 'yahoo':
-		  $link = 'https://search.yahoo.com/search?p=@';
-			break;
-		case 'ngramviewer':
-		  $link = 'https://books.google.com/ngrams/graph?content=@&year_start=1800&year_end=2000';
-			break;
-		case 'imdb':
-		  $link = 'https://www.imdb.com/find?q=@&s=all';
-			break;
-		case 'custom':
-		  $link = $_GET['customlink'];
-			break;
-	}
+	$link = getMainLink ();
 	$linkencoded = urlencode ($link);
 
 		// Loop through results from database
@@ -66,28 +26,12 @@ function showResults ($result, $consObjects, $corpusObjects) {
 	$tde = $tabular ? '</td>' : ' ';
 	if ($tabular) {
 		echo '<table>';
-		$header = '<tr>' .
-			(getCheckbox ('letteralpha') ? '<th>Letters in Order</th>' : '') .
-			(getCheckbox ('letterabank') ? '<th>Without Dupes</th>' : '') .
-			'<th />'; // No title for the word itself
-		foreach ($consObjects as $rowNumber => $thisConsObject) {
-			if ($thisConsObject->detailsEnabled()) {
-				$classCounter[get_class ($thisConsObject)]++;
-			}
-		}
-
-		foreach ($consObjects as $rowNumber => $thisConsObject) {
-			if ($thisConsObject->detailsEnabled()) {
-				$title = $thisConsObject->tableTitle ($classCounter[get_class ($thisConsObject)] > 1);
-				$header .= "<th>$title</th>";
-			}
-		}
-		$header .= '</tr>';
-	} // end $tabular
+		$header = buildTableHeader ($consObjects);
+	}
 
   // process results one at a time
   $timedOut = false;
-	while(true) {
+	while (true) {
 		if (!$timedOut  &&  $row = $result->fetch(PDO::FETCH_ASSOC)) {
 			$oneword = $row['word'];
 			$corpus = $row['corpus'];
@@ -107,26 +51,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 		}
 
 		if ($matched) {
-			// Figure the display format for the match
-			$echo = (getCheckbox ('lettersonly')  ||  $row['whole'] != 'Y') ? $oneword : $entry;
-			$ascii = preg_match ("/^[-a-z' 0-9]*$/i", $echo);
-			switch ($_GET['wordcase']) {
-				case 'U':
-				if ($ascii) {
-					$echo = strtoupper ($echo); // works fine for ASCII-128 stuff
-				} else {
-					$echo = "<span style='text-transform: uppercase'>$echo</span>"; // better for accented characters than strtoupper
-				}
-				break;
-
-				case 'L':
-				if ($ascii) {
-					$echo = strtolower ($echo);
-				} else {
-					$echo = "<span style='text-transform: lowercase'>$echo</span>";
-				}
-				break;
-			}
+			$echo = wordDisplayFormat ($row);
 
 			if ($oneword == $previous) {
 				$same = true;
@@ -142,35 +67,11 @@ function showResults ($result, $consObjects, $corpusObjects) {
 						break;
 					}
 				}
+
+				// Start on the new one
 				unset ($rowMore);
 				$rowMore ['L'] = strlen ($oneword);
-				$sorted = stringSort ($oneword);
-				$baseURL = "http://alfwords.com/search$type.php";
-				if (getCheckbox ('letterauc')) {
-					$sorted = strtoupper ($sorted);
-				}
-				$output = '';
-				$sortedOutput = '';
-				if (getCheckbox ('letteralpha')) {
-					$sortedecho = font ($sorted, '-lettera');
-					if (getCheckbox ('letteralinks')) {
-						$sortedOutput .= "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&$security$moreParms' target='_blank'>$sortedecho</A>$tde";
-					} else {
-						$sortedOutput .= "$td$sortedecho$tde";
-					}
-					$rowMore ['A'] = $sorted;
-				}
-				if (getCheckbox ('letterabank')) {
-					$sorted = noDupes ($sorted);
-					$sortedecho = font ($sorted, '-lettera');
-					if (getCheckbox ('letteralinks')) {
-						$sortedOutput .= "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&repeat=on&$security$moreParms' target='_blank'>$sortedecho</A>$tde";
-					} else {
-						$sortedOutput .= "$td$sortedecho$tde";
-					}
-					$rowMore ['B'] = $sorted;
-				}
-				$output .= font ($sortedOutput, '+lettera');
+				$output = sortedOutput ($oneword, $rowMore, $td, $tde);
 				$previous = $oneword;
 				$same = false;
 			}
@@ -240,57 +141,15 @@ function showResults ($result, $consObjects, $corpusObjects) {
 	$dumpCounter = 0;
 	$rowMulti = $_GET['rowmulti'];
 	foreach ($found as $entry) {
-		if ($tabular  &&  $dumpCounter++ % 30 == 0  &&  !rowMulti) {
-			echo $header;
-		}
-		if ($rowMulti) {
-			if ($tabular) {
-				$before = ($dumpCounter % 3 == 1) ? '<tr>' : '';
-				$after = ($dumpCounter % 3 == 0) ? '</tr>' : '';
-			} else {
-				$before = "";
-				$after = "<span style='color:green'> | </span>";
-			}
-		} else {
-			if ($tabular) {
-				$before = "<tr>";
-				$after = "</tr>";
-			} else {
-				$before = "";
-				$after = "<br>";
-			}
-		}
-		if ($dumpCounter < 5) {comment ("#$dumpCounter $rowMulti $tabular --> $before ^ $after");}
-		echo "$before{$entry ['output']}$after\n";
+		dumpOne ($entry, $header, $dumpCounter++, $tabular, $rowMulti);
 	}
 	if ($rowMulti  &&  $tabular  &&  $dumpCounter % 3 > 0) {
 		echo '</tr>';
 	}
 	echo $tabular ? '</table>' : '';
 
-  try {
-		if ($counter > 0  &&  $level > 1){
-			$connw = openConnection (true);
-			if ($row = (SQLQuery ($connw, "SELECT id FROM session WHERE session_key = '{$_GET['sessionkey']}'")->fetch(PDO::FETCH_ASSOC))) {
-				$sessionID = $row['id'];
-			} else {
-				THROW Exception ("No results getting session ID for $sessionKey");
-			}
-
-			// Delete previous list unless we're continuing
-			if (!isset ($_GET['from'])) {
-				$connw -> exec ("DELETE FROM session_words WHERE session_id = $sessionID");
-			}
-			foreach ($found as $entry) {
-				$stmt = $connw->prepare('INSERT session_words (session_id, entry, corpus_id) VALUES (?, ?, ?)');
-				$stmt->execute(array ($sessionID, $entry ['text'], $entry ['corpus']));
-			}
-			$ret ['save'] = $sessionID;
-		}
-	} catch (Exception $e) {
-		errorMessage ($e->getMessage());
-	} finally {
-		unset ($connw);
+	if ($counter > 0  &&  $level > 1) {
+  	$ret ['save'] = saveResults ($found);
 	}
 
   if ($timedOut) {
@@ -379,4 +238,166 @@ function font ($text, $type) {
 		return $text;
 	}
 }
+
+function getMainLink () {
+	switch ($_GET['linkoption']) {
+	case 'suppress':
+		return '';
+	case 'source':
+		return '*';
+	case 'google':
+		return 'https://www.google.com/search?q=@';
+	case 'bing':
+		return 'https://www.bing.com/search?q=@';
+	case 'yahoo':
+		return 'https://search.yahoo.com/search?p=@';
+	case 'ngramviewer':
+		return 'https://books.google.com/ngrams/graph?content=@&year_start=1800&year_end=2000';
+	case 'imdb':
+		return 'https://www.imdb.com/find?q=@&s=all';
+	case 'custom':
+		return $_GET['customlink'];
+	default:
+		throw new Exception ("Invalid link option: {$_GET['linkoption']}");
+	}
+}
+function getParmsForLinks () {
+	$moreParms = "sessionkey=$urlkey&level=$level&type=$type&version={$_GET['version']}";
+	foreach ($_GET as $key => $parm) {
+		if (substr ($key, 0, 6) == 'corpus'  ||  preg_match ('/^c([0-9]+)flag(.)(.*)$/', $key)  ||
+				$key == 'phrase' || $key == 'single' || $key == 'whole') {
+			if ($parm == 'on') {
+				$moreParms .= "&$key=on";
+			}
+		} elseif ($key == 'linkoption') {
+			$moreParms .= "&$key=$parm";
+		}
+	}
+	return $moreParms;
+}
+
+function buildTableHeader ($consObjects) {
+	$header = '<tr>' .
+		(getCheckbox ('letteralpha') ? '<th>Letters in Order</th>' : '') .
+		(getCheckbox ('letterabank') ? '<th>Without Dupes</th>' : '') .
+		'<th />'; // No title for the word itself
+	foreach ($consObjects as $rowNumber => $thisConsObject) {
+		if ($thisConsObject->detailsEnabled()) {
+			$classCounter[get_class ($thisConsObject)]++;
+		}
+	}
+
+	foreach ($consObjects as $rowNumber => $thisConsObject) {
+		if ($thisConsObject->detailsEnabled()) {
+			$title = $thisConsObject->tableTitle ($classCounter[get_class ($thisConsObject)] > 1);
+			$header .= "<th>$title</th>";
+		}
+	}
+	$header .= '</tr>';
+	return $header;
+}
+
+function wordDisplayFormat ($row) {
+	// Figure the display format for the match
+	$echo = (getCheckbox ('lettersonly')  ||  $row['whole'] != 'Y') ? $row['word'] : $row['entry'];
+	$ascii = preg_match ("/^[-a-z' 0-9]*$/i", $echo);
+	switch ($_GET['wordcase']) {
+		case 'U':
+		if ($ascii) {
+			$echo = strtoupper ($echo); // works fine for ASCII-128 stuff
+		} else {
+			$echo = "<span style='text-transform: uppercase'>$echo</span>"; // better for accented characters than strtoupper
+		}
+		break;
+
+		case 'L':
+		if ($ascii) {
+			$echo = strtolower ($echo);
+		} else {
+			$echo = "<span style='text-transform: lowercase'>$echo</span>";
+		}
+		break;
+	}
+	return $echo;
+}
+
+function sortedOutput ($oneword, &$rowMore, $td, $tde) {
+	$sorted = stringSort ($oneword);
+	$baseURL = "http://alfwords.com/search{$_GET['type']}.php";
+	$moreParms = getParmsForLinks ();
+	if (getCheckbox ('letterauc')) {
+		$sorted = strtoupper ($sorted);
+	}
+	$sortedOutput = '';
+	if (getCheckbox ('letteralpha')) {
+		$sortedecho = font ($sorted, '-lettera');
+		if (getCheckbox ('letteralinks')) {
+			$sortedOutput .= "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&$moreParms' target='_blank'>$sortedecho</A>$tde";
+		} else {
+			$sortedOutput .= "$td$sortedecho$tde";
+		}
+		$rowMore ['A'] = $sorted;
+	}
+	if (getCheckbox ('letterabank')) {
+		$sorted = noDupes ($sorted);
+		$sortedecho = font ($sorted, '-lettera');
+		if (getCheckbox ('letteralinks')) {
+			$sortedOutput .= "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&repeat=on&$moreParms' target='_blank'>$sortedecho</A>$tde";
+		} else {
+			$sortedOutput .= "$td$sortedecho$tde";
+		}
+		$rowMore ['B'] = $sorted;
+	}
+	return font ($sortedOutput, '+lettera');
+}
+
+function dumpOne ($entry, $header, $dumpCounter, $tabular, $rowMulti) {
+	if ($dumpCounter % 30 == 0  &&  $tabular  &&  !$rowMulti) {
+		echo $header;
+	}
+	if ($rowMulti) {
+		if ($tabular) {
+			$before = ($dumpCounter % 3 == 0) ? '<tr>' : '';
+			$after = ($dumpCounter % 3 == 2) ? '</tr>' : '';
+		} else {
+			$before = "";
+			$after = "<span style='color:green'> | </span>";
+		}
+	} else {
+		if ($tabular) {
+			$before = "<tr>";
+			$after = "</tr>";
+		} else {
+			$before = "";
+			$after = "<br>";
+		}
+	}
+	echo "$before{$entry ['output']}$after\n";
+}
+
+function saveResults ($found) {
+	try {
+		$connw = openConnection (true);
+		if ($row = (SQLQuery ($connw, "SELECT id FROM session WHERE session_key = '{$_GET['sessionkey']}'")->fetch(PDO::FETCH_ASSOC))) {
+			$sessionID = $row['id'];
+		} else {
+			THROW new Exception ("No results getting session ID for {$_GET['sessionkey']}");
+		}
+
+		// Delete previous list unless we're continuing
+		if (!isset ($_GET['from'])) {
+			$connw -> exec ("DELETE FROM session_words WHERE session_id = $sessionID");
+		}
+		foreach ($found as $entry) {
+			$stmt = $connw->prepare('INSERT session_words (session_id, entry, corpus_id) VALUES (?, ?, ?)');
+			$stmt->execute(array ($sessionID, $entry ['text'], $entry ['corpus']));
+		}
+	} catch (Exception $e) {
+		errorMessage ($e->getMessage());
+	} finally {
+		unset ($connw);
+	}
+	return $sessionID;
+}
+
 ?>
