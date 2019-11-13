@@ -219,7 +219,9 @@ function showResults ($result, $consObjects, $corpusObjects) {
 			}
 
 			$prevword = strtolower ($oneword);
-		}
+			$row += $rowMore;
+			$sortkey = sorter ($row, 1) . ' ' . sorter ($row, 2);
+		} // $matched
 
 		if (microtime (true) > $timeout) {
 			$timedOut = 'T';
@@ -227,8 +229,6 @@ function showResults ($result, $consObjects, $corpusObjects) {
 		if ($counter == $pagelimit) {
 			$timedOut = 'C';
 		}
-		$row += $rowMore;
-		$sortkey = sorter ($row, 1) . ' ' . sorter ($row, 2);
 	} // end while
 
   // We have everything, now sort it
