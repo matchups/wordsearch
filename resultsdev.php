@@ -46,7 +46,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				$thisMatch = $thisConsObject->localFilterArray ($row);
 				if ($thisConsObject->postFormat()) {
 					if ($thisMatch) {
-						$consMatch [$num] = true;
+						$consMatch[$num] = true;
 					}
 				} else if (!$thisMatch) {
 					$matched = false;
@@ -92,7 +92,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				$previous = $oneword;
 				$same = false;
 				unset ($info);
-				$info ['V'] = $consMatch;
+				$info['V'] = $consMatch;
 				}
 			foreach (str_split ($row['flags']) as $flag) {
 				$info ['F'][$flag] = true;
@@ -441,7 +441,7 @@ function isMatch ($info, $oneFormat) {
 	}
 	switch ($matches[1]) {
 		case 'v': // regular constraint
-		$ret = isset ($info ['V'][$matches[4]]);
+		$ret = isset ($info ['V'][$matches[2]]);
 		break;
 
 		case 'cv':
