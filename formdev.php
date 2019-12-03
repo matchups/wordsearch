@@ -35,7 +35,6 @@ echo "<div id='catlookup' class='wizard'>
 foreach ($corpusObjects as $corpusObject) {
   if (isset ($corpusObject->optionButtonList ()['category'])) {
     $corpus = $corpusObject->getCorpusNum();
-    //     <input type='text' name=category$corpus id=category{$corpus}old class=category$corpus style='display: none'/>
     echo "<div class='typeahead__container'>
             <div class='typeahead__field'>
               <div class='typeahead__query'>
@@ -119,9 +118,14 @@ foreach ($corpusObjects as $corpusObject) {
   $checklist = $checklist . $corpusObject->form();
   echo "<BR>\n";
 }
-echo "<input type=hidden name=morecbx value='$checklist' />\n";
+echo "</div>
+<input type=hidden name=morecbx value='$checklist' />\n";
 
+if ($level == 0) {
+  echo "<div style='display: none'>";
+}
 echo "<H3>Output</H3>
+<div id='output' >
 " . inputCheckbox ('lettersonly') . "Show letters only&nbsp;&nbsp;&nbsp;
 <input type=radio name=wordcase id=wcaseu value=U><span style='font-variant: small-caps'>&nbsp;Uppercase&nbsp&nbsp</span></input>
 <input type=radio name=wordcase id=wcasel value=L>&nbsp;lowercase&nbsp&nbsp</input>
@@ -167,7 +171,11 @@ Apply to: " . inputCheckbox ('fontlettera') . " alphabetized letters&nbsp;&nbsp;
 Special formatting for...
 <input type=hidden id='endoutput'/>
 </div>
-<!-- Put the type (Beta, Dev, Back, or nil) in the form so subsequent scripts can access it -->
+" . inputCheckbox ('showoutput', 'updateShowOutput();'). "show output options<br>\n";
+if ($level == 0) {
+  echo "<\div>";
+}
+echo "<!-- Put the type (Beta, Dev, Back, or nil) in the form so subsequent scripts can access it -->
 <input type=hidden id='type' name='type' value='$type' />
 <input type=hidden id='version' name='version' value='$version' />
 <input type='submit' value='Submit' id='xxx'/>

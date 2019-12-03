@@ -473,3 +473,7 @@ function updateHighlightChoices () {
     }
   }
 } // end updateHighlightChoices
+
+function updateShowOutput () {
+  document.getElementById('output').style.display = document.getElementById('showoutput').checked ? 'inline' : 'none';
+}
