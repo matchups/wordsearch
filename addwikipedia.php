@@ -120,12 +120,18 @@ try {
     $ret = fetchUrl($url);
     $json = json_decode($ret, true);
     foreach ($json["query"]["pages"] as $page) {
-      echo '<BR><B>' . ++$counter . ' ' . $page['title'];
+      $title = $page['title'];
+      echo '<BR><B>' . ++$counter . ' ' . $title;
       echo '</B>';
-      if (preg_match ('/^Lists? of/i', $page['title'])) {
+      if (preg_match ('/^Lists? of/i', $title)) {
         throw new Exception ("Skip list articles");
       }
-      $ret = newEntry ($conn, $page['title'], $helper -> getFlags ($page), $corpus, $helper);
+      $shortTitle = trim (explode ('(', $title)[0]);
+      if (strlen ($shortTitle)<3  ||  (strlen ($shortTitle) == 3  &&  ord($shortTitle)>128)) {
+        echo " -- Skipping short entry";
+      } else {
+        $ret = newEntry ($conn, $title, $helper -> getFlags ($page), $corpus, $helper);
+      }
       echo '<BR>';
     }
     if (isset ($json["continue"])) {

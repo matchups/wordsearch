@@ -127,3 +127,7 @@ table, th, td {
 .typeahead__query {
   width: 90%;
 }
+
+.extrabold {
+  font-family: Georgia Pro Black, Cooper Black, Bodoni MT Black, Cambria, Times, serif;}
+}

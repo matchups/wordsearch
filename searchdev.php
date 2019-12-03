@@ -1,4 +1,3 @@
-
 <?php
 $type = $_GET['type']; // beta, dev, etc.
 include "utility" . $type . ".php";

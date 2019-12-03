@@ -1,5 +1,7 @@
 <?php
 class consweights extends constraint {
+	protected $compare;
+
 	protected function explainSub() {
 		return (($_GET["wttype$this->num"] == "SCR") ? 'Scrabble&reg;' : "Alphabet") . " weight $this->spec";
 	}
@@ -8,11 +10,14 @@ class consweights extends constraint {
 		preg_match ('/^([0-9]*)([-+]?)([0-9]*)([<=>][0-9]*)$/', $this->spec, $matches);
 		// $left (digits) / + or - / $right (digits) / $compare (like >30)
 		$compare = $matches [4];
-		if ($this->not) {
+		$column = $this->columnSyntax ();
+		if ($this->postFormat) {
+			$this->compare = $compare;
+			$compare = '';
+		} else if ($this->not) {
 			$compare = str_replace (array ('<', '=', '>'), array ('>=', '!=', '<='), $compare);
 		}
-		$column = $this->columnSyntax ();
-		return $this->parseWhere ("AND $column $compare ");
+		return $this->parseWhere ("$column $compare ");
 	}
 
 	function columnSyntax () {
@@ -50,6 +55,28 @@ class consweights extends constraint {
 		return " (SELECT sum(weights.weight $times) FROM weights INNER JOIN spandex " .
 			"WHERE weights.name = '$wttype' AND weights.letter = substr(PW.text, spandex.value, 1) ".
 			"AND spandex.value <= char_length(PW.text)) ";
+	}
+
+	public function localFilterPostFormat ($value) {
+		$target = substr ($this->compare, 1);
+		switch (substr ($this->compare, 0, 1)) {
+			case '>':
+			$ret = $value > $target;
+			break;
+
+			case '=':
+			$ret = $value = $target;
+			break;
+
+			case '<':
+			$ret = $value < $target;
+			break;
+
+			default:
+			throw new Exception ("Bad compare: {$this->compare}");
+		}
+		if ($value % 10 == 2) {comment ("$value {$this->compare} $ret");}
+		return $this->not ? !$ret : $ret;
 	}
 
 	public static function isColumnSyntax () {

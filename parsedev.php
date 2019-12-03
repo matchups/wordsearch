@@ -26,8 +26,11 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 		}
 		$classname = "cons" . $_GET["radio$num"]; // subclass name based on user choice of constraint type
 		$consObjects[$num] = new $classname($_GET["query$num"], $num, getCheckbox ("not$num"), getCheckbox ("details$num"));
-		$required = $required . $consObjects[$num]->required(); // Do this now because needed below
-		// Not done for corpus ones, but they shouldn't ever need it.
+		if (preg_match ('/[^P]/', $_GET["rdispdivv$num"])) {
+			$consObjects[$num]->setPostFormat(true);
+		} else {
+			$required = $required . $consObjects[$num]->required(); // Do this now because needed below
+		}
 	} // end for
 
 	// Identify pattern when we're doing an Any Order search.
@@ -70,11 +73,24 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 			if (++$counter % 2 == 0) { // Display constraint info, two per line
 					echo "<BR>";
 			}
+			if ($thisConsObject->postFormat()) {
+				if ($thisConsObject->parentID() == 'F') {
+					$subkey = "v$rowNumber";
+				} else {
+					$subkey = "cv$rowNumber";
+				}
+				$format = array ('parm' => $_GET["rdispdiv{$subkey}"], 'more' => $_GET["dispdiv{$subkey}x"] ?? '');
+				if ($format['parm'] == 'B') {
+					$format['parm'] = 'BB'; // because baseline in header is already bold
+				}
+				$explain = applyFormat ($explain, $format);
+			}
 			echo " </span>and<span class='specs'> $explain ";
 		}
-		$sql = insertSql ($sql, $thisConsObject->parse ());
-		if ($thisConsObject -> detailsEnabled()) {
-			$consValue = $thisConsObject -> columnSyntax();
+		$parse = $thisConsObject->parse ();
+		$sql = insertSql ($sql, $parse);
+		if ($thisConsObject->detailsEnabled()  ||  $thisConsObject->postFormat()) {
+			$consValue = $parse['column'] ?? $thisConsObject -> columnSyntax();
 			$sql = str_replace ($select, ", $consValue AS cv$rowNumber $select", $sql);
 		}
 		$thisConsObject->setlengths ($minlen, $maxlen);
@@ -85,7 +101,7 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 	$sql = $sql . doWordTypes ();
 	$sql = $sql . doLength ('PW', $minlen, $maxlen, true);
 	$fourlist = $anyorder ? '' : $pattern;
-	foreach ($consObjects as $thisConsObject) {
+	foreach (filteringObjects ($consObjects) as $thisConsObject) {
 		$fourlist .= '|' . $thisConsObject->fourPattern();
 	}
 
@@ -389,6 +405,8 @@ function corpusInfo ($table, $option, &$consObjects) {
 			} else {
 				$flags[$corpus] = ($flags[$corpus] ?? '') . $matches [2];
 			}
+		} else if (preg_match ('/^rdispdivcf_./', $key)) {
+			$flagFormat = true;
 		}
   }
 
@@ -432,9 +450,7 @@ function corpusInfo ($table, $option, &$consObjects) {
 		}
 	}
 
-	if ($likeFlags) {
-		$ret ['select'] = ", PW.id AS pw_id";
-	}
+	$ret ['select'] = ($likeFlags ? ", PW.id AS pw_id" : '') . ($flagFormat ? ", entry.flags" : '');
 
 	$ret ['where'] = " AND $table.corpus_id $clause $flagClause $moreSQL";
 	return $ret;
@@ -595,5 +611,14 @@ function insertSql ($sql, $more) {
 		$sql = substr ($sql, 0, $here - 1) . $more['select'] . substr ($sql, $here - 1);
 	}
 	return $sql;
+}
+
+function filteringObjects ($consObjects) {
+	foreach ($consObjects as $rowNumber => $thisConsObject) {
+		if (!$thisConsObject->postFormat()) {
+			$ret [$rowNumber] = $thisConsObject;
+		}
+	}
+	return $ret;
 }
 ?>

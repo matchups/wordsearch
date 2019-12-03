@@ -29,6 +29,8 @@ function showResults ($result, $consObjects, $corpusObjects) {
 		$header = buildTableHeader ($consObjects);
 	}
 
+	$formatInfo = getFormatInfo ($consObjects);
+
   // process results one at a time
   $timedOut = false;
 	while (true) {
@@ -39,8 +41,14 @@ function showResults ($result, $consObjects, $corpusObjects) {
 			$entry_id = $row['entry_id'];
 			$matched = true;
 			// Check any constraints that require client-side work
-			foreach ($consObjects as $thisConsObject) {
-				if (!$thisConsObject->localFilterArray ($row)) {
+			unset ($consMatch);
+			foreach ($consObjects as $num => $thisConsObject) {
+				$thisMatch = $thisConsObject->localFilterArray ($row);
+				if ($thisConsObject->postFormat()) {
+					if ($thisMatch) {
+						$consMatch [$num] = true;
+					}
+				} else if (!$thisMatch) {
 					$matched = false;
 					break;
 				}
@@ -62,6 +70,15 @@ function showResults ($result, $consObjects, $corpusObjects) {
 			} else {
 				if ($previous <> '') {
 				  $output .= $tde . font ($details, '+details');
+					foreach ($formatInfo as $oneFormat) {
+						if (isMatch ($info, $oneFormat)) {
+							if ($tabular) {
+								$output = applyFormatHTML ($output, 'td', $oneFormat);
+							} else {
+								$output = applyFormat ($output, $oneFormat);
+							}
+						}
+					}
 					$found [++$counter] = array ('text' => $entry, 'corpus' => $corpus, 'sort' => $sortkey, 'output' => $output);
 					if (!$oneword) {
 						break;
@@ -74,9 +91,15 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				$output = sortedOutput ($oneword, $rowMore, $td, $tde);
 				$previous = $oneword;
 				$same = false;
+				unset ($info);
+				$info ['V'] = $consMatch;
+				}
+			foreach (str_split ($row['flags']) as $flag) {
+				$info ['F'][$flag] = true;
 			}
 			$output .= $same ? ' ' : $td;
 			$echo = font ($echo, 'word');
+			$info ['C'][$corpus] = true;
 			if ($row['whole'] == 'Y') {
 				// If this is the whole entry, set up a link
 				if ($link == '*') {
@@ -98,8 +121,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 					}
 				}
 				if ($corpusObjects[$corpus]->phrases()) {
-					$output .= " <A target='_blank'
-						HREF='phrases$type.php?base=$oneword&corpus=$corpus&type=$type&level=$level&link=$linkencoded'><i>phrases</i></A> ";
+					$output .= " <A target='_blank'	HREF='phrases$type.php?base=$oneword&corpus=$corpus&type=$type&level=$level&link=$linkencoded'><i>phrases</i></A> ";
 				}
 			}
 
@@ -108,6 +130,9 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				foreach ($consObjects as $rowNumber => $thisConsObject) {
 					if ($thisConsObject->detailsEnabled()) {
 						$value = $row["cv$rowNumber"];
+						if ($value == '0'  &&  $thisConsObject->postFormat()) {
+							$value = ''; // displaying even on mismatch, so don't show dummy zeroes
+						}
 						if ($tabular  &&  is_numeric ($value)) {
 							$tdx = "<td style='text-align:right'>";
 						} else {
@@ -400,4 +425,85 @@ function saveResults ($found) {
 	return $sessionID;
 }
 
+function getFormatInfo ($consObjects) {
+	foreach ($_GET as $key => $parm) {
+		if (substr ($key, 0, 8) == 'rdispdiv'  &&  $parm <> 'P') {
+			$ret [] = array ('key' => $subkey = substr ($key, 8), 'parm' => $parm, 'more' => $_GET["dispdiv{$subkey}x"] ?? '',
+					'not' => getCheckbox ("dispdiv{$subkey}not"));
+		}
+	}
+	return $ret;
+}
+
+function isMatch ($info, $oneFormat) {
+	if (!preg_match ("/^([a-z]+)([0-9]*)_*([a-z]*)([0-9]*)$/i", $oneFormat ['key'], $matches)) {
+		throw New Exception ("Bad format format: {$oneFormat['key']}");
+	}
+	switch ($matches[1]) {
+		case 'v': // regular constraint
+		$ret = isset ($info ['V'][$matches[4]]);
+		break;
+
+		case 'cv':
+		$ret = isset ($info ['V']["{$matches[2]}_{$matches[4]}"]);
+		break;
+
+		case 'cf': // Corpus flag
+		$ret = isset ($info ['F'][$matches[3]]);
+		break;
+
+		case 'cp': // Corpus
+		$ret = isset ($info ['C'][$matches[4]]);
+	}
+	return $ret  XOR  $oneFormat ['not'];
+}
+
+function applyFormat ($output, $oneFormat) {
+	$more = $oneFormat['more'];
+	switch ($parm = $oneFormat['parm']) {
+		case 'U':
+		case 'B':
+		case 'I':
+		$output = "<$parm>$output</$parm>";
+		break;
+
+		case 'BB':
+		$output = "<span class='extrabold'>$output</span>";
+		break;
+
+		case 'S';
+		$output = "<strike>$output</strike>";
+		break;
+
+		case 'L';
+		$output = "<font size=+1>$output</font>";
+		break;
+
+    case 'CF':
+		// Apply color to the innerHTML of each anchor
+		$output = applyFormatHTML ($output, 'a', $oneFormat);
+		if (!preg_match ('/^<A[^>]*>[^<]*</A>$/i', $output)) { // Is there anything beyond a single anchor?
+			$output = "<font color='$more'>$output</font>";
+		}
+		break;
+
+		case 'CB':
+		$output = "<span style='background-color:$more'>$output</span>";
+		break;
+
+		default:
+			throw new Exception ("Bad format parameter: $parm");
+	}
+  return $output;
+}
+
+// Apply formatting to innerHTML of <entity>stuff</entity>
+function applyFormatHTML ($string, $entity, $oneFormat) {
+	setTemp ('oneFormat', $oneFormat);
+	return preg_replace_callback ('/(<' . $entity . '[^>]*>)(.*?)(<\/' . $entity . '>)/i',
+		function ($matches) {
+			return $matches[1] . applyFormat ($matches[2], getTemp ('oneFormat')) . $matches[3];
+		},
+		$string);
+	}
 ?>

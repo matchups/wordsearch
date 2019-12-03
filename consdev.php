@@ -6,6 +6,7 @@ class constraint {
 	protected $num;		// constraint sequence number
 	protected $not;		// true if the "Not" checkbox is checked
 	protected $details; // true if the "details" checkbox is checked
+	protected $postFormat; // true if we are formatting based on this, rather than filtering
 
 	public function __construct ($_spec, $_num, $_not, $_details) {
 		$this->spec = strtolower ($_spec);
@@ -45,27 +46,44 @@ class constraint {
 	}
 
 	protected function parseWhere ($more) {
-		return array ('where' => $more);
+		if ($this->postFormat) {
+			return array ('column' => "($more)");
+		} else {
+			return array ('where' => " AND $more ");
+		}
 	}
 
 	public function setlengths(&$consmin, &$consmax) {
 		// For cryptograms, the word length must match the pattern length
-		// &$consmin and &$consmax -- word length boundar`ies
+		// &$consmin and &$consmax -- word length boundaries
 		// Do nothing by default
 	}
 
   public function localFilterArray (&$row) {
+		// When doing formatting based on a rule, rather than filtering, check the value returned from the database
+		if ($this->postFormat) {
+			$ret = $this->localFilterPostFormat ($row["cv{$this->num}"]);
+			if ($ret !== '#default') {
+				return $ret;
+			}
+		}
+
 		// Most classes will use the regular localFilter; this one has been added to provide access to other elements
 		$ret = $this->localFilter ($row['word'], $row['entry']);
-		$t = ($ret == true);
-		$nt = !$t;
-		if ($ret  &&  $ret !== true  &&  $this->details) {
+		if ($ret === 'V') { // look at database column
+			$ret = preg_match ('/[^0]/', $row["cv{$this->num}"]);
+		}
+		if ($ret  &&  $ret !== true  &&  $ret != 1  &&  $this->details) {
 			$this->setMatch ($row, $ret);
 		}
 		return $ret;
 	}
 
-	function setMatch (&$row, $value) {
+	protected function localFilterPostFormat ($value) {
+		return '#default';
+	}
+
+	protected function setMatch (&$row, $value) {
 		$row['cv' . $this->num] = $value;
 	}
 
@@ -77,8 +95,8 @@ class constraint {
 		// Do any additional filtering that can't be done in SQL
 		// $oneword = the word to check
 		// $entry = external name; useful for literal or source checks
-		// returns true if okay or false if bad
-		return true;
+		// returns true if okay, false if bad, or V to check the database column
+		return $this->postFormat ? 'V' : true;
 	}
 
 	public function isLocalFilter () {
@@ -134,6 +152,14 @@ class constraint {
 
 	public function detailsEnabled () {
 		return $this->details;
+	}
+
+	public function postFormat() {
+		return $this->postFormat;
+	}
+
+	public function setPostFormat($_postFormat) {
+		$this->postFormat = $_postFormat;
 	}
 
   // ** Begin Static functions **
@@ -207,7 +233,7 @@ class conspattern extends constraint {
 		// Convert to regular expression
 		$spec = patternToRegex (expandSpecial ($this->spec), 'S');
 		$column = ($this->raw ? 'entry.name' : 'PW.text');
-		return $this->parseWhere (" AND $column " . $this->maybeNot() . " RLIKE '$spec' ");
+		return $this->parseWhere (" $column " . $this->maybeNot() . " RLIKE '$spec' ");
 	}
 
 	public function getRegex () {
@@ -319,7 +345,7 @@ class consregex extends constraint {
 		} else {// good, we can do it on the database side
 			$this->local = false;
 			$column = ($this->raw ? 'entry.name' : 'PW.text');
-			return $this->parseWhere (" AND $column " . $this->maybeNot() . " RLIKE '" . substr ($this->regex, 1, strlen ($this->regex) - 2) . "' ");
+			return $this->parseWhere (" $column " . $this->maybeNot() . " RLIKE '" . substr ($this->regex, 1, strlen ($this->regex) - 2) . "' ");
 		}
 	}
 
@@ -436,7 +462,7 @@ class conscharmatch extends constraint {
 		if ($this->not) {
 			$rel = str_replace (array ('<', '=', '>'), array ('>=', '!=', '<='), $rel);
 		}
-		$sql = " AND $expra[1] $rel $expra[3]";
+		$sql = " $expra[1] $rel $expra[3]";
 		// Adjustment on value of right side
 		if (count ($matches) > 4) {
 			$sql = $sql . str_replace ('^', '', $matches [4]);
@@ -515,7 +541,7 @@ class conscrypto extends constraint {
 			} else {
 				$rel = "=";
 			}
-			$sql = " AND char_length(PW.bank) $rel char_length(PW.text)";
+			$sql = " char_length(PW.bank) $rel char_length(PW.text)";
 		} else {
 			if ($this->not) {
 				$sql = $sql . " AND NOT (1 = 1 ";
@@ -586,7 +612,7 @@ class conscustomsql extends constraint {
 		if ($this->type == 'IJ') {
 			return array ('pre' => $spec);
 		} else {
-			return $this->parseWhere(' AND ' . $spec);
+			return $this->parseWhere($spec);
 		}
 	}
 

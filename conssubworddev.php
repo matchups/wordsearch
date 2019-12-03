@@ -2,12 +2,33 @@
 class conssubword extends constraint {
 	public function parse() {
 	// boilerplate to look for subword
-	$more = " AND " . $this->maybeNot() . " EXISTS (SELECT 1 FROM words SW INNER JOIN word_entry SWE ON SWE.word_id = SW.id " .
-		   " INNER JOIN entry SE ON SE.id = SWE.entry_id " .
-		   " WHERE SW.text = " . $this->columnSyntax ();
-	$more = insertSql ($more, corpusInfo('SE', 'W', $dummy)) . ')'; // subword has to be in same corpus as main word
-	return $this->parseWhere ($more);
+	if ($this->postFormat  &&  $this->details) {
+		return array(); // Work to be done later
+	} else {
+		$more = $this->maybeNot() . " EXISTS (SELECT 1 FROM words SW INNER JOIN word_entry SWE ON SWE.word_id = SW.id " .
+			   " INNER JOIN entry SE ON SE.id = SWE.entry_id " .
+			   " WHERE SW.text = " . $this->columnSyntax ();
+		$more = insertSql ($more, corpusInfo('SE', 'W', $dummy)) . ')'; // subword has to be in same corpus as main word
+		return $this->parseWhere ($more);
+	}
 } // end function
+
+function localFilterPostFormat ($subword) {
+	if ($this->details) {
+		if (isset($GLOBALS['isword'][$subword])) {
+			return $GLOBALS['isword'][$subword];
+		} else {
+			$sql = "SELECT count(1) AS counter FROM words PW INNER JOIN word_entry SWE ON SWE.word_id = PW.id
+				   INNER JOIN entry ON entry.id = SWE.entry_id
+				   WHERE PW.text = '$subword'";
+		  $sql = insertSql ($sql, corpusInfo('entry', 'W', $dummy)); // subword has to be in same corpus as main word
+			return SQLQuery (openConnection (false), $sql)->fetch(PDO::FETCH_ASSOC)['counter'] > 0;
+		}
+	} else {
+		return parent::localFilterPostFormat ($subword);
+	}
+}
+
 
 public static function isColumnSyntax () {
 	return true;

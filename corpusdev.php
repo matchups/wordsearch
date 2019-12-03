@@ -107,11 +107,12 @@ class corpus {
   public function form () {
 		$checklist = '';
 		$corpus = $this->corpus;
-		echo "<label><span id=cn$corpus>$this->name</span>: <input name=corpus$corpus id=corpus$corpus type=checkbox checked /></label>\n";
+		echo "<label><span id=cn$corpus>$this->name</span>: <input name=corpus$corpus id=corpus$corpus
+				onclick='updateHighlightChoices ();' type=checkbox checked /></label>\n";
 		$checklist = $checklist . ' corpus' . $corpus;
 		foreach ($this->flags as $flag => $flagname) {
 			$xname = "c{$corpus}flag$flag";
-			echo "   &nbsp; &nbsp; <label>$flagname okay? <input name=$xname id=$xname type=checkbox /></label>\n";
+			echo "   &nbsp; &nbsp; <label><span id=tflag$flag$corpus>$flagname</span> okay? <input name=$xname id=$xname type=checkbox onclick='updateHighlightChoices ();' /></label>\n";
 			$checklist = $checklist . ' ' . $xname;
 		}
 		return $checklist . $this -> formExtra();
@@ -130,6 +131,7 @@ class corpus {
 			if (isset ($_GET["query$key"])  &&
 					($ccobject = $this -> buildOne ($_GET["query$key"], $_GET["radio$key"], getCheckbox ("not$key"), getCheckbox ("details$key"), $num)) !== null) {
 				$consObjects [$key] = $ccobject;
+				$consObjects [$key]->setPostFormat(preg_match ('/[^P]/', $_GET["rdispdivcv$key"]));
 			}
 		}
 	}
@@ -193,7 +195,8 @@ class corpus {
 		if ($clickedCode) {
 			echo "radioClicked$corpus (corpusOptionNumber);\n";
 		}
-		echo "}\n";
+		echo "updateHighlightChoices();
+			}\n";
 
     if ($clickedCode) {
 			echo "function radioClicked$corpus (thisOption) {

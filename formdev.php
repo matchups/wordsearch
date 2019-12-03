@@ -152,7 +152,7 @@ echo "<BR>" . inputCheckbox ('usetable') . "Use table&nbsp;&nbsp;&nbsp;
 <BR><input type=number name=pagelen id=pagelen value={$_GET['pagelen']}> Number of answers per page
 <BR>Sort by " . makeSelectSort (1) . "
 and then by " . makeSelectSort (2) . "
-<BR>
+<BR><BR>
 Font: <input type=radio name=font id=fnormal value=N checked=yes>&nbsp;Normal&nbsp&nbsp</input>
 <input type=radio name=font id=fmono value=M><span style='font-family: monospace'>&nbsp;monospace&nbsp&nbsp</span></input>
 <input type=radio name=font id=fserif value=S><span style='font-family: serif'>&nbsp;serif&nbsp&nbsp</span></input>
@@ -163,7 +163,15 @@ Font: <input type=radio name=font id=fnormal value=N checked=yes>&nbsp;Normal&nb
 Apply to: " . inputCheckbox ('fontlettera') . " alphabetized letters&nbsp;&nbsp;
 " . inputCheckbox ('fontword') . " words found&nbsp;&nbsp;
 " . inputCheckbox ('fontdetails') . " additional values
-<BR>
+<BR><BR>
+Special formatting for...
+<input type=hidden id='endoutput'/>
+</div>
+<!-- Put the type (Beta, Dev, Back, or nil) in the form so subsequent scripts can access it -->
+<input type=hidden id='type' name='type' value='$type' />
+<input type=hidden id='version' name='version' value='$version' />
+<input type='submit' value='Submit' id='xxx'/>
+</form>
 ";
 // Start Javascript
 echo "<script>
@@ -197,13 +205,6 @@ function saveQuery() {
   window.open(url, '_blank');
 }
   </script>
-  </div>
-  <!-- Put the type (Beta, Dev, Back, or nil) in the form so subsequent scripts can access it -->
-  <input type=hidden id='type' name='type' value='$type' />
-  <input type=hidden id='version' name='version' value='$version' />
-  <input type='submit' value='Submit' id='xxx'/>
-  </form>
-
   <P>
   <button type='button' id='reset' onclick='resetForm();return false;'>Reset</button>\n";
   $sessionEncoded = urlencode ($sessionkey);
@@ -435,6 +436,7 @@ echo "  var newCheck = newInput ('details' + optionNumber, 'checkbox', '');
 
 	// run side effects of selecting the first radio button
 	radioClicked(optionNumber);
+  updateHighlightChoices ();
 }
 
 // Side effects when one of the main radio buttons is selected
@@ -466,7 +468,11 @@ function radioClicked (thisOption) {
   $fieldlist = substr ($fieldlist, 1); // remove initial space
 
   echo " var display = details ? 'inline' : 'none';
-  document.getElementById('details' + thisOption).style.display = display;
+  var here = document.getElementById('details' + thisOption);
+  if (!details) {
+    here.checked = false;
+  }
+  here.style.display = display;
   document.getElementById('tdetails' + thisOption).style.display = display;
   theForm['wizard' + thisOption].disabled = !wizard;
 
@@ -543,7 +549,6 @@ function makeSelectSort ($num) {
   return "<select name='sort$num' id=sort$num value=$value><option value=$value>Dummy</option></select>\n" .
     inputCheckbox ("desc$num") . "descending  ";
 }
-
 ?>
 // This needs to be at the end, after controls have been created
 var modal = document.getElementById('wizard');

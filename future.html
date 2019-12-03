@@ -96,13 +96,23 @@
   <LI>0.99a favicon.ico to get it to stop bugging me (done)
   <LI>0.99b Resolve failure with filtering (done)
   <LI>0.99c Break up showResults() (done)
-  <LI>0.99d Check on deleting Show details on row delete & reset
-  <LI>0.9A Use italics, bold, color (F & B), font to differentiate corpuses, flags, & stuff from .95
-  <LI>0.9B Show/hide output options (always hide for guests)
-  <LI>0.9C Reset on output options
-  <LI>0.9D Consolidate phrases from multiple corpora
+  <LI>0.99d Fix deletion of Show details on row delete (done)
+  <LI>0.9A Use italics, bold, underline, nonstrikeout, color (F & B), size to differentiate corpuses, flags, & stuff from .95
+<!--
+Allow for highlight instead of filter on corpus flag filter
+* Add entry.flags as column when there is any post format on a flag
+* Set info[F][flag]
+-->
+  <LI>0.9B Sorting on DOMINION is random
+  <LI>0.9C Show/hide output options (always hide for guests)
+  <LI>0.9D Ensure that output options are retained
+  <LI>0.9E Reset on output options
+  <LI>0.9F Consolidate phrases from multiple corpora
+  <LI>0.9G Change <font> to span/style
   <LI>Release
 <!--
+Tell everybody
+Tell Hunt Krewe
 No gooch in project or pushed
 -->
   </UL>
@@ -116,7 +126,7 @@ No gooch in project or pushed
   <LI>0.A4 Show results carried over from previous screen
   <LI>0.A5 Filter on number of distinct letters
   <LI>0.A6 Filter on instances of a particular letter or group or equal to another
-  <LI>0.A7 Instead of filtering, apply .9A
+  <LI>0.A7 More results with same letters
   <LI>0.A8 Recursive queries on results
   </UL>
 <LI>1.0 Public release
@@ -188,6 +198,7 @@ No gooch in project or pushed
 <LI>Signon to display message based on code
 <LI>Restore query after re-signon
 <LI>Find a way to avoid 500 errors
+<LI>No underlining of links if there is an underline thing
 <LI>"More" improvements
   <UL>
   <LI>Don't redo SQL
@@ -224,16 +235,27 @@ No gooch in project or pushed
 * pull back from temp
 * Tell everyone (just Eric Chaikin & Andy Latto unless .#0)
 -->
-<H2>Restart downloads</H2>
+<H2>Cleanup</H2>
 <UL>
-<LI>Find funny Z character in wyz* interpreted as wya and change it, then fix everything
-<LI>Change X̄ from Xu to X and fix
-<LI><A HREF="http://www.8wheels.org/wordsearch/addwikipedia.php?limit=500&classname=wiktionary&from=Plissees&corpus=3">resume uppercase Wiktionary</A>
-<LI><A HREF="http://www.8wheels.org/wordsearch/addwikipedia.php?limit=265&classname=wiktionary&from=antiliquor&corpus=3">resume lowercase Wiktionary</A>
-<LI>Fix some early Wikitionary capitalization (see Alex*, for example)
-<LI>Fill in categories for first 5M on Wikipedia
-<LI>Redo special characters for entire Wikipedia
-<LI>Modify addwikipedia to skip redirect from spelling error.
-<LI>Delete "Redirect from spelling error" on Wikipedia
+<LI>Special characters
+  <UL>
+  <LI>Find entries with length >7 and more than half non-ASCII and track common non-ASCII in them; manually review
+  <LI>Find funny Z character in wyz* interpreted as wya and change it, then fix everything
+  <LI>Change X̄ from Xu to X
+  <LI>Redo special characters for entire Wikipedia
+  </UL>
+</LI>
+<LI>Wiktionary
+  <UL>
+  <LI><A HREF="http://www.8wheels.org/wordsearch/addwikipedia.php?limit=500&classname=wiktionary&from=Plissees&corpus=3">resume uppercase Wiktionary</A>
+  <LI><A HREF="http://www.8wheels.org/wordsearch/addwikipedia.php?limit=265&classname=wiktionary&from=antiliquor&corpus=3">resume lowercase Wiktionary</A>
+  <LI>Fix some early Wikitionary capitalization (see Alex*, for example)
+  </UL>
+<LI>Wikipedia cleanup
+  <UL>
+  <LI>Fill in categories for first 5M on Wikipedia
+  <LI>Modify addwikipedia to skip redirect from spelling error.
+  <LI>Delete "Redirect from spelling error" on Wikipedia
+  </UL>
 </UL>
 </BODY>

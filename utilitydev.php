@@ -4,6 +4,7 @@ function comment ($text) {
 	if (is_array ($text)) {
 		foreach ($text as $key => $value) {
 			if (isset ($temp)) {$temp .= ' ^ ';}
+			if (is_array ($value)) {$value = implodeMulti (array ('|', ','), $value);}
 			if ($class = get_class ($value)) {$value = "<$class>";}
 			$temp .= "$key => $value";
 		}
@@ -245,4 +246,29 @@ return ($typeahead ? "<script src='https://code.jquery.com/jquery-3.3.1.min.js'
 	". ($wide ? "<link rel='stylesheet' href='wideleft.css'>" : '');
 }
 
+// Like implode, but handles multiple levels of nesting with an array of delimiters
+function implodeMulti ($delimiters, $array) {
+	// Get rest of the delimiters, or use the current one again if it is last
+	if (count($moreDelimiters = array_slice ($delimiters, 1)) == 0) {
+		$moreDelimiters = $delimiters;
+	}
+	// Call ourselves recursively on each member which is an array
+	foreach ($array as $element) {
+		if (is_array ($element)) {
+			$element = implodeMulti ($moreDelimiters, $element);
+		} else if ($class = get_class ($element)) {
+			$element = "<$class>";
+		}
+		$linear[] = $element;
+	}
+	return implode ($delimiters[0], $linear);
+}
+
+function setTemp ($key, $value) {
+	return $GLOBALS['temp'][$key] = $value; // so it can be accessed inside callback function
+}
+
+function getTemp ($key) {
+	return $GLOBALS['temp'][$key];
+}
 ?>
