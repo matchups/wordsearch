@@ -171,6 +171,7 @@ function buildReloadQuery ($consObjects) {
 	}
 	echo "mainChange();
 	updateSortChoices();
+	initializeHighlight();
 	updateShowOutput();
 	}
 	</script>\n";

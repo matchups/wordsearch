@@ -127,9 +127,9 @@ if ($level == 0) {
 echo "<H3>Output</H3>
 <div id='output' >
 " . inputCheckbox ('lettersonly') . "Show letters only&nbsp;&nbsp;&nbsp;
-<input type=radio name=wordcase id=wcaseu value=U><span style='font-variant: small-caps'>&nbsp;Uppercase&nbsp&nbsp</span></input>
-<input type=radio name=wordcase id=wcasel value=L>&nbsp;lowercase&nbsp&nbsp</input>
-<input type=radio name=wordcase id=wcasen value=N>&nbsp;Natural Case</input>
+" . inputRadio ('wordcase', 'U') . "<span style='font-variant: small-caps'>&nbsp;Uppercase&nbsp&nbsp</span></input>
+" . inputRadio ('wordcase', 'L') . "&nbsp;lowercase&nbsp&nbsp</input>
+" . inputRadio ('wordcase', 'N') . "&nbsp;Natural Case</input>
 <BR>
 Show letters in " . inputCheckbox ('letteralpha', 'updateSortChoices();'). "alphabetical order
 " . inputCheckbox ('letterabank', 'updateSortChoices();'). "without duplication
@@ -157,11 +157,11 @@ echo "<BR>" . inputCheckbox ('usetable') . "Use table&nbsp;&nbsp;&nbsp;
 <BR>Sort by " . makeSelectSort (1) . "
 and then by " . makeSelectSort (2) . "
 <BR><BR>
-Font: <input type=radio name=font id=fnormal value=N checked=yes>&nbsp;Normal&nbsp&nbsp</input>
-<input type=radio name=font id=fmono value=M><span style='font-family: monospace'>&nbsp;monospace&nbsp&nbsp</span></input>
-<input type=radio name=font id=fserif value=S><span style='font-family: serif'>&nbsp;serif&nbsp&nbsp</span></input>
-<input type=radio name=font id=fsans value=W><span style='font-family: sans-serif'>&nbsp;sanserif&nbsp;&nbsp;</span></input>
-<input type=radio name=font id=fcustom value=C>&nbsp;other:&nbsp</input>
+Font: " . inputRadio ('font', 'N') . "&nbsp;Normal&nbsp&nbsp</input>
+" . inputRadio ('font', 'M') . "<span style='font-family: monospace'>&nbsp;monospace&nbsp&nbsp</span></input>
+" . inputRadio ('font', 'S') . "<span style='font-family: serif'>&nbsp;serif&nbsp&nbsp</span></input>
+" . inputRadio ('font', 'W') . "<span style='font-family: sans-serif'>&nbsp;sanserif&nbsp;&nbsp;</span></input>
+" . inputRadio ('font', 'C') . "&nbsp;other:&nbsp</input>
 <input type=text name=fontname id=fontname />
 <BR>
 Apply to: " . inputCheckbox ('fontlettera') . " alphabetized letters&nbsp;&nbsp;
@@ -552,11 +552,35 @@ function inputCheckbox ($name, $onclick = '') {
   return "<input type=checkbox id=$name name=$name $check $onclick/>";
 }
 
+function inputRadio ($name, $value, $onclick = '') {
+  $check = ($_GET[$name] == $value) ? 'checked' : '';
+  if ($onclick) {
+    $onclick = "onclick='$onclick'";
+  }
+  return "<input type=radio id=$name name=$name$value $check $onclick/>";
+}
+
 function makeSelectSort ($num) {
   $value = $_GET["sort$num"];
   return "<select name='sort$num' id=sort$num value=$value><option value=$value>Dummy</option></select>\n" .
     inputCheckbox ("desc$num") . "descending  ";
 }
+
+echo "function initializeHighlight() {\n";
+  foreach ($_GET as $key => $value) {
+    if (preg_match ('/r(dispdiv.*)/', $key, $matches)) {
+      $subkey = $matches[1];
+      $lcvalue = strtolower ($value);
+      echo "document.getElementById('$subkey$lcvalue').checked = true;\n";
+      if (getCheckbox ("{$subkey}not")) {
+        echo "document.getElementById('{$subkey}not').checked = true;\n";
+      }
+      if ($text = $_GET ["{$subkey}x"]) {
+        echo "document.getElementById('{$subkey}x').value = '$text';\n";
+      }
+    }
+  }
+echo "}\n";
 ?>
 // This needs to be at the end, after controls have been created
 var modal = document.getElementById('wizard');
