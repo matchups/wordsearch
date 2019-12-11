@@ -30,4 +30,8 @@ include "form$type.php";
 echo "<P>\n";
 
 ?>
+<script>
+updateSortChoices();
+</script>
 </BODY>
+</HTML>

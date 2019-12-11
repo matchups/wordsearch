@@ -330,6 +330,7 @@ function loClick (linkOption) {
 }
 
 function updateSortChoices () {
+	theForm = document.forms["search"];
   var optionList = 'word:word/L:length';
 	var multipleOK = true;
   if (theForm['letteralpha'].checked) {
@@ -437,7 +438,7 @@ function updateHighlightChoices () {
     return corpusOptions;
   }).join ('/'); // Ugly closure of anonymous map function before finishing statement
 
-  var options = optionList.split('/');
+	var options = optionList.split('/');
   var here, there;
   var fieldNum, nextField;
   for (fieldNum = 0; fieldNum < options.length; fieldNum++) {
@@ -489,7 +490,6 @@ function updateHighlightChoices () {
   }
 
   deleteUnusedOptions (optionList);
-
 } // end updateHighlightChoices
 
 function deleteUnusedOptions (optionList) {
