@@ -108,6 +108,7 @@ function removeChildrenGeneric (containerField, thisOption, nameList) {
 // Zap the form back to its original state
 function resetForm() {
 	var theForm = document.forms["search"];
+	deleteUnusedOptions (''); // Will delete all of them, to be rebuilt later with the defaults
 	// clear simple fields
 	theForm["pattern"].value = "";
 	theForm["anyorder"].checked = false;
@@ -141,8 +142,31 @@ function resetForm() {
 		document.getElementById(fieldName).checked=answer;
 	});
 
+	// Reset output stuff
+	theForm['lettersonly'].checked = false;
+	theForm['wordcaseN'].checked = true;
+	theForm['losource'].checked = true;
+	theForm['letteralpha'].checked = false;
+	theForm['letterabank'].checked = false;
+	theForm['letteralinks'].checked = false;
+	theForm['letterauc'].checked = false;
+	theForm['customlink'].value = '';
+	theForm['usetable'].checked = false;
+	theForm['rowmulti'].checked = false;
+	theForm['pagelen'].value = '';
+	theForm['sort1'].value = 'word';
+	theForm['sort2'].value = 'word';
+	theForm['desc1'].checked = false;
+	theForm['desc2'].checked = false;
+	theForm['fontN'].checked = true;
+	theForm['fontname'].value = '';
+	theForm['fontlettera'].checked = false;
+	theForm['fontword'].checked = false;
+	theForm['fontdetails'].checked = false;
+
 	resetCorporaMore(); // generated dynamically
-}
+	updateSortChoices ();
+} // end resetForm
 
 // Make sure the form is okay before we submit it for processing.
 function validateForm() {
@@ -375,7 +399,7 @@ function updateSortChoices () {
 	}
 	document.getElementById ('trowmulti').style = 'color:' + (multipleOK ? 'black' : 'gray');
 	updateHighlightChoices ();
-}
+} // end updateSortChoices
 
 function updateHighlightChoices () {
   var here;
@@ -416,7 +440,6 @@ function updateHighlightChoices () {
   var options = optionList.split('/');
   var here, there;
   var fieldNum, nextField;
-  var container = document.getElementById('endoutput').parentNode;
   for (fieldNum = 0; fieldNum < options.length; fieldNum++) {
     if (fieldInfo = options[fieldNum]) {
       var colon = fieldInfo.search (':');
@@ -429,7 +452,7 @@ function updateHighlightChoices () {
         newDiv.appendChild (newSpan ('l' + choiceID, '&nbsp;' + fieldInfo.substring (colon + 1)));
         newDiv.appendChild (newInput (choiceID + 'not', 'checkbox', ''));
         newDiv.appendChild (newSpan (choiceID + 'tnot', 'Not&nbsp;'));
-        newDiv.appendChild (newRadio (choiceID + 'n', 'r' + choiceID, 'C', 'P', ''));
+        newDiv.appendChild (newRadio (choiceID + 'p', 'r' + choiceID, 'C', 'P', ''));
         if (id.substring (0, 2) == 'cv') {
           label = 'filter';
         } else {
@@ -465,14 +488,21 @@ function updateHighlightChoices () {
     }
   }
 
-  // Delete any which are no longer applicable
-  for (fieldNum = 0; fieldNum < container.children.length; fieldNum++) {
+  deleteUnusedOptions (optionList);
+
+} // end updateHighlightChoices
+
+function deleteUnusedOptions (optionList) {
+	var container = document.getElementById('endoutput').parentNode;
+	var fieldNum;
+	var here;
+  for (fieldNum = container.children.length - 1; fieldNum >= 0; fieldNum--) {
     here = container.children[fieldNum];
     if (here.id.substring (0, 7) == 'dispdiv'  &&  optionList.search ('/' + here.id.substring (7) + ':') < 0) {
       container.removeChild(here);
     }
   }
-} // end updateHighlightChoices
+}
 
 function updateShowOutput () {
   document.getElementById('output').style.display = document.getElementById('showoutput').checked ? 'inline' : 'none';

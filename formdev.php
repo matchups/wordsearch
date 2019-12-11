@@ -557,7 +557,7 @@ function inputRadio ($name, $value, $onclick = '') {
   if ($onclick) {
     $onclick = "onclick='$onclick'";
   }
-  return "<input type=radio id=$name name=$name$value $check $onclick/>";
+  return "<input type=radio id=$name$value name=$name $check $onclick/>";
 }
 
 function makeSelectSort ($num) {
