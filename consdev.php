@@ -742,11 +742,11 @@ class consenum extends constraint {
 	}
 
 	public static function getHint () {
-		return "Enter the desired enumeration for the answer.  A simple example would be <font face=Courier>5 4</font>, to represent a five-letter word
+		return "Enter the desired enumeration for the answer.  A simple example would be <kbd>5 4</kbd>, to represent a five-letter word
 			followed by a four-letter word.  You can also use
-			<B>#</B> to represent any digit (e.g., <font face=Courier>#### 3 3 4</font> would match <u>1776 and All That</u>),
-			<B>\\'</B> and <B>-</B> (quote and hyphen) to represent themselves (<font face=Courier>6 2 \\'##</font> would match <u>Spirit of \\'76</u>),
-			<B>*</B> to represent a word (sequence of letters) of any length (<font face=Courier>6 * 9</font> would match <u>Ludvig van Beethoven</u> or <u>George Albert Boulenger,</u>
+			<B>#</B> to represent any digit (e.g., <kbd>#### 3 3 4</kbd> would match <u>1776 and All That</u>),
+			<B>\\'</B> and <B>-</B> (quote and hyphen) to represent themselves (<kbd>6 2 \\'##</kbd> would match <u>Spirit of \\'76</u>),
+			<B>*</B> to represent a word (sequence of letters) of any length (<kbd>6 * 9</kbd> would match <u>Ludvig van Beethoven</u> or <u>George Albert Boulenger,</u>
 			or <B>?</B> to represent any punctuation mark other than quote and hyphen.";
 			// A few lines up, first \ is to escape the second \ in the PHP string and the second one is to escape the apostrophe in the single-quoted generated code.
 	}

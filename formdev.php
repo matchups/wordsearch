@@ -230,7 +230,7 @@ echo "<div class='sidenav'>
 </div>\n";
 if ($level > 0) {
   echo "<button class='dropdown-btn' id='account-dd' disabled=yes>Account
-  <span id=account-arrow><font color=black>&#9662;</font></span>
+  <span id=account-arrow style='color:black'>&#9662;</span>
   </button>
   <div class='dropdown-container' style='display: none'>
     <span class=disabledmenu>Change password</span>

@@ -483,14 +483,14 @@ function applyFormat ($output, $oneFormat) {
 		break;
 
 		case 'L';
-		$output = "<font size=+1>$output</font>";
+		$output = "<span style='font-size:larger'>$output</span>";
 		break;
 
     case 'CF':
 		// Apply color to the innerHTML of each anchor
 		$output = applyFormatHTML ($output, 'a', $oneFormat);
 		if (!preg_match ('/^<A[^>]*>[^<]*</A>$/i', $output)) { // Is there anything beyond a single anchor?
-			$output = "<font color='$more'>$output</font>";
+			$output = "<span style='color:$more'>$output</span>";
 		}
 		break;
 

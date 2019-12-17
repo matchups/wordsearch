@@ -469,11 +469,11 @@ function updateHighlightChoices () {
         newDiv.appendChild (newRadio (choiceID + 's', 'r' + choiceID, '', 'S', ''));
         newDiv.appendChild (newSpan (choiceID + 'ts', '<strike>struck out</strike>&nbsp;'));
         newDiv.appendChild (newRadio (choiceID + 'l', 'r' + choiceID, '', 'L', ''));
-        newDiv.appendChild (newSpan (choiceID + 'tl', '<font size=+1>larger</font>&nbsp;'));
+        newDiv.appendChild (newSpan (choiceID + 'tl', '<span style="font-size:larger">larger</span>&nbsp;'));
         newDiv.appendChild (newRadio (choiceID + 'cb', 'r' + choiceID, '', 'CB', ''));
         newDiv.appendChild (newSpan (choiceID + 'tcb', '<span style="background-color:yellow">color</span>&nbsp;'));
         newDiv.appendChild (newRadio (choiceID + 'cf', 'r' + choiceID, '', 'CF', ''));
-        newDiv.appendChild (newSpan (choiceID + 'tcf', '<font color="blue">color</font>&nbsp;'));
+        newDiv.appendChild (newSpan (choiceID + 'tcf', '<span style="color:blue">color</span>&nbsp;'));
         newDiv.appendChild (newInput (choiceID + 'x', 'text', ''));
         // find the right place to insert it
         here = document.getElementById('endoutput');
