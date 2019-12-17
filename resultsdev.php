@@ -11,6 +11,12 @@ function showResults ($result, $consObjects, $corpusObjects) {
 	$counter = 0;
 	$timedOut = false;
 	$timeout = (($level == 3) ? 110 : 30) + $GLOBALS['time']['top.int'];
+	foreach ($corpusObjects as $corpus => $corpusObject) {
+		if ($corpusObject->phrases()) {
+			$phraseCorpora .= ",$corpus";
+		}
+	}
+	$phraseCorpora = substr ($phraseCorpora, 1);
 
 	if (get_class ($result) <> "PDOStatement") {
 		echo "<span class='error'>$result</span>"; // Error message
@@ -120,8 +126,9 @@ function showResults ($result, $consObjects, $corpusObjects) {
 						$output .= "$echo  ";
 					}
 				}
-				if ($corpusObjects[$corpus]->phrases()) {
-					$output .= " <A target='_blank'	HREF='phrases$type.php?base=$oneword&corpus=$corpus&type=$type&level=$level&link=$linkencoded'><i>phrases</i></A> ";
+				if ($corpusObjects[$corpus]->phrases()  &&  $lastPhraseWord != $oneword) {
+					$output .= " <A target='_blank'	HREF='phrases$type.php?base=$oneword&corpus=$phraseCorpora&type=$type&level=$level&link=$linkencoded'><i>phrases</i></A> ";
+					$lastPhraseWord = $oneword;
 				}
 			}
 

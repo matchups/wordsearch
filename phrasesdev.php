@@ -10,7 +10,7 @@ Echo "$base Phrases";
 <BODY>
 <H2>
 <?php
-  $corpus = $_GET['corpus'];
+  $corpusList = $_GET['corpus'];
   $type = $_GET['type'];
   $level = $_GET['level'];
 Echo "<link rel='stylesheet' href='styles$type.css'>
@@ -20,7 +20,7 @@ $sql = "SELECT entry.name AS entry, " .
       " entry.corpus_id AS corpus FROM words PW".
 	" INNER JOIN word_entry ON word_entry.word_id = PW.id " .
 	" INNER JOIN entry ON entry.id = word_entry.entry_id " .
-	" WHERE entry.corpus_id IN ($corpus)" .
+	" WHERE entry.corpus_id IN ($corpusList)" .
 	" AND PW.text = '$base'" .
 	" AND char_length(entry.name) > " . strlen($base) .
 	" ORDER BY entry.name";
@@ -34,16 +34,18 @@ try {
   $conn = openConnection (false);
   $result = $conn->query($sql);
   $m = $result->rowCount();
-  comment ("Got $m rows for $corpus");
+  comment ("Got $m rows for $corpusList");
 
-  $corpusObject = corpus::factory($corpus); // need to handle multiple corpora
+  foreach (explode (',', $corpusList) as $corpus) {
+    $corpusObject[$corpus] = corpus::factory($corpus);
+  }
 
   // Loop through words and display results
   $link = $_GET['link'];
   while($row = $result->fetch(PDO::FETCH_ASSOC)) {
     $entry = $row['entry'];
     if ($link == '*') {
-      echo $corpusObject->answerLink ($entry);
+      echo $corpusObject[$row['corpus']]->answerLink ($entry);
     } elseif ($link) {
       $entryLink = str_replace ('@', urlencode ($entry), $link);
       Echo "<A HREF='$entryLink' target='_blank'>$entry</A>  ";
