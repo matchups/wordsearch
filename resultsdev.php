@@ -3,7 +3,6 @@
 function showResults ($result, $consObjects, $corpusObjects) {
 	$type = $_GET['type'];
 	$level = $_GET['level'];
-	$urlkey = urlencode ($_GET['sessionkey']);
 	if (!$pagelimit = ($_GET['pagelen'] ?? 0)) {
 		$pagelimit = 1E9;
 	}
@@ -159,7 +158,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 		if (microtime (true) > $timeout) {
 			$timedOut = 'T';
 		}
-		if ($counter == $pagelimit) {
+		if ($counter + 2 > $pagelimit) {
 			$timedOut = 'C';
 		}
 	} // end while
@@ -187,7 +186,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
   if ($timedOut) {
 		$ret ['code'] = 'limit';
 		$ret ['subcode'] = $timedOut;
-		$ret ['restart'] = $oneword;
+		$ret ['restart'] = $prevword;
 	} else if ($counter > 0) {
 		$ret ['code'] = 'ok';
 	} else {
@@ -230,6 +229,8 @@ function sorter ($row, $level) {
 			$value = $newValue;
 		}
 		return $value;
+	} else if ($level == 1) {
+		return $row['word'];
 	} else {
 		return '';
 	}
@@ -294,7 +295,8 @@ function getMainLink () {
 	}
 }
 function getParmsForLinks () {
-	$moreParms = "sessionkey=$urlkey&level=$level&type=$type&version={$_GET['version']}";
+	$urlkey = urlencode ($_GET['sessionkey']);
+	$moreParms = "sessionkey=$urlkey&level={$_GET['level']}&type={$_GET['type']}&version={$_GET['version']}";
 	foreach ($_GET as $key => $parm) {
 		if (substr ($key, 0, 6) == 'corpus'  ||  preg_match ('/^c([0-9]+)flag(.)(.*)$/', $key)  ||
 				$key == 'phrase' || $key == 'single' || $key == 'whole') {
@@ -326,6 +328,9 @@ function buildTableHeader ($consObjects) {
 		}
 	}
 	$header .= '</tr>';
+	if (!strpos ($header, '<th>')) {
+		$header = ''; // No point in generating an empty row
+	}
 	return $header;
 }
 

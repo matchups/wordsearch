@@ -683,7 +683,7 @@ class consenum extends constraint {
 	protected $pattern;
 
 	public function parse() {
-		$this -> pattern = preg_replace_callback ('/[0-9]+|./', function ($matches) {
+		$this -> pattern = '/^' . preg_replace_callback ('/[0-9]+|./', function ($matches) {
 			$match = $matches[0];
 			switch ($match) {
 				case ' ':
@@ -704,7 +704,7 @@ class consenum extends constraint {
 				return "[a-z]" . '{' . $match . '}';
 			}
 		},
-		$this -> spec);
+		$this -> spec) . '$/i';
 	}
 
 	public function setlengths(&$consmin, &$consmax) {

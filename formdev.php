@@ -162,7 +162,7 @@ Font: " . inputRadio ('font', 'N') . "&nbsp;Normal&nbsp&nbsp</input>
 " . inputRadio ('font', 'S') . "<span style='font-family: serif'>&nbsp;serif&nbsp&nbsp</span></input>
 " . inputRadio ('font', 'W') . "<span style='font-family: sans-serif'>&nbsp;sanserif&nbsp;&nbsp;</span></input>
 " . inputRadio ('font', 'C') . "&nbsp;other:&nbsp</input>
-<input type=text name=fontname id=fontname />
+<input type=text name=fontname id=fontname value='{$_GET['fontname']}' />
 <BR>
 Apply to: " . inputCheckbox ('fontlettera') . " alphabetized letters&nbsp;&nbsp;
 " . inputCheckbox ('fontword') . " words found&nbsp;&nbsp;
@@ -557,7 +557,7 @@ function inputRadio ($name, $value, $onclick = '') {
   if ($onclick) {
     $onclick = "onclick='$onclick'";
   }
-  return "<input type=radio id=$name$value name=$name $check $onclick/>";
+  return "<input type=radio id=$name$value name=$name value=$value $check $onclick/>";
 }
 
 function makeSelectSort ($num) {

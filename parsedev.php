@@ -127,7 +127,7 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 			}
 		}
 		if (!$localFilter) {
-			$limit = " LIMIT {$_GET['pagelen']}";
+			$limit = " LIMIT " . ($_GET['pagelen'] + 1); // Add one so that the limit will be reached during output processing
 		}
 	}
 	return $sql . $orderby . $limit;
