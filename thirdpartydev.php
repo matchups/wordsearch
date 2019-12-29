@@ -55,11 +55,22 @@ class qat extends thirdParty {
 
 class qhex extends thirdParty {
   function link () {
-    return "https://tools.qhex.org";
+    $pattern = patternToRegex ($this->pattern, 'U');
+    if ($this->letterBank) {
+      $pattern = "bank:$pattern";
+    }
+    else if ($this->anyOrder) {
+      $pattern = "anagram:$pattern";
+    }
+    return "https://tools.qhex.org?wordplay=" . urlencode ($pattern);
   }
 
   function name () {
     return 'Qhex';
+  }
+
+  function enabled () {
+    return true;
   }
  }
 
