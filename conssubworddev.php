@@ -144,5 +144,9 @@ public function columnSyntax () {
 			first two letters of the word.  Out-of-order ranges indicate that the letter sequence will be reversed; again with ISCHEMIA,
 			the pattern 8:5D will represent AIMED.";
 	}
+
+	function slow () {
+		return $this->postFormat  &&  $this->details;
+	}
 } // end class conssubword
 ?>

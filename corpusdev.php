@@ -279,6 +279,10 @@ class corpusConstraint extends constraint {
 		return true;
 	}
 
+	function slow () {
+		return true;
+	}
+
 	function columnSyntax () {
 		return '0';
 	}

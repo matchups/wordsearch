@@ -3,13 +3,24 @@
 function showResults ($result, $consObjects, $corpusObjects) {
 	$type = $_GET['type'];
 	$level = $_GET['level'];
+	comment ("sR $type $level");
 	if (!$pagelimit = ($_GET['pagelen'] ?? 0)) {
 		$pagelimit = 1E9;
 	}
 	$moreParms = getParmsForLinks ();
 	$counter = 0;
 	$timedOut = false;
-	$timeout = (($level == 3) ? 110 : 30) + $GLOBALS['time']['top.int'];
+	$timeout = 300; // We should be able to process all the results we got
+	foreach ($consObjects as $thisConsObject) {
+		if ($thisConsObject->isLocalFilter()  &&  $thisConsObject->slow()) {
+			comment (get_class ($thisConsObject));
+			$timeout = (($level > 1) ? 110 : 30); // There is a slow local filter, so set a time limit
+					// (partly to avoid a web server timeout)
+			break;
+		}
+	}
+	comment ($timeout);
+	$timeout += $GLOBALS['time']['top.int'];
 	foreach ($corpusObjects as $corpus => $corpusObject) {
 		if ($corpusObject->phrases()) {
 			$phraseCorpora .= ",$corpus";
@@ -367,7 +378,12 @@ function sortedOutput ($oneword, &$rowMore, $td, $tde) {
 	}
 	$sortedOutput = '';
 	if (getCheckbox ('letteralpha')) {
-		$sortedecho = font ($sorted, '-lettera');
+		if ($tde  &&  strlen ($sorted) > 25) {
+			$sortedecho = implode (' ', str_split ($sorted, 20));
+		} else {
+			$sortedecho = $sorted;
+		}
+		$sortedecho = font ($sortedecho, '-lettera');
 		if (getCheckbox ('letteralinks')) {
 			$sortedOutput .= "$td<A HREF='$baseURL?pattern=$sorted&anyorder=on&$moreParms' target='_blank'>$sortedecho</A>$tde";
 		} else {

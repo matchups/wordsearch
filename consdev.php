@@ -79,6 +79,10 @@ class constraint {
 		return $ret;
 	}
 
+  public function slow () {
+		return false;
+	}
+
 	protected function localFilterPostFormat ($value) {
 		return '#default';
 	}
@@ -308,7 +312,12 @@ class conspattern extends constraint {
 	}
 	public static function getValidateConstraintCode () {
 		return "  // Same validation as with the main pattern
-			if (!/^[a-z?*@#&\[\-\]]+$/i.test (thisValue)  &&  !theForm['craw' + thisOption].checked) {
+		  if (theForm['craw' + thisOption].checked) { // raw search, so allow more possibilities
+				if (thisValue.indexOf ('[') < 0) {
+					return '';
+				}
+				// otherwise drop through to check groups
+			} else if (!/^[a-z?*@#&\[\-\]]+$/i.test (thisValue)) {
 				return 'Invalid character in pattern ' + thisOption;
 			}
 			if (badGroups (thisValue)) {
