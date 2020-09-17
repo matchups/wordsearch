@@ -1,6 +1,28 @@
 <?php
 function asciitize ($rawword) {
-	$oneword = "";
+	return (new asciiConvert ())->convert($rawword);
+}
+
+class asciiConvert extends asciiTools {
+	protected $oneword;
+
+public function convert($rawword) {
+	$this->oneword = '';
+	$this->doStuff ($rawword);
+	return $this->oneword;
+}
+
+protected function hit ($unicode, $char) {
+	$this->oneword .= $char;
+}
+
+protected function miss ($char, $unicode, $here, $next) {
+	throw new Exception ("Unrecognized character $char $unicode at position $here -- next is $next.");
+}
+} // end asciiConvert
+
+class asciiTools {
+protected function doStuff($rawword) {
 	$bad = "";
 	$twobyte = " [136,120]x -
 							 [150,32]h -
@@ -169,7 +191,7 @@ function asciitize ($rawword) {
 		$char = substr ($rawword, $here, 1);
 		$ord = ord ($char);
 		if ($ord < 128) {
-      $oneword = $oneword . $char;
+      $this->hit ($ord, $char);
     } else {
       $counter = 1;
       do {
@@ -195,13 +217,22 @@ function asciitize ($rawword) {
           } else {
             $next = "EOS";
           }
-          throw new Exception ("Unrecognized character $char $unicode at position $here -- next is $next.");
+					$this->miss ($char, $unicode, $here, $next);
+					$new = '';
         }
         $counter++;
       } while ($new == '+');
-      $oneword = $oneword . $new;
+      $this->hit ($unicode, $new);
     }
 	}
-	return $oneword;
+} // end doStuff
+
+protected function hit ($unicode, $char) {
+	throw new Exception ("asciiTools.hit must be overridden");
 }
+
+protected function miss ($char, $unicode, $here, $next) {
+	throw new Exception ("asciiTools.miss must be overridden");
+}
+} // end asciiConvert
 ?>

@@ -35,7 +35,6 @@ echo "<div id='catlookup' class='wizard'>
 foreach ($corpusObjects as $corpusObject) {
   if (isset ($corpusObject->optionButtonList ()['category'])) {
     $corpus = $corpusObject->getCorpusNum();
-    //     <input type='text' name=category$corpus id=category{$corpus}old class=category$corpus style='display: none'/>
     echo "<div class='typeahead__container'>
             <div class='typeahead__field'>
               <div class='typeahead__query'>
@@ -84,7 +83,7 @@ if ($type == 'dev') {
    <input name=anyorder type=checkbox onchange="mainChange();"/>
 <?php
 if ($advanced) {
-	echo "<span id=trepeat style='disabled'>Repeat letters? <input name=repeat type=checkbox disabled=true /></span>\n";
+	echo "<span id=trepeat style='disabled'>Repeat letters? <input name=repeat type=checkbox disabled=true /></span><br>\n";
 }
 echo '<input type=hidden id="count" name="count" value="1" /><BR>';
 if ($advanced) {
@@ -119,9 +118,73 @@ foreach ($corpusObjects as $corpusObject) {
   $checklist = $checklist . $corpusObject->form();
   echo "<BR>\n";
 }
-echo "<input type=hidden name=morecbx value='$checklist' />\n";
+echo "</div>
+<input type=hidden name=morecbx value='$checklist' />\n";
 
+if ($level == 0) {
+  echo "<div style='display: none'>";
+}
+echo "<H3>Output</H3>
+<div id='output' >
+" . inputCheckbox ('lettersonly') . "Show letters only&nbsp;&nbsp;&nbsp;
+" . inputRadio ('wordcase', 'U') . "<span style='font-variant: small-caps'>&nbsp;Uppercase&nbsp&nbsp</span></input>
+" . inputRadio ('wordcase', 'L') . "&nbsp;lowercase&nbsp&nbsp</input>
+" . inputRadio ('wordcase', 'N') . "&nbsp;Natural Case</input>
+<BR>
+Show letters in " . inputCheckbox ('letteralpha', 'updateSortChoices();'). "alphabetical order
+" . inputCheckbox ('letterabank', 'updateSortChoices();'). "without duplication
+" . inputCheckbox ('letteralinks'). "with links&nbsp;&nbsp;&nbsp;
+" . inputCheckbox ('letterauc'). "<span style='font-variant: small-caps'>Uppercase</span>
+<BR>Link option: ";
+$default = $_GET['linkoption'] ?? 'source';
+foreach (array ('suppress', 'source', 'Google', 'Bing', 'Yahoo', 'nGram viewer', 'IMDB', 'custom') as $linkOption) {
+  $name = strtolower (str_replace (' ', '', $linkOption));
+  $more = ($name == $default) ? 'checked ' : '';
+  echo "<input type=radio name=linkoption id=lo$name value=$name $more onclick='loClick(\"$name\");'>&nbsp$linkOption&nbsp&nbsp ";
+  if ($linkOption == 'custom') {
+    $urlChars = "-A-Za-z0-9._~:/?#\[\]!$&\'()*+,;%=";
+//    $urlChars = "-A-Za-z0-9._~:/?#!$&()*+,;%=";
+    echo "<input type=text placeholder='http://somewhere.com&title=@' name=customlink id=customlink value='{$_GET['customlink']}'
+        size=50 pattern='https?://[$urlChars]*@[$urlChars]*'>";
+  }
+}
+
+// Create dropdowns for sorting.  Include an option for the actual incoming selected item so it won't get lost;
+// the real option list will be generated in later calls to updateSortChoices().
+echo "<BR>" . inputCheckbox ('usetable') . "Use table&nbsp;&nbsp;&nbsp;
+" . inputCheckbox ('rowmulti') . "<span id='trowmulti'>Multiple words per line</span>
+<BR><input type=number name=pagelen id=pagelen value={$_GET['pagelen']}> Number of answers per page
+<BR>Sort by " . makeSelectSort (1) . "
+and then by " . makeSelectSort (2) . "
+<BR><BR>
+Font: " . inputRadio ('font', 'N') . "&nbsp;Normal&nbsp&nbsp</input>
+" . inputRadio ('font', 'M') . "<span style='font-family: monospace'>&nbsp;monospace&nbsp&nbsp</span></input>
+" . inputRadio ('font', 'S') . "<span style='font-family: serif'>&nbsp;serif&nbsp&nbsp</span></input>
+" . inputRadio ('font', 'W') . "<span style='font-family: sans-serif'>&nbsp;sanserif&nbsp;&nbsp;</span></input>
+" . inputRadio ('font', 'C') . "&nbsp;other:&nbsp</input>
+<input type=text name=fontname id=fontname value='{$_GET['fontname']}' />
+<BR>
+Apply to: " . inputCheckbox ('fontlettera') . " alphabetized letters&nbsp;&nbsp;
+" . inputCheckbox ('fontword') . " words found&nbsp;&nbsp;
+" . inputCheckbox ('fontdetails') . " additional values
+<BR><BR>
+Special formatting for...
+<input type=hidden id='endoutput'/>
+</div>
+" . inputCheckbox ('showoutput', 'updateShowOutput();'). "show output options<br>\n";
+if ($level == 0) {
+  echo "<\div>";
+}
+echo "<!-- Put the type (Beta, Dev, Back, or nil) in the form so subsequent scripts can access it -->
+<input type=hidden id='type' name='type' value='$type' />
+<input type=hidden id='version' name='version' value='$version' />
+<input type='submit' value='Submit' id='xxx'/>
+</form>
+";
+// Start Javascript
 echo "<script>
+loClick ('$default');
+
 function resetCorporaMore () {
 var count;\n";
 foreach ($corpusObjects as $corpusObject) {
@@ -150,13 +213,6 @@ function saveQuery() {
   window.open(url, '_blank');
 }
   </script>
-  </div>
-  <!-- Put the type (Beta, Dev, Back, or nil) in the form so subsequent scripts can access it -->
-  <input type=hidden id='type' name='type' value='$type' />
-  <input type=hidden id='version' name='version' value='$version' />
-  <input type='submit' value='Submit' id='xxx'/>
-  </form>
-
   <P>
   <button type='button' id='reset' onclick='resetForm();return false;'>Reset</button>\n";
   $sessionEncoded = urlencode ($sessionkey);
@@ -174,7 +230,7 @@ echo "<div class='sidenav'>
 </div>\n";
 if ($level > 0) {
   echo "<button class='dropdown-btn' id='account-dd' disabled=yes>Account
-  <span id=account-arrow><font color=black>&#9662;</font></span>
+  <span id=account-arrow style='color:black'>&#9662;</span>
   </button>
   <div class='dropdown-container' style='display: none'>
     <span class=disabledmenu>Change password</span>
@@ -188,7 +244,7 @@ if ($level > 0) {
       </button>
       <div class='dropdown-container' style='display: none'>
       <a href='http:asksaveresults$type.php?sessionkey=$sessionEncoded&level=$level&type=$type&source=upload' target='_blank'>Upload file</a>\n";
-    if (isset ($GLOBALS['ret']['save'])) {
+    if (isset ($GLOBALS['ret']['save'])  &&  $ret ['code'] != 'limit') {
        $sessionEncoded = urlencode ($_GET['sessionkey']);
        echo "<A HREF='http://www.alfwords.com/asksaveresults$type.php?sessionkey=$sessionEncoded&type=$type&level=$level&source=results'
          target='_blank'>Save Results</A>\n";
@@ -207,11 +263,8 @@ if ($level > 0) {
         <span class=disabledmenu>Properties</span>\n";
     }
     $userid = $GLOBALS['userid'];
-    if ((SQLQuery($conn, "SELECT 1 FROM corpus_share WHERE user_id = $userid"))->rowCount() > 0) {
-      echo "<a href='http:askaccesssharedlist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Access Shared</a>\n";
-    } else {
-      echo "<span class=disabledmenu>Access Shared</span>\n";
-    }
+    navLink ('Access Shared', "http:askaccesssharedlist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type",
+        (SQLQuery($conn, "SELECT 1 FROM corpus_share WHERE user_id = $userid"))->rowCount() > 0);
     echo "</div>
       <button class='dropdown-btn' id='query-dd'>Queries
       <span id=query-arrow>&#9662;</span>
@@ -226,11 +279,7 @@ if ($level > 0) {
     }
 
     $shared = $conn->query("SELECT count(1) AS shared FROM query_share WHERE user_id = $userid")->fetch(PDO::FETCH_ASSOC)['shared'];
-    if ($current + $shared) {
-      echo "<a href='http:askloadquery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type'>Load</a>\n";
-    } else {
-      echo "  <span class=disabledmenu>Load</span>\n";
-    }
+    navLink ('Load', "http:askloadquery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type", $current + $shared);
     if ($current) {
       echo "<a href='http:asksharequery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Share</a>
       <a href='http:askdeletequery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
@@ -260,17 +309,47 @@ if ($level > 0) {
       array ('id' => 'beta', 'minlev' => 2, 'name' => 'Beta'),
       array ('id' => 'dev', 'minlev' => 3, 'name' => 'Development')) as $typeinfo) {
     if ($level >= $typeinfo['minlev']) {
-      if ($type == $typeinfo ['id']) {
-        Echo "<span class=disabledmenu>{$typeinfo['name']}</span>\n";
-      } else {
-        Echo "<A HREF='index{$typeinfo['id']}.php$security&type={$typeinfo['id']}'>{$typeinfo['name']}</A>\n";
+      navLink ($typeinfo['name'], "!index{$typeinfo['id']}.php$security&type={$typeinfo['id']}", $type != $typeinfo ['id']);
+    }
+  }
+  if ($level > 0  &&  isset($_GET['pattern'])) {
+    include "thirdparty$type.php";
+    foreach (thirdParty::list() as $thirdParty) {
+      $helper = new $thirdParty ();
+      if ($helper->allowed()) {
+        navLink ($helper->name(), $helper->link(), $helper->enabled());
       }
     }
   }
 
   echo "<a href='http:logout.php?sessionkey=$sessionEncoded'>Log out</a>
-    </div>
-  </div>\n";
+    </div>\n";
+
+  if ($level == 3) {
+    echo "<button class='dropdown-btn' id='nav-dd'>Debug
+        <span id=nav-arrow>&#9662;</span>
+      </button>
+      <div class='dropdown-container' style='display: none'>
+      <button type='button' onclick='showParms();'>Parameters</button>
+      </div>
+      <script>
+      function showParms () {
+        alert ('";
+      $counter = 0;
+      foreach ($_GET as $key => $value) {
+        if (++$counter == 15) {
+          echo "[more]');\n alert ('";
+          $counter = 0;
+        }
+        $value = str_replace (array ('\n', '\''), array (' <lf> ', '\\\''), $value);
+        echo "$key => $value\\n";
+      }
+    echo "');
+      }
+      </script>";
+    }
+
+  echo "</div>\n";
 }
 
 // Wizard stuff
@@ -354,13 +433,18 @@ echo "function addOption () {
     }
 	}
 
-echo "	myParent.insertBefore (newButton ('delcons' + optionNumber, 'Remove', 'removeConstraint(' + optionNumber + ')'), here);
+echo "  var newCheck = newInput ('details' + optionNumber, 'checkbox', '');
+	newCheck.setAttribute('onclick','updateSortChoices()');\n
+  myParent.insertBefore (newCheck, here);
+  myParent.insertBefore (newSpan ('tdetails' + optionNumber, 'Show details '), here);
+	myParent.insertBefore (newButton ('delcons' + optionNumber, 'Remove', 'removeConstraint(' + optionNumber + ')'), here);
 	myParent.insertBefore (newSpan ('butspace' + optionNumber, '&nbsp;&nbsp;'), here);
   myParent.insertBefore (newButton ('wizard' + optionNumber, 'Wizard', 'openWizard(' + optionNumber + ')'), here);
 	myParent.insertBefore (newBreak ('br' + optionNumber), here);
 
 	// run side effects of selecting the first radio button
 	radioClicked(optionNumber);
+  updateHighlightChoices ();
 }
 
 // Side effects when one of the main radio buttons is selected
@@ -369,6 +453,7 @@ function radioClicked (thisOption) {
 	var theForm = document.forms['search'];
 	var hint;
   var newOption;
+  var details;
 	var wizard;\n";
   $delcode = '';
   foreach (constraint::list () as $classname) {
@@ -384,12 +469,20 @@ function radioClicked (thisOption) {
     $fieldlist = "{$fieldlist} r$suffix t$suffix";
     echo "if (theForm['r$suffix' + thisOption].checked) {
       hint = '" . str_replace ("\n", "", $classname::getHint()) . "';
-      wizard = " . ($classname::wizard() ? 'true' : 'false'). ";
+      wizard = " . ($classname::wizard() ? 'true' : 'false'). "
+      details = " . ($classname::isColumnSyntax() ? 'true' : 'false'). ";
     }\n";
   }
   $fieldlist = substr ($fieldlist, 1); // remove initial space
 
-	echo "theForm['wizard' + thisOption].disabled = !wizard;
+  echo " var display = details ? 'inline' : 'none';
+  var here = document.getElementById('details' + thisOption);
+  if (!details) {
+    here.checked = false;
+  }
+  here.style.display = display;
+  document.getElementById('tdetails' + thisOption).style.display = display;
+  theForm['wizard' + thisOption].disabled = !wizard;
 
 	// Get rid of old hint and display new one.
 	if (wizard) {
@@ -435,6 +528,59 @@ function validateConstraint (thisOption) {
       }
 		}
   echo "} // end validateCorpus\n";
+// end main
+
+function navLink ($name, $link, $enabled) {
+  if ($enabled) {
+    if (substr ($link, 0, 1) == '!') {
+      $link = substr ($link, 1);
+      $target = '';
+    } else {
+      $target = "target='_blank'";
+    }
+    Echo "<A HREF='$link' $target>$name</A>\n";
+  } else {
+    Echo "<span class=disabledmenu>$name</span>\n";
+  }
+}
+
+function inputCheckbox ($name, $onclick = '') {
+  $check = getCheckbox ($name) ? 'checked' : '';
+  if ($onclick) {
+    $onclick = "onclick='$onclick'";
+  }
+  return "<input type=checkbox id=$name name=$name $check $onclick/>";
+}
+
+function inputRadio ($name, $value, $onclick = '') {
+  $check = ($_GET[$name] == $value) ? 'checked' : '';
+  if ($onclick) {
+    $onclick = "onclick='$onclick'";
+  }
+  return "<input type=radio id=$name$value name=$name value=$value $check $onclick/>";
+}
+
+function makeSelectSort ($num) {
+  $value = $_GET["sort$num"];
+  return "<select name='sort$num' id=sort$num value=$value><option value=$value>Dummy</option></select>\n" .
+    inputCheckbox ("desc$num") . "descending  ";
+}
+
+echo "function initializeHighlight() {\n";
+  foreach ($_GET as $key => $value) {
+    if (preg_match ('/r(dispdiv.*)/', $key, $matches)) {
+      $subkey = $matches[1];
+      $lcvalue = strtolower ($value);
+      echo "document.getElementById('$subkey$lcvalue').checked = true;\n";
+      if (getCheckbox ("{$subkey}not")) {
+        echo "document.getElementById('{$subkey}not').checked = true;\n";
+      }
+      if ($text = $_GET ["{$subkey}x"]) {
+        echo "document.getElementById('{$subkey}x').value = '$text';\n";
+      }
+    }
+  }
+echo "}\n";
 ?>
 // This needs to be at the end, after controls have been created
 var modal = document.getElementById('wizard');

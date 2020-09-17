@@ -31,16 +31,22 @@ catch (PDOException $e) {
 // Set up lookups for any corpus which supports categories
 echo "<div id='catlookup' class='wizard'>
   <div class='wizard-content'>
-  <div class='csswarning'>Error building CSS.  This lookup may not look or function correctly.</div>
 	<form name='catwiz' id='catwiz'>\n";
 foreach ($corpusObjects as $corpusObject) {
   if (isset ($corpusObject->optionButtonList ()['category'])) {
     $corpus = $corpusObject->getCorpusNum();
-    echo "    <input type='text' name=category$corpus id=category$corpus class=category$corpus style='display: none'/>\n";
+    //     <input type='text' name=category$corpus id=category{$corpus}old class=category$corpus style='display: none'/>
+    echo "<div class='typeahead__container'>
+            <div class='typeahead__field'>
+              <div class='typeahead__query'>
+                <input class='js-typeahead-category' name=category$corpus[query] id=category$corpus type='search'
+                    placeholder='Search' autocomplete='off' style='display: none'/>
+              </div>
+            </div>
+          </div>";
   }
 }
 echo "</form>
-  <font color=white><P>.<P>.</font><!-- Invisible spacing so that buttons are not hidden-->
 	<button type='button' id='catclose' onclick='closeCatWizard(true);'>OK</button>
 	<button type='button' id='catcancel' onclick='closeCatWizard(false);'>Cancel</button>
   </div>
@@ -58,6 +64,7 @@ if ($level == 0) {
 	}
 }
 Echo "<BR>\n";
+
 Echo "<form name='search' id='search' action='search$type.php' onsubmit='return validateForm()' method='get'>\n";
 Echo "<input type=hidden id='simple' name='simple' value='" . ($advanced ? 'off' : 'on') . "' />\n";
 if ($advanced) {
@@ -98,7 +105,7 @@ if ($advanced) {
 if ($level > 0) {
   $sourceDisplay = '';
 } else {
-  $sourceDisplay = "style='display: none'"; //@@
+  $sourceDisplay = "style='display: none'";
 }
 echo "<label>Single words? <input name=single type=checkbox
    checked /></label><br>
@@ -128,6 +135,20 @@ foreach ($corpusObjects as $corpusObject) {
   }\n";
 }
 echo "} // end resetCorporaMore
+
+function saveQuery() {
+  var url='http:asksavequery$type.php?';
+  var elnum, item, name, value;
+  for (elnum = 0; elnum < document.getElementById('search').elements.length; elnum++) {
+		item = theForm.elements[elnum];
+		name = item.name;
+    value = item.value;
+    if (name && value) {
+      url += name + '=' + encodeURIComponent(value) + '&';
+    }
+	}
+  window.open(url, '_blank');
+}
   </script>
   </div>
   <!-- Put the type (Beta, Dev, Back, or nil) in the form so subsequent scripts can access it -->
@@ -167,6 +188,11 @@ if ($level > 0) {
       </button>
       <div class='dropdown-container' style='display: none'>
       <a href='http:asksaveresults$type.php?sessionkey=$sessionEncoded&level=$level&type=$type&source=upload' target='_blank'>Upload file</a>\n";
+    if (isset ($GLOBALS['ret']['save'])) {
+       $sessionEncoded = urlencode ($_GET['sessionkey']);
+       echo "<A HREF='http://www.alfwords.com/asksaveresults$type.php?sessionkey=$sessionEncoded&type=$type&level=$level&source=results'
+         target='_blank'>Save Results</A>\n";
+     }
     if ((SQLQuery($conn, "SELECT 1 FROM corpus WHERE owner = {$GLOBALS['userid']}"))->rowCount() > 0) {
       echo "<a href='http:asksharelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Share</a>
         <a href='http:askdeletelist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
@@ -180,20 +206,42 @@ if ($level > 0) {
         <span class=disabledmenu>Delete word</span>
         <span class=disabledmenu>Properties</span>\n";
     }
-    if ((SQLQuery($conn, "SELECT 1 FROM corpus_share WHERE user_id = {$GLOBALS['userid']}"))->rowCount() > 0) {
+    $userid = $GLOBALS['userid'];
+    if ((SQLQuery($conn, "SELECT 1 FROM corpus_share WHERE user_id = $userid"))->rowCount() > 0) {
       echo "<a href='http:askaccesssharedlist$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Access Shared</a>\n";
     } else {
       echo "<span class=disabledmenu>Access Shared</span>\n";
     }
     echo "</div>
-      <button class='dropdown-btn' id='query-dd' disabled=yes>Queries
-      <span id=query-arrow><font color=black>&#9662;</font></span>
+      <button class='dropdown-btn' id='query-dd'>Queries
+      <span id=query-arrow>&#9662;</span>
       </button>
-      <div class='dropdown-container' style='display: none'>
-        <span class=disabledmenu>Load</span>
-        <span class=disabledmenu>Share</span>
-        <span class=disabledmenu>Delete</span>
-        </div>\n";
+      <div class='dropdown-container' style='display: none'>\n";
+    $current = $conn->query("SELECT count(1) AS current FROM query WHERE owner = $userid")->fetch(PDO::FETCH_ASSOC)['current'];
+    $limit = ($level == 3) ? 20 : 5;
+    if ($current < $limit) {
+      echo "  <a onclick='saveQuery();'>Save</a>\n";
+    } else {
+      echo "  <span class=disabledmenu>Can't save: at limit of $limit</span>\n";
+    }
+
+    $shared = $conn->query("SELECT count(1) AS shared FROM query_share WHERE user_id = $userid")->fetch(PDO::FETCH_ASSOC)['shared'];
+    if ($current + $shared) {
+      echo "<a href='http:askloadquery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type'>Load</a>\n";
+    } else {
+      echo "  <span class=disabledmenu>Load</span>\n";
+    }
+    if ($current) {
+      echo "<a href='http:asksharequery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Share</a>
+      <a href='http:askdeletequery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Delete</a>
+      <a href='http:askrenamequery$type.php?sessionkey=$sessionEncoded&level=$level&type=$type' target='_blank'>Rename</a>\n";
+    }
+    else {
+      echo "    <span class=disabledmenu>Share</span>
+          <span class=disabledmenu>Delete</span>
+          <span class=disabledmenu>Rename</span>\n";
+    }
+  echo "   </div>\n";
   }
   echo "<button class='dropdown-btn' id='nav-dd'>Navigation
       <span id=nav-arrow>&#9662;</span>
@@ -378,7 +426,7 @@ function validateConstraint (thisOption) {
   echo "} // end validateConstraint
 
   function validateCorpus (thisCorpus) {\n";
-    // Generate stuff from classes @@
+    // Generate stuff from classes
     foreach ($corpusObjects as $thisCorpus => $corpusObject) {
       if ($code = $corpusObject->getValidateCorpusCode ()) {
         echo "if (thisCorpus == $thisCorpus) {

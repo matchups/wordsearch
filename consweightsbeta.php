@@ -1,5 +1,7 @@
 <?php
 class consweights extends constraint {
+	protected $compare;
+
 	protected function explainSub() {
 		return (($_GET["wttype$this->num"] == "SCR") ? 'Scrabble&reg;' : "Alphabet") . " weight $this->spec";
 	}
@@ -8,9 +10,19 @@ class consweights extends constraint {
 		preg_match ('/^([0-9]*)([-+]?)([0-9]*)([<=>][0-9]*)$/', $this->spec, $matches);
 		// $left (digits) / + or - / $right (digits) / $compare (like >30)
 		$compare = $matches [4];
-		if ($this->not) {
+		$column = $this->columnSyntax ();
+		if ($this->postFormat) {
+			$this->compare = $compare;
+			$compare = '';
+		} else if ($this->not) {
 			$compare = str_replace (array ('<', '=', '>'), array ('>=', '!=', '<='), $compare);
 		}
+		return $this->parseWhere ("$column $compare ");
+	}
+
+	function columnSyntax () {
+		preg_match ('/^([0-9]*)([-+]?)([0-9]*)([<=>][0-9]*)$/', $this->spec, $matches);
+		// $left (digits) / + or - / $right (digits) / $compare (like >30)
 		$left = $matches [1];
 		if ($matches [2] == '+') {
 			$default = 1;
@@ -40,11 +52,35 @@ class consweights extends constraint {
 		}
 		// Now use the spandex table (which contains numbers 1-100) to add up the weights of all the letters in the word.
 		$wttype = $_GET["wttype$this->num"];
-		$sql = "AND (SELECT sum(weights.weight $times) FROM weights INNER JOIN spandex " .
+		return " (SELECT sum(weights.weight $times) FROM weights INNER JOIN spandex " .
 			"WHERE weights.name = '$wttype' AND weights.letter = substr(PW.text, spandex.value, 1) ".
-			"AND spandex.value <= char_length(PW.text)) $compare ";
+			"AND spandex.value <= char_length(PW.text)) ";
+	}
 
-		return $this->parseWhere ($sql);
+	public function localFilterPostFormat ($value) {
+		$target = substr ($this->compare, 1);
+		switch (substr ($this->compare, 0, 1)) {
+			case '>':
+			$ret = $value > $target;
+			break;
+
+			case '=':
+			$ret = $value = $target;
+			break;
+
+			case '<':
+			$ret = $value < $target;
+			break;
+
+			default:
+			throw new Exception ("Bad compare: {$this->compare}");
+		}
+		if ($value % 10 == 2) {comment ("$value {$this->compare} $ret");}
+		return $this->not ? !$ret : $ret;
+	}
+
+	public static function isColumnSyntax () {
+		return true;
 	}
 
 	public static function wizard () {
@@ -125,6 +161,10 @@ class consweights extends constraint {
 
 	public static function getLabel () {
 		return 'weight';
+	}
+
+	function tableTitle ($nonUnique) {
+		return $nonUnique ? $this->spec : 'Weight';
 	}
 
 	public static function getValidateConstraintCode () {

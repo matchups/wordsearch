@@ -4,8 +4,7 @@ include "utility" . $type . ".php";
 
 echo "<HTML>
 <HEAD>
-" . scriptRefs (true, false) . "	<meta name='viewport' content='width=device-width, initial-scale=1'>
-	<link rel='stylesheet' href='styles.css'>
+" . scriptStyleRefs (false, false, false) . "
 	<TITLE>
 	Access Shared Word List
 	</TITLE>

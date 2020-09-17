@@ -121,7 +121,7 @@ class consweights extends constraint {
 				removeChildren (thisOption, 'twtob rscrabble tscrabble ralpha talpha');
 			}
 		}\n";
-}
+  }
 
 	public static function getLabel () {
 		return 'weight';
@@ -133,6 +133,13 @@ class consweights extends constraint {
 				return 'Invalid weight specification ' + thisOption;
 			}";
 		}
+
+	public function rebuildForm($realNumber) {
+		parent::rebuildForm($realNumber);
+		if ($_GET["wttype{$this->num}"] == 'ALF') {
+			Echo "theForm['ralpha$realNumber'].checked = true;\n";
+		} // else it is Scrabble, which is set by default.
+	}
 
 	public static function getButtonCode () {
 		$ret ['add'] = "

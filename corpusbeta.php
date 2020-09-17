@@ -54,9 +54,12 @@ class corpus {
 		return "corpus$name";
 	}
 
-	public function answerLink ($entry) {
+	public function answerLink ($entry, $echo = false) {
 		if ($this->urlpattern != '') {
-			return "<A target='_blank' HREF='" . $this->getURL ($entry) . "'>$entry</A>";
+			if (!$echo) {
+				$echo = $entry;
+			}
+			return "<A target='_blank' HREF='" . $this->getURL ($entry) . "'>$echo</A>";
 		} else {
 			return $entry;
 		}
@@ -104,11 +107,12 @@ class corpus {
   public function form () {
 		$checklist = '';
 		$corpus = $this->corpus;
-		echo "<label>$this->name: <input name=corpus$corpus id=corpus$corpus type=checkbox checked /></label>\n";
+		echo "<label><span id=cn$corpus>$this->name</span>: <input name=corpus$corpus id=corpus$corpus
+				onclick='updateHighlightChoices ();' type=checkbox checked /></label>\n";
 		$checklist = $checklist . ' corpus' . $corpus;
 		foreach ($this->flags as $flag => $flagname) {
 			$xname = "c{$corpus}flag$flag";
-			echo "   &nbsp; &nbsp; <label>$flagname okay? <input name=$xname id=$xname type=checkbox /></label>\n";
+			echo "   &nbsp; &nbsp; <label><span id=tflag$flag$corpus>$flagname</span> okay? <input name=$xname id=$xname type=checkbox onclick='updateHighlightChoices ();' /></label>\n";
 			$checklist = $checklist . ' ' . $xname;
 		}
 		return $checklist . $this -> formExtra();
@@ -125,13 +129,14 @@ class corpus {
 		for ($num = 1; $num <= $count; $num++) {
 			$key = "{$this->corpus}_$num";
 			if (isset ($_GET["query$key"])  &&
-					($ccobject = $this -> buildOne ($_GET["query$key"], $_GET["radio$key"], getCheckbox ("not$key"), $num)) !== null) {
+					($ccobject = $this -> buildOne ($_GET["query$key"], $_GET["radio$key"], getCheckbox ("not$key"), getCheckbox ("details$key"), $num)) !== null) {
 				$consObjects [$key] = $ccobject;
+				$consObjects [$key]->setPostFormat(preg_match ('/[^P]/', $_GET["rdispdivcv$key"]));
 			}
 		}
 	}
 
-	protected function buildOne ($spec, $radio, $not, $num) {
+	protected function buildOne ($spec, $radio, $not, $details, $num) {
 		errorMessage ("Must override corpus.buildOne ($spec, $radio, $num)");
 	}
 
@@ -142,9 +147,9 @@ class corpus {
 		$corpus = $this->corpus;
 		$key = "count$corpus";
 		$name = $this->name;
-		Echo "&nbsp;&nbsp;<button type='button' id='add$corpus' onclick='addOption$corpus();return false;'>More</button><BR>
+		Echo "&nbsp;&nbsp;<button type='button' id='add$corpus' onclick='addOption$corpus();return false;'>More</button>
 			<script>
-			function addOption$corpus() {;
+			function addOption$corpus() {
 			// add a new constraint when user presses that button
 			var theForm = document.getElementById('search');
 			var corpusOptionNumber = ++(theForm['$key'].value);
@@ -179,11 +184,19 @@ class corpus {
 			}
 			echo "myParent.insertBefore (newOption, here);\n";
 		}
+		echo "  var newCheck = newInput ('details{$corpus}_' + corpusOptionNumber, 'checkbox', '');
+			newCheck.setAttribute('onclick','updateSortChoices()');\n
+		  myParent.insertBefore (newCheck, here);
+		myParent.insertBefore (newSpan ('tdet{$corpus}_' + corpusOptionNumber, ' Show details '), here);\n";
 
 		// Button to remove constraint
-		Echo "		myParent.insertBefore (newButton ('delcons{$corpus}_' + corpusOptionNumber, 'Remove', 'removeConstraint$corpus(' + corpusOptionNumber + ')'), here);
-			myParent.insertBefore (newBreak ('br{$corpus}_' + corpusOptionNumber), here);
-			} // End addOption$corpus\n";
+		echo "		myParent.insertBefore (newButton ('delcons{$corpus}_' + corpusOptionNumber, 'Remove', 'removeConstraint$corpus(' + corpusOptionNumber + ')'), here);
+			myParent.insertBefore (newBreak ('br{$corpus}_' + corpusOptionNumber), here);\n";
+		if ($clickedCode) {
+			echo "radioClicked$corpus (corpusOptionNumber);\n";
+		}
+		echo "updateHighlightChoices();
+			}\n";
 
     if ($clickedCode) {
 			echo "function radioClicked$corpus (thisOption) {
@@ -197,7 +210,7 @@ class corpus {
 		}
 
 		echo "function removeConstraint$corpus (corpusOptionNumber) {\n";
-		$fieldlist = "br{$corpus}_ delcons{$corpus}_ label{$corpus}_ not{$corpus}_ query{$corpus}_";
+		$fieldlist = "br{$corpus}_ delcons{$corpus}_ label{$corpus}_ not{$corpus}_ query{$corpus}_ details{$corpus}_ tdet{$corpus}_";
 		foreach ($this->optionButtonList() as $id => $description) {
 			$fieldlist = $fieldlist . " r{$corpus}_$id t{$corpus}_$id";
 		}
@@ -208,7 +221,8 @@ class corpus {
 		if ($clickedCode) {
 			echo "noSub$corpus (corpusOptionNumber);\n";
 		}
-		echo "} // end removeConstraint$corpus
+		echo "updateSortChoices ();
+		} // end removeConstraint$corpus
 		</script>
 		<input type=hidden id='$key' name='$key' value='0' />\n";
 	}
@@ -234,9 +248,9 @@ class corpus {
 class corpusConstraint extends constraint {
   protected $corpusObject;
 
-	public function __construct ($spec, $num, $not, $corpusObject) {
+	public function __construct ($spec, $num, $not, $details, $corpusObject) {
 		$this->corpusObject = $corpusObject;
-		parent::__construct ($spec, $num, $not);
+		parent::__construct ($spec, $num, $not, $details);
 	}
 
 	function parentID () {
@@ -244,14 +258,37 @@ class corpusConstraint extends constraint {
 	}
 
 	function rebuildForm($realNumber) {
-		$corpusNum = $this->corpusObject->getCorpusNum();
-		echo "addOption$corpusNum();";
+		$corpusObject = $this->corpusObject;
+		$corpusNum = $corpusObject->getCorpusNum();
+		echo "addOption$corpusNum();\n";
 		if ($this->not) {
 			echo "theForm['not{$corpusNum}_$realNumber'].checked = true;\n";
 		}
 		echo "theForm['query{$corpusNum}_$realNumber'].value = '" . addslashes ($this->spec) . "';\n";
 		// Set the radio button corresponding to the selected option
 		echo "theForm['r{$corpusNum}_" . $_GET["radio{$corpusNum}_$this->num"] . "$realNumber'].checked = true;\n";
+		if ($corpusObject -> clickedCode ()) {
+		  echo "radioClicked{$corpusNum}({$this->num});\n";
+	  }
+		if ($this->details) {
+			echo "theForm['details{$corpusNum}_$realNumber'].checked = true;\n";
+		}
+	}
+
+	function isLocalFilter () {
+		return true;
+	}
+
+	function slow () {
+		return true;
+	}
+
+	function columnSyntax () {
+		return '0';
+	}
+
+	function setMatch (&$row, $value) {
+		$row['cv' . $this->corpusObject->getCorpusNum() . '_' . $this->num] = $value;
 	}
 } // end class corpusConstraint
 
@@ -278,9 +315,9 @@ class corpusWikipedia extends corpus {
 		return array ('pattern' => 'pattern', 'regex' => 'regular expression', 'category' => 'category', 'size' => 'size', 'links' => 'incoming links');
 	}
 
-	protected function buildOne ($spec, $radio, $not, $num) {
+	protected function buildOne ($spec, $radio, $not, $details, $num) {
 		$classname = "ccWikipedia$radio";
-		return new $classname ($spec, $num, $not, $this);
+		return new $classname ($spec, $num, $not, $details, $this);
 	}
 
 	function clickedCode () {
@@ -320,7 +357,18 @@ class corpusWikipedia extends corpus {
 			} else {
 				notbox.disabled = false;
 				noSub{$corpus} (thisOption);
-			}";
+			}
+
+      var display;
+			if (theForm['r2_category' + thisOption].checked  ||  theForm['r2_links' + thisOption].checked  ||
+					theForm['r2_regex' + thisOption].checked || theForm['r2_size' + thisOption].checked) {
+				display = 'inline';
+			} else {
+				display = 'none';
+			}
+			document.getElementById('details{$corpus}_' + thisOption).style.display = display;
+			document.getElementById('tdet{$corpus}_' + thisOption).style.display = display;
+			";
 		$ret ['add'] = $code;
 
 		$fieldlist = "t{$corpus}_ob catlook{$corpus}_ tclsp{$corpus}_";
@@ -481,15 +529,26 @@ class ccWikipediaregex extends ccWikipediaText {
 	}
 
 	function init () {
-		$this -> regex = expandSpecial ($this->spec);
+		$this->regex = expandSpecial ($this->spec);
+		if (substr ($this->regex, 0, 1) != '/') {
+			$this->regex = "/{$this->regex}/";
+		}
 	}
 
 	function localFilter($oneword, $entry) {
-		$ret = (preg_match ($this->regex, $this->getText($entry), $matches)) XOR ($this -> not);
-		if (count($matches) > 1) {
-			comment ("matched " . implode ('/', $matches));
+		if (preg_match ($this->regex, $this->getText($entry), $matches)) {
+			if ($this -> not) {
+				return false;
+			} else {
+				return implode ('/', $matches);
+			}
+		} else {
+			return $this -> not;
 		}
-		return $ret;
+	}
+
+	function tableTitle ($nonUnique) {
+		return $this->regex;
 	}
 }
 
@@ -556,7 +615,7 @@ class ccWikipediacategory extends ccWikipediaText {
 		return '';
 	} // end parse
 
-	function localFilterArray ($row) {
+	function localFilterArray (&$row) {
 		/*
 		get word & indirect entry if C type
 		*/
@@ -571,24 +630,21 @@ class ccWikipediacategory extends ccWikipediaText {
 		if (!$entry_id = $row['entry_id']) {
 			return $false;
 		}
-		if ($this->style == 'A'){
-			$column = "entry_cat.cat_id";
-		} else {
-			$column = "category.title";
-		}
-		$sql = "SELECT $column FROM entry_cat INNER JOIN category ON category.id = entry_cat.cat_id
+		$column = ($this->style == 'A') ? ", entry_cat.cat_id" : '';
+		$sql = "SELECT category.title $column FROM entry_cat INNER JOIN category ON category.id = entry_cat.cat_id
 		 		WHERE entry_cat.entry_id = $entry_id AND category.corpus_id = $corpus";
 		$result = SQLQuery ($conn, $sql);
-		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+		while ($catRow = $result->fetch(PDO::FETCH_ASSOC)) {
 			// Make a list to seed the tree walk
 			if ($this->style == 'A') {
-				$catID = $row ["cat_id"];
+				$catID = $catRow ["cat_id"];
 				if (!isset ($catIndex [$catID])) {
-					$catList [$buildCount++] = array ('id' => $catID, 'depth' => 0);
+					$catList [$buildCount++] = array ('id' => $catID, 'depth' => 0, 'basetitle' => $catRow['title']);
 					$catIndex [$catID] = true;
 				}
 			} else { // C
-				if (strpos (strtolower ($row['title']), $this->spec)) {
+				if (strpos (strtolower ($catRow['title']), $this->spec)) {
+					$this -> setMatch ($row, $catRow['title']);
 					return true;
 				}
 			}
@@ -604,6 +660,7 @@ class ccWikipediacategory extends ccWikipediaText {
 			$oneCat = $catList [$searchCount]['id'];
 			$depth = $catList [$searchCount]['depth'];
 			if ($oneCat == $this -> categoryID) {
+				$this->setMatch ($row, $catList [$searchCount]['basetitle']);
 				return true;
 			}
 			if (++$depth < 6) {
@@ -611,10 +668,10 @@ class ccWikipediacategory extends ccWikipediaText {
 						INNER JOIN category ON category.title = catparent.parentcat
 						WHERE catparent.cat_id = $oneCat AND corpus_id = $corpus";
 				$result = SQLQuery ($conn, $sql);
-				while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-					$catID = $row ['id'];
+				while ($catRow = $result->fetch(PDO::FETCH_ASSOC)) {
+					$catID = $catRow ['id'];
 					if (!isset ($catIndex [$catID])) {
-						$catList [$buildCount++] = array ('id' => $catID, 'depth' => $depth);
+						$catList [$buildCount++] = array ('id' => $catID, 'depth' => $depth, 'basetitle' => $catList [$searchCount]['basetitle']);
 						$catIndex [$catID] = true;
 					}
 				}
@@ -631,6 +688,10 @@ class ccWikipediacategory extends ccWikipediaText {
 		$range = $_GET["wc{$corpus}_type{$this->num}"];
 		Echo "theForm['rc{$corpus}_$range$realNumber'].checked = true;\n";
   }
+
+	function tableTitle ($nonUnique) {
+		return ($nonUnique ? ('Cat #' . $this->num) : 'Category');
+	}
 } // end class ccWikipediacategory
 
 class ccWikipediasize extends ccWikipediaText {
@@ -651,7 +712,11 @@ class ccWikipediasize extends ccWikipediaText {
 			$size = $page['length'];
 		}
 		$ret = (($size > $this->size) XOR ($this->relation == '<') XOR ($this->not));
-		return $ret;
+		return $ret ? $size : false;
+	}
+
+	function tableTitle ($nonUnique) {
+		return 'Size';
 	}
 }
 
@@ -684,14 +749,18 @@ class ccWikipedialinks extends ccWikipediaText {
 			}
 			foreach ($backlinkArray as $backlink) {
 				$count += $backlink['ns'] ? 1 : $nonMainFactor;
-				if ($count > $target) {
+				if ($count > $target  &&  !$this->details) {
 					$continue = '';
 					break;
 				}
 			}
 		} while ($continue);
 		$ret = (($count > $target) XOR ($this->relation == '<') XOR ($this->not));
-		return $ret;
+		return $ret ? $count : false;
+	}
+
+	function tableTitle ($nonUnique) {
+		return 'Links';
 	}
 }
 
@@ -710,7 +779,7 @@ class ccCorpusLikeFlags extends corpusConstraint {
 
 	function parse () {}
 
-	function localFilterArray ($row) {
+	function localFilterArray (&$row) {
 		$corpus = $row['corpus'];
 		$valid = true;
 		if ($corpus == $this->corpusObject->getCorpusNum()) {

@@ -8,14 +8,14 @@ Echo "$base Phrases";
 </TITLE>
 </HEAD>
 <BODY>
+<link rel="stylesheet" href="styles.css">
 <H2>
-<?php
-  $corpus = $_GET['corpus'];
-  $type = $_GET['type'];
-  $level = $_GET['level'];
-Echo "<link rel='stylesheet' href='styles$type.css'>
-  Phrases containing <span class='specs'>$base</span></H2>";
+  <?php
+Echo "Phrases containing <span class='specs'>$base</span></H2>";
 // Prepare for phrase search
+$corpus = $_GET['corpus'];
+$type = $_GET['type'];
+$level = $_GET['level'];
 $sql = "SELECT entry.name AS entry, " .
       " entry.corpus_id AS corpus FROM words PW".
 	" INNER JOIN word_entry ON word_entry.word_id = PW.id " .

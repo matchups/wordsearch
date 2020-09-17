@@ -9,8 +9,9 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 
 	// Prepare for anagram search
 	$prewhere = '/* premain */';
+	$select = '/* select */';
 	$sql = "SELECT PW.text AS word, Min(entry.name) AS entry, entry.id as entry_id," .
-			   " word_entry.whole AS whole, entry.corpus_id AS corpus FROM words PW" .
+			   " word_entry.whole AS whole, entry.corpus_id AS corpus $select FROM words PW" .
 			   " INNER JOIN word_entry ON word_entry.word_id = PW.id " .
 			   " INNER JOIN entry ON entry.id = word_entry.entry_id " .
 			   " $prewhere WHERE 1=1 "; // End with dummy condition so we can keep appending AHD clauses
@@ -24,9 +25,12 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 				continue;
 		}
 		$classname = "cons" . $_GET["radio$num"]; // subclass name based on user choice of constraint type
-		$consObjects[$num] = new $classname($_GET["query$num"], $num, getCheckbox ("not$num"));
-		$required = $required . $consObjects[$num]->required(); // Do this now because needed below
-		// Not done for corpus ones, but they shouldn't ever need it.
+		$consObjects[$num] = new $classname($_GET["query$num"], $num, getCheckbox ("not$num"), getCheckbox ("details$num"));
+		if (preg_match ('/[^P]/', $_GET["rdispdivv$num"])) {
+			$consObjects[$num]->setPostFormat(true);
+		} else {
+			$required = $required . $consObjects[$num]->required(); // Do this now because needed below
+		}
 	} // end for
 
 	// Identify pattern when we're doing an Any Order search.
@@ -64,14 +68,31 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 
 	$counter = 0;
 	// Handle additional constraints
-	foreach ($consObjects as $thisConsObject) {
+	foreach ($consObjects as $rowNumber => $thisConsObject) {
 		if ($explain = $thisConsObject->explain ()) {
 			if (++$counter % 2 == 0) { // Display constraint info, two per line
 					echo "<BR>";
 			}
+			if ($thisConsObject->postFormat()) {
+				if ($thisConsObject->parentID() == 'F') {
+					$subkey = "v$rowNumber";
+				} else {
+					$subkey = "cv$rowNumber";
+				}
+				$format = array ('parm' => $_GET["rdispdiv{$subkey}"], 'more' => $_GET["dispdiv{$subkey}x"] ?? '');
+				if ($format['parm'] == 'B') {
+					$format['parm'] = 'BB'; // because baseline in header is already bold
+				}
+				$explain = applyFormat ($explain, $format);
+			}
 			echo " </span>and<span class='specs'> $explain ";
 		}
-		$sql = insertSql ($sql, $thisConsObject->parse ());
+		$parse = $thisConsObject->parse ();
+		$sql = insertSql ($sql, $parse);
+		if ($thisConsObject->detailsEnabled()  ||  $thisConsObject->postFormat()) {
+			$consValue = $parse['column'] ?? $thisConsObject -> columnSyntax();
+			$sql = str_replace ($select, ", $consValue AS cv$rowNumber $select", $sql);
+		}
 		$thisConsObject->setlengths ($minlen, $maxlen);
 		$position += $thisConsObject->position();
 		// keep object around for post-filtering and for rebuilding form
@@ -80,7 +101,7 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 	$sql = $sql . doWordTypes ();
 	$sql = $sql . doLength ('PW', $minlen, $maxlen, true);
 	$fourlist = $anyorder ? '' : $pattern;
-	foreach ($consObjects as $thisConsObject) {
+	foreach (filteringObjects ($consObjects) as $thisConsObject) {
 		$fourlist .= '|' . $thisConsObject->fourPattern();
 	}
 
@@ -98,7 +119,18 @@ function parseQuery ($pattern, &$consObjects, &$corpusObjects) {
 
 	$by = "PW.text, word_entry.whole DESC, entry.corpus_id";
 	$orderby = " GROUP BY " . str_replace('DESC', '', $by) . " ORDER BY $by";
-	return $sql . $orderby;
+	if ($_GET['pagelen']) {
+		$localFilter = false;
+		foreach ($consObjects as $thisConsObject) {
+			if ($thisConsObject->isLocalFilter()) {
+				$localFilter = true;
+			}
+		}
+		if (!$localFilter) {
+			$limit = " LIMIT " . ($_GET['pagelen'] + 1); // Add one so that the limit will be reached during output processing
+		}
+	}
+	return $sql . $orderby . $limit;
 }
 
 // Processing of "any order" searches
@@ -360,7 +392,6 @@ function corpusInfo ($table, $option, &$consObjects) {
 				}
       }
     } else if (preg_match ('/^c([0-9]+)flag(.)(.*)$/', $key, $matches)  &&  $option == 'W') {
-			comment ($matches);
 			$corpus = $matches[1];
 			if ($matches [2] == '@') { // fake item set in code
 				$ret = $GLOBALS['corpusObjects'][$corpus] -> moreSQL ($table, $matches[3], $parm);
@@ -374,10 +405,12 @@ function corpusInfo ($table, $option, &$consObjects) {
 			} else {
 				$flags[$corpus] = ($flags[$corpus] ?? '') . $matches [2];
 			}
+		} else if (preg_match ('/^rdispdivcf_./', $key)) {
+			$flagFormat = true;
 		}
   }
 
-	if ($option == 'L') {
+  if ($option == 'L') {
 		return $corpusList;
 	}
 
@@ -388,7 +421,7 @@ function corpusInfo ($table, $option, &$consObjects) {
 		$clause = " IN ($list)";
 	}
 
-	preg_match_all ('/c([0-9]+)flag(.)/', $_GET['morecbx'], $matches);
+  preg_match_all ('/c([0-9]+)flag(.)/', $_GET['morecbx'], $matches);
 	foreach ($matches[1] as $counter => $thisCorpus) {
 		if (strpos ($flags[$thisCorpus], $matches[2][$counter]) === false) {
 			$nonflags [$thisCorpus] = $nonflags [$thisCorpus] . $matches[2][$counter];
@@ -402,7 +435,8 @@ function corpusInfo ($table, $option, &$consObjects) {
 			$corpusObject = $GLOBALS['corpusObjects'][$thisCorpus];
 			if ($corpusObject->likeCorpus()) {
 				if ($table == 'entry') {
-					$consObjects["clfb$thisCorpus"] = new ccCorpusLikeFlags ($nonflags[$thisCorpus], 0, false, $corpusObject);
+					//@@ need to figure out details
+					$consObjects["clfb$thisCorpus"] = new ccCorpusLikeFlags ($nonflags[$thisCorpus], 0, false, $details, $corpusObject);
 					$likeFlags = true;
 				}
 			} else {
@@ -416,9 +450,7 @@ function corpusInfo ($table, $option, &$consObjects) {
 		}
 	}
 
-	if ($likeFlags) {
-		$ret ['select'] = ", PW.id AS pw_id";
-	}
+	$ret ['select'] = ($likeFlags ? ", PW.id AS pw_id" : '') . ($flagFormat ? ", entry.flags" : '');
 
 	$ret ['where'] = " AND $table.corpus_id $clause $flagClause $moreSQL";
 	return $ret;
@@ -579,5 +611,14 @@ function insertSql ($sql, $more) {
 		$sql = substr ($sql, 0, $here - 1) . $more['select'] . substr ($sql, $here - 1);
 	}
 	return $sql;
+}
+
+function filteringObjects ($consObjects) {
+	foreach ($consObjects as $rowNumber => $thisConsObject) {
+		if (!$thisConsObject->postFormat()) {
+			$ret [$rowNumber] = $thisConsObject;
+		}
+	}
+	return $ret;
 }
 ?>

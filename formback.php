@@ -207,17 +207,17 @@ if ($level > 0) {
   }
   $security = "?sessionkey=$sessionkey&level=$level";
   // Links to other versions of the project, based on permissions
-  if ($type != "back"  &&  $level > 1) {
-  	Echo "<A HREF='indexback.html$security&type=back'>Previous</A>";
-  }
-  if ($type != "") {
-  	Echo "<A HREF='index.php$security'>Current</A>";
-  }
-  if ($type != "beta"  &&  $level > 1) {
-  	Echo "<A HREF='indexbeta.php$security&type=beta'>Beta</A>";
-  }
-  if ($type != "dev"  &&  $level > 2) {
-  	Echo "<A HREF='indexdev.php$security&type=dev'>Development</A>";
+  foreach (array (array ('id' => 'back', 'minlev' => 2, 'name' => 'Previous'),
+      array ('id' => '', 'minlev' => 0, 'name' => 'Current'),
+      array ('id' => 'beta', 'minlev' => 2, 'name' => 'Beta'),
+      array ('id' => 'dev', 'minlev' => 3, 'name' => 'Development')) as $typeinfo) {
+    if ($level >= $typeinfo['minlev']) {
+      if ($type == $typeinfo ['id']) {
+        Echo "<span class=disabledmenu>{$typeinfo['name']}</span>\n";
+      } else {
+        Echo "<A HREF='index{$typeinfo['id']}.php$security&type={$typeinfo['id']}'>{$typeinfo['name']}</A>\n";
+      }
+    }
   }
 
   echo "<a href='http:logout.php?sessionkey=$sessionEncoded'>Log out</a>
@@ -281,9 +281,7 @@ function openWizard (thisOption) {
 
 // Is there any other code that this constraint wants to dump into the page?
 foreach (constraint::list () as $classname) {
-	if ($classname::wizard()) {
-		echo $classname::getMoreCode () . "\n";
-	}
+	echo $classname::getMoreCode () . "\n";
 }
 
 // Dynamically create some Javascript functions
@@ -358,9 +356,12 @@ function radioClicked (thisOption) {
 	myParent.insertBefore (newOption, here);
 }
 
+deleteMode = false;
 function removeConsMore (thisOption) {
+  deleteMode = true; // Deletion code may need to know whether this is a hard delete (whole row) or a soft delete (from changing options)
   $delcode
   removeChildren (thisOption, '$fieldlist');
+  deleteMode = false;
 }
 
 function validateConstraint (thisOption) {

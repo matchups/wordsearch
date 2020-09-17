@@ -3,6 +3,14 @@ body {
   padding: 0px 10px;
 }
 
+table {
+  border-collapse: collapse;
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+
 /* Code display (for development/debugging) */
 .code {
   color: #c000c0;
@@ -15,10 +23,16 @@ body {
   font-size: small;
 }
 
+/* Fixed-width */
+.fixed {
+  font-family: courier new, courier, monospace;
+}
+
 /* Error messages */
 .error {
   color: red;
 }
+
 /* Hint text */
 .hint {
   color: #1030F0;
@@ -112,4 +126,8 @@ body {
 
 .typeahead__query {
   width: 90%;
+}
+
+.extrabold {
+  font-family: Georgia Pro Black, Cooper Black, Bodoni MT Black, Cambria, Times, serif;}
 }

@@ -48,7 +48,13 @@ class constraint {
 		// Do nothing by default
 	}
 
-	public function localFilter($oneword, $entry, $entry_id) {
+  public function localFilterArray ($row) {
+		// Most classes will use the regular localFilter; this one has been added to provide access to other elements
+		return $this->localFilter ($row['word'], $row['entry']);
+	}
+
+
+	public function localFilter($oneword, $entry) {
 		// Do any additional filtering that can't be done in SQL
 		// $oneword = the word to check
 		// $entry = external name; useful for literal or source checks
@@ -164,7 +170,7 @@ class conspattern extends constraint {
 		// Convert to regular expression
 		$spec = patternToRegex (expandSpecial ($this->spec), 'S');
 		$column = ($this->raw ? 'entry.name' : 'PW.text');
-		return $this->parseWhere ("AND $column " . $this->maybeNot() . " RLIKE '$spec' ");
+		return $this->parseWhere (" AND $column " . $this->maybeNot() . " RLIKE '$spec' ");
 	}
 
 	public function position() {
@@ -235,7 +241,7 @@ class conspattern extends constraint {
 	}
 	public static function getValidateConstraintCode () {
 		return "  // Same validation as with the main pattern
-			if (!/^[a-z?*@#&\[\-\]]+$/i.test (thisValue)) {
+			if (!/^[a-z?*@#&\[\-\]]+$/i.test (thisValue)  &&  !theForm['craw' + thisOption].checked) {
 				return 'Invalid character in pattern ' + thisOption;
 			}
 			if (badGroups (thisValue)) {
@@ -272,9 +278,9 @@ class consregex extends constraint {
 		}
 	}
 
-	public function localFilter($oneword, $entry, $entry_id) {
+	public function localFilter($oneword, $entry) {
 		if ($this->local) {
-			$matched = preg_match ($this->regex, $this->raw ? entry : $oneword);
+			$matched = preg_match ($this->regex, $this->raw ? $entry : $oneword);
 			if ($this->not) {
 				$matched = !$matched;
 			}
@@ -623,7 +629,7 @@ class consenum extends constraint {
 		}
 	}
 
-	public function localFilter($oneword, $entry, $entry_id) {
+	public function localFilter($oneword, $entry) {
 		return preg_match ($this->pattern, asciitize ($entry));
 	}
 

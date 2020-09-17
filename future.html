@@ -8,62 +8,18 @@
 <H1>Word Search Plans</H1>
 <H2>Future Plans</H2>
 <UL>
-<LI>0.7 Major expansion of word list
-  <UL>
-  <LI>0.72 Content search (text & categories) (done)
-  <LI>0.73 Miscellaneous internal (done)
-  <LI>0.74 Wiktionary (done)
-  <LI>0.75 User-specific word lists (done)
-  <LI>0.76 Other search capabilities <b>(all done)</b>
-    <OL type=a>
-    <LI>Custom SQL with PW. (converted to lowercase)
-    <LI>Custom SQL: IJ or WHERE
-    <LI>Improve word lookup GUI
-    <LI>Fix remove corpus constraint button fail
-    <LI>Enumeration (digit # ' - sp * ?) with help
-    <LI>Hide corpus MORE in simple UI
-    <LI>Raw pattern/regex with help
-    <LI>Use best 4-pattern and use BETWEEN on xxx_ things
-    <LI><strike>Debug typeahead</strike>
-    <LI>Number of incoming links
-    <LI>Implement subresource integrity and local copies of libraries
-    <LI>Release
-    </OL>
-  </UL>
 <LI>0.8 Saving queries--see user types document for limits and features <b>(all done)</b>
-  <UL>
-  <LI>0.81 Save query
-  <LI>0.82 Recall query
-  <LI>*brownscho* is showing redirects
-  <LI>0.83 Delete query
-  <LI>Validate needs expansion when raw checked
-  <LI>0.84 Share query
-  <LI>SQL issues
-  <OL type=a>
-    <LI>Look into why *bombing* dies
-    <LI>Similarly, SVs starting with James (same)
-    <LI>Once that's fixed, support categories on LIKE corpora again
-    <LI>Support C and U on LIKE corpora as well
-    <LI>don't include AND PW.text BETWEEN '' AND 'zzz'
-    <LI>Don't add fours & pairs unless they help
-  </OL>
-  <LI>0.85 Access shared query
-  <LI>Move Save Query to sidebar
-  <LI>0.86 Rename query
-  <LI>switch to https://cdnjs.com/libraries/jquery-typeahead
-  <LI><span class=internal>Release</span>
-  </UL>
-<LI>0.9 Output options
+<LI>0.9 Output options (all done)
   <UL>
   <LI>0.90 Links to
   <OL type=a>
-    <LI><A HREF="www.quinapalus.com/cgi-bin/qat">Qat</A> (done)
-    <LI><A HREF="https://tools.qhex.org/">Qhex</A> <i>query out to developer</i>
-    <LI><A HREF="https://nutrimatic.org/">Nutrimatic</A> (done)
-    <LI><A HREF="http://wordsmith.org/anagram/index.html">IAS</A> (done)
+    <LI><A HREF="www.quinapalus.com/cgi-bin/qat">Qat</A>
+    <LI><A HREF="https://tools.qhex.org/">Qhex</A> (done 12/29/19)
+    <LI><A HREF="https://nutrimatic.org/">Nutrimatic</A>
+    <LI><A HREF="http://wordsmith.org/anagram/index.html">IAS</A>
     <LI><A HREF="http://stufffromhell.com/dmitri">Ask dmitri</A> <i>started; query out to developer</i>
   </OL>
-  <LI>0.91 Show letters in anagram/bank order (with links) (done)
+  <LI>0.91 Show letters in anagram/bank order (with links)
   <LI>0.92 Links
     <OL type=i>
     <LI>suppress
@@ -73,57 +29,55 @@
     <LI>Yahoo
     <LI>nGram viewer
     <LI>IMDB
-    <LI>custom (all done)
+    <LI>custom
     </OL>
-    <OL type=a> 
+    <OL type=a>
     <LI>Front end
     <LI>Back end
     <LI>Apply to phrases
     <LI>Restore on reload
     <LI>Validate custom
     </OL>
-  <LI>0.93 Display letters only (done)
-  <LI>0.94 Number of answers per page (done)
-  <LI>0.95 Show subwords, weights, etc. (done)
-  <LI>0.95a Use table (done)
-  <LI>0.96 Answers in order of word, length, other columns (done)
-  <LI>0.96a Phrase list is blank (done)
-  <LI>0.96b Table: multiple links should not start in new cells, not sorting correctly by bank, & other bugs (done)
-  <LI>0.96c Reversed subwords not working (wrong length, and more) (done)
-  <LI>0.97 Force upper/lower case (separately for alphagrams & answer) (done)
-  <LI>0.98 Choice of fonts (done)
-  <LI>0.99 Multiple hits per line (done)
-  <LI>0.99a favicon.ico to get it to stop bugging me (done)
-  <LI>0.99b Resolve failure with filtering (done)
-  <LI>0.99c Break up showResults() (done)
-  <LI>0.99d Fix deletion of Show details on row delete (done)
-  <LI>0.9A Use italics, bold, underline, nonstrikeout, color (F & B), size to differentiate corpuses, flags, & stuff from .95 (done)
-  <LI>0.9B Show/hide output options (always hide for guests) (done)
-  <LI>0.9C Ensure that output options are retained (done)
-  <LI>0.9D Reset on output options (done)
-  <LI>0.9E Consolidate phrases from multiple corpora (done)
-  <LI>0.9F Change <font> to span/style (done)
-  <LI>Release
-<!--
-* Test
-* Increment version number
-* vup; compare beta to dev
-* vup new stuff to beta
-* Look for 'dev' references in beta after vup
-* Copy everything to network (with hide)
-* Retest
-* pull back from temp
-* git push
-* Tell everyone (not just Eric Chaikin & Andy Latto unless .#0)
-* Tell everybody
-* Tell Hunt Krewe
-* No gooch in project or pushed
--->
+  <LI>0.93 Display letters only
+  <LI>0.94 Number of answers per page
+  <LI>0.95 Show subwords, weights, etc.
+  <LI>0.95a Use table
+  <LI>0.96 Answers in order of word, length, other columns
+  <LI>0.96a Phrase list is blank
+  <LI>0.96b Table: multiple links should not start in new cells, not sorting correctly by bank, & other bugs
+  <LI>0.96c Reversed subwords not working (wrong length, and more)
+  <LI>0.97 Force upper/lower case (separately for alphagrams & answer)
+  <LI>0.98 Choice of fonts
+  <LI>0.99 Multiple hits per line
+  <LI>0.99a favicon.ico to get it to stop bugging me
+  <LI>0.99b Resolve failure with filtering
+  <LI>0.99c Break up showResults()
+  <LI>0.99d Fix deletion of Show details on row delete
+  <LI>0.9A Use italics, bold, underline, nonstrikeout, color (F & B), size to differentiate corpuses, flags, & stuff from .95
+  <LI>0.9B Show/hide output options (always hide for guests)
+  <LI>0.9C Ensure that output options are retained
+  <LI>0.9D Reset on output options
+  <LI>0.9E Consolidate phrases from multiple corpora
+  <LI>0.9F Change <font> to span/style
   </UL>
 <LI>0.A More projects
   <UL>
 <!-- Consolidate duplication with bug list & Ideas
 -->
+  <LI>0.A0 Online code repository
+    <UL>
+    <LI>Get rid of ‘type’
+<!--
+Test, including features
+Modify base, back, & dev navigation
+Remove from main folder on network
+Some more testing
+-->
+    <LI>Fix navigation from basic after running a query
+    <LI>Create a new repo in Dev (to clean and remove Gooch); archive \wordsearch\.git & remove large file in 62
+    <LI>Look for JS foreaches which might be Maps
+    <LI>Migrate to public Github
+    </UL>
   <LI>0.A1 Break up long-running queries
   <LI>0.A2 Gooch
   <LI>0.A3 Source processing
@@ -157,7 +111,7 @@
   </OL>
   <LI>1.05 Side ribbon
   <OL type=a>
-	<LI>Contact Us link (done)
+	<LI>Contact Us link
 	<LI>copyright notice
 	<LI>Help: search, features, account types, known issues & future plans
   </OL>
@@ -234,7 +188,7 @@
 * vup; compare beta to dev
 * vup new stuff to beta
 * Look for 'dev' references in beta after vup
-* Copy everything to network (with hide)
+* Copy everything to network (with hide & no subdirectories)
 * Retest
 * pull back from temp
 * git push

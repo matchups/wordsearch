@@ -3,8 +3,6 @@
 function showResults ($result, $consObjects, $corpusObjects) {
 	$type = $_GET['type'];
 	$level = $_GET['level'];
-	$counter = 0;
-	$timedOut = false;
 	if ($level == 3) {
 		$timeout = 200;
 	} else {
@@ -18,6 +16,7 @@ function showResults ($result, $consObjects, $corpusObjects) {
 	}
 
 		// Loop through results from database
+	$found = false;
 	while($row = $result->fetch(PDO::FETCH_ASSOC)) {
 		$oneword = $row['word'];
 		$corpus = $row['corpus'];
@@ -42,62 +41,35 @@ function showResults ($result, $consObjects, $corpusObjects) {
 				$previous = $oneword;
 				$same = false;
 			}
-			$found [++$counter] = array ('text' => $entry, 'corpus' => $corpus);
 			if ($row['whole'] == 'Y') {
 				// If this is the whole entry, set up a link
-				echo $corpusObjects[$corpus]->answerLink ($entry) . ' ';
+				echo $corpusObjects[$corpus]->answerLink ($entry);
 			} else {
 				// Else if part of an entry name, set up a link to our page to list phrases
 				if (!$same) {
 					Echo "$oneword  ";
 				}
 				if ($corpusObjects[$corpus]->phrases()) {
-					Echo "<A target='_blank'
-						HREF='phrases$type.php?base=$oneword&corpus=$corpus&type=$type&level=$level'><i>phrases</i></A>";
+					Echo "<A target='_blank' " .
+						"HREF='phrases$type.php?base=$oneword&corpus=$corpus&type=$type&level=$level'>" .
+						"<i>phrases</i></A>";
 				}
 			}
 			$prevword = strtolower ($oneword);
+			$found = true; // We found something, so don't tell them later that we didn't
 		}
 		if (microtime (true) > $timeout) {
-			$timedOut = true;
+			return "time^$oneword";
 			break;
 		}
 	} // end while
 
-  try {
-		if ($counter > 0  &&  $level > 1){
-			$connw = openConnection (true);
-			if ($row = (SQLQuery ($connw, "SELECT id FROM session WHERE session_key = '{$_GET['sessionkey']}'")->fetch(PDO::FETCH_ASSOC))) {
-				$sessionID = $row['id'];
-			} else {
-				THROW Exception ("No results getting session ID for $sessionKey");
-			}
-
-			// Delete previous list unless we're continuing
-			if (!isset ($_GET['from'])) {
-				$connw -> exec ("DELETE FROM session_words WHERE session_id = $sessionID");
-			}
-			foreach ($found as $entry) {
-				$stmt = $connw->prepare('INSERT session_words (session_id, entry, corpus_id) VALUES (?, ?, ?)');
-				$stmt->execute(array ($sessionID, $entry ['text'], $entry ['corpus']));
-			}
-			$ret ['save'] = $sessionID;
-		}
-	} catch (Exception $e) {
-		errorMessage ($e->getMessage());
-	} finally {
-		unset ($connw);
-	}
-
-  if ($timedOut) {
-		$ret ['code'] = 'time';
-		$ret ['restart'] = $oneword;
-	} else if ($counter > 0) {
-		$ret ['code'] = 'ok';
+  if ($found) {
+		return 'ok';
 	} else {
-		$ret ['code'] = 'none';
+		Echo "No matches found.<BR>";
+		return 'none';
   }
-	return $ret;
 } // end showResults
 
 include 'sqldump.php';
@@ -113,8 +85,7 @@ function showExplain ($result) {
 			if ($table == 'PW' || $table == 'SW') {
 				$table = 'words';
 			}
-			echo "<P>Sorry, currently unable to show possible indexes.  Please edit resultsdev.php.<P>";
-			// sqlDump ("SHOW index FROM " . $table);
+			sqlDump ("SHOW index FROM " . $table);
 		}
 	}
 }

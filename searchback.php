@@ -11,12 +11,15 @@ if ($code = securityCheck ($level, $userid, $sessionid)) {
 	exit();
 }
 
+if (isset($_GET['hacktest'])) {
+	$foo = '';
+} else {
+	$foo = 'x';
+}
+// <script src='//{$foo}netsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>
 echo "<HTML>
-<HEAD>
-<script src='//code.jquery.com/jquery-2.1.4.min.js'></script>
-	<script src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'></script>
-	<script src='//xnetsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>
-	<script src='utility$type.js'></script>";
+<HEAD>\n";
+echo scriptRefs (true, true);
 include "cons$type.php";
 include "corpus$type.php";
 
@@ -24,7 +27,7 @@ $pattern = $_GET['pattern'];
 $version = $_GET['version'];
 echo "<meta name='viewport' content='width=device-width, initial-scale=1'>
 <link rel='stylesheet' href='styles$type.css'>
-<link rel='stylesheet' href='styles$type.php'>
+<link rel='stylesheet' href='catcss$type.php'>
 <link rel='stylesheet' href='wideleft.css'>
 <TITLE>
 $pattern - Word Search $type $version

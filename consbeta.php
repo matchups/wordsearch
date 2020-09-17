@@ -5,11 +5,14 @@ class constraint {
 	protected $spec; 		// what the user typed
 	protected $num;		// constraint sequence number
 	protected $not;		// true if the "Not" checkbox is checked
+	protected $details; // true if the "details" checkbox is checked
+	protected $postFormat; // true if we are formatting based on this, rather than filtering
 
-	public function __construct ($spec, $num, $not) {
-		$this->spec = strtolower ($spec);
-		$this->num = $num;
-		$this->not = $not;
+	public function __construct ($_spec, $_num, $_not, $_details) {
+		$this->spec = strtolower ($_spec);
+		$this->num = $_num;
+		$this->not = $_not;
+		$this->details = $_details;
 		$this->init();
 	}
 
@@ -38,28 +41,70 @@ class constraint {
 		throw new Exception ("Base parse--needs to be overridden");
 	}
 
+  public function getRegex () {
+		return false;
+	}
+
 	protected function parseWhere ($more) {
-		return array ('where' => $more);
+		if ($this->postFormat) {
+			return array ('column' => "($more)");
+		} else {
+			return array ('where' => " AND $more ");
+		}
 	}
 
 	public function setlengths(&$consmin, &$consmax) {
 		// For cryptograms, the word length must match the pattern length
-		// &$consmin and &$consmax -- word length boundar`ies
+		// &$consmin and &$consmax -- word length boundaries
 		// Do nothing by default
 	}
 
-  public function localFilterArray ($row) {
+  public function localFilterArray (&$row) {
+		// When doing formatting based on a rule, rather than filtering, check the value returned from the database
+		if ($this->postFormat) {
+			$ret = $this->localFilterPostFormat ($row["cv{$this->num}"]);
+			if ($ret !== '#default') {
+				return $ret;
+			}
+		}
+
 		// Most classes will use the regular localFilter; this one has been added to provide access to other elements
-		return $this->localFilter ($row['word'], $row['entry']);
+		$ret = $this->localFilter ($row['word'], $row['entry']);
+		if ($ret === 'V') { // look at database column
+			$ret = preg_match ('/[^0]/', $row["cv{$this->num}"]);
+		}
+		if ($ret  &&  $ret !== true  &&  $ret != 1  &&  $this->details) {
+			$this->setMatch ($row, $ret);
+		}
+		return $ret;
 	}
 
+  public function slow () {
+		return false;
+	}
+
+	protected function localFilterPostFormat ($value) {
+		return '#default';
+	}
+
+	protected function setMatch (&$row, $value) {
+		$row['cv' . $this->num] = $value;
+	}
+
+  function tableTitle ($nonUnique) {
+		return $this->explain() . ($nonUnique ? (' #' . $this->num) : '');
+	}
 
 	public function localFilter($oneword, $entry) {
 		// Do any additional filtering that can't be done in SQL
 		// $oneword = the word to check
 		// $entry = external name; useful for literal or source checks
-		// returns true if okay or false if bad
-		return true;
+		// returns true if okay, false if bad, or V to check the database column
+		return $this->postFormat ? 'V' : true;
+	}
+
+	public function isLocalFilter () {
+		return false;
 	}
 
 	public function position() {
@@ -86,6 +131,9 @@ class constraint {
 		Echo "theForm['query$realNumber'].value = '" . addslashes ($this->spec) . "';\n";
 		// Set the radio button corresponding to the selected option
 		Echo "theForm['r" . $_GET["radio$this->num"] . "$realNumber'].checked = true;\n";
+		if (getCheckbox ("details{$this->num}")) {
+			Echo "theForm['details$realNumber'].checked = true;\n";
+		}
 		Echo "radioClicked ($realNumber);\n";
 	}
 
@@ -100,6 +148,22 @@ class constraint {
   // This value is used to segregate counters
   public function parentID () {
 		return 'F'; // main form
+	}
+
+	public function columnSyntax () {
+		return '';
+	}
+
+	public function detailsEnabled () {
+		return $this->details;
+	}
+
+	public function postFormat() {
+		return $this->postFormat;
+	}
+
+	public function setPostFormat($_postFormat) {
+		$this->postFormat = $_postFormat;
 	}
 
   // ** Begin Static functions **
@@ -153,6 +217,9 @@ class constraint {
 		return 'Dummy hint';
 	}
 
+	public static function isColumnSyntax () {
+		return false;
+	}
 
 	public function debug () {return "[" . get_class() . "#$this->num=$this->spec]";}
 
@@ -170,7 +237,11 @@ class conspattern extends constraint {
 		// Convert to regular expression
 		$spec = patternToRegex (expandSpecial ($this->spec), 'S');
 		$column = ($this->raw ? 'entry.name' : 'PW.text');
-		return $this->parseWhere (" AND $column " . $this->maybeNot() . " RLIKE '$spec' ");
+		return $this->parseWhere (" $column " . $this->maybeNot() . " RLIKE '$spec' ");
+	}
+
+	public function getRegex () {
+		return $this->not ? '' : patternToRegex (expandSpecial ($this->spec), 'U');
 	}
 
 	public function position() {
@@ -241,7 +312,12 @@ class conspattern extends constraint {
 	}
 	public static function getValidateConstraintCode () {
 		return "  // Same validation as with the main pattern
-			if (!/^[a-z?*@#&\[\-\]]+$/i.test (thisValue)  &&  !theForm['craw' + thisOption].checked) {
+		  if (theForm['craw' + thisOption].checked) { // raw search, so allow more possibilities
+				if (thisValue.indexOf ('[') < 0) {
+					return '';
+				}
+				// otherwise drop through to check groups
+			} else if (!/^[a-z?*@#&\[\-\]]+$/i.test (thisValue)) {
 				return 'Invalid character in pattern ' + thisOption;
 			}
 			if (badGroups (thisValue)) {
@@ -267,27 +343,47 @@ class consregex extends constraint {
 		$this->raw = getCheckbox ("craw" . $this->num);
 	}
 
+  function getRegex () {
+		return $this->not ? '' : '.*' . expandSpecial ($this->spec) . '.*';
+	}
+
 	public function parse() {
-		if (strpos ($this->regex, '(') !== false) { // MySQL doesn't support this
+		if (strpos ($this->regex, '(') !== false  ||  $this->details) { // MySQL doesn't support this
 			$this->local = true;
 			return "";
 		} else {// good, we can do it on the database side
 			$this->local = false;
 			$column = ($this->raw ? 'entry.name' : 'PW.text');
-			return $this->parseWhere (" AND $column " . $this->maybeNot() . " RLIKE '" . substr ($this->regex, 1, strlen ($this->regex) - 2) . "' ");
+			return $this->parseWhere (" $column " . $this->maybeNot() . " RLIKE '" . substr ($this->regex, 1, strlen ($this->regex) - 2) . "' ");
 		}
 	}
 
 	public function localFilter($oneword, $entry) {
 		if ($this->local) {
-			$matched = preg_match ($this->regex, $this->raw ? $entry : $oneword);
+			$matched = preg_match ($this->regex, $this->raw ? $entry : $oneword, $matches);
 			if ($this->not) {
-				$matched = !$matched;
+				$ret = !$matched;
+			} else if ($matched) {
+				$ret = implode ('/', $matches);
+			} else {
+				$ret = false;
 			}
-			return $matched;
+			return $ret;
 		} else {
 			return true; // done on the DB side; no filtering here
 		}
+	}
+
+	function isLocalFilter () {
+		return $this->local;
+	}
+
+	public function columnSyntax () {
+		return '0';
+	}
+
+	public static function isColumnSyntax () {
+		return true;
 	}
 
 	public function position() {
@@ -316,6 +412,10 @@ class consregex extends constraint {
 
 	public static function getLabel () {
 		return 'regular expression';
+	}
+
+	function tableTitle ($nonUnique) {
+		return $this->spec;
 	}
 
 	public static function getButtonCode () {
@@ -371,7 +471,7 @@ class conscharmatch extends constraint {
 		if ($this->not) {
 			$rel = str_replace (array ('<', '=', '>'), array ('>=', '!=', '<='), $rel);
 		}
-		$sql = " AND $expra[1] $rel $expra[3]";
+		$sql = " $expra[1] $rel $expra[3]";
 		// Adjustment on value of right side
 		if (count ($matches) > 4) {
 			$sql = $sql . str_replace ('^', '', $matches [4]);
@@ -450,7 +550,7 @@ class conscrypto extends constraint {
 			} else {
 				$rel = "=";
 			}
-			$sql = " AND char_length(PW.bank) $rel char_length(PW.text)";
+			$sql = " char_length(PW.bank) $rel char_length(PW.text)";
 		} else {
 			if ($this->not) {
 				$sql = $sql . " AND NOT (1 = 1 ";
@@ -521,7 +621,7 @@ class conscustomsql extends constraint {
 		if ($this->type == 'IJ') {
 			return array ('pre' => $spec);
 		} else {
-			return $this->parseWhere(' AND ' . $spec);
+			return $this->parseWhere($spec);
 		}
 	}
 
@@ -581,6 +681,10 @@ class conscustomsql extends constraint {
 		}
 		return $spec;
 	}
+
+	function tableTitle ($nonUnique) {
+		return 'Custom' . ($nonUnique ? (' #' . $this->num) : '');
+	}
 } // end class customsql
 
 class consenum extends constraint {
@@ -588,7 +692,7 @@ class consenum extends constraint {
 	protected $pattern;
 
 	public function parse() {
-		$this -> pattern = preg_replace_callback ('/[0-9]+|./', function ($matches) {
+		$this -> pattern = '/^' . preg_replace_callback ('/[0-9]+|./', function ($matches) {
 			$match = $matches[0];
 			switch ($match) {
 				case ' ':
@@ -609,8 +713,7 @@ class consenum extends constraint {
 				return "[a-z]" . '{' . $match . '}';
 			}
 		},
-		$this -> spec);
-		comment ($this->pattern = '/^' . $this->pattern . '$/i');
+		$this -> spec) . '$/i';
 	}
 
 	public function setlengths(&$consmin, &$consmax) {
@@ -633,6 +736,10 @@ class consenum extends constraint {
 		return preg_match ($this->pattern, asciitize ($entry));
 	}
 
+	function isLocalFilter () {
+		return true;
+	}
+
 	public static function getLabel () {
 		return 'enumeration';
 	}
@@ -644,11 +751,11 @@ class consenum extends constraint {
 	}
 
 	public static function getHint () {
-		return "Enter the desired enumeration for the answer.  A simple example would be <font face=Courier>5 4</font>, to represent a five-letter word
+		return "Enter the desired enumeration for the answer.  A simple example would be <kbd>5 4</kbd>, to represent a five-letter word
 			followed by a four-letter word.  You can also use
-			<B>#</B> to represent any digit (e.g., <font face=Courier>#### 3 3 4</font> would match <u>1776 and All That</u>),
-			<B>\\'</B> and <B>-</B> (quote and hyphen) to represent themselves (<font face=Courier>6 2 \\'##</font> would match <u>Spirit of \\'76</u>),
-			<B>*</B> to represent a word (sequence of letters) of any length (<font face=Courier>6 * 9</font> would match <u>Ludvig van Beethoven</u> or <u>George Albert Boulenger,</u>
+			<B>#</B> to represent any digit (e.g., <kbd>#### 3 3 4</kbd> would match <u>1776 and All That</u>),
+			<B>\\'</B> and <B>-</B> (quote and hyphen) to represent themselves (<kbd>6 2 \\'##</kbd> would match <u>Spirit of \\'76</u>),
+			<B>*</B> to represent a word (sequence of letters) of any length (<kbd>6 * 9</kbd> would match <u>Ludvig van Beethoven</u> or <u>George Albert Boulenger,</u>
 			or <B>?</B> to represent any punctuation mark other than quote and hyphen.";
 			// A few lines up, first \ is to escape the second \ in the PHP string and the second one is to escape the apostrophe in the single-quoted generated code.
 	}

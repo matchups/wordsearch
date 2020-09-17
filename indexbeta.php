@@ -14,7 +14,7 @@ if ($code = securityCheck ($level, $userid, $sessionid)) {
 <HEAD>
 <TITLE>Word Search</TITLE>
 <?php
-echo scriptStyleRefs (true, $type, true);
+echo scriptStyleRefs (true, true, true);
 include "cons$type.php";
 include "corpus$type.php";
 
@@ -23,11 +23,15 @@ echo "
 
 <BODY>\n";
 
-$version = "0.85";
+$version = "0.9F";
 echo "<H2>Word Search <span class='specs'>$version</span></H2>";
 $level = $_GET['level'];
 include "form$type.php";
 echo "<P>\n";
 
 ?>
+<script>
+updateSortChoices();
+</script>
 </BODY>
+</HTML>

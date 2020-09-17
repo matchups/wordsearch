@@ -2,9 +2,39 @@
 class conssubword extends constraint {
 	public function parse() {
 	// boilerplate to look for subword
-	$more = " AND " . $this->maybeNot() . " EXISTS (SELECT 1 FROM words SW INNER JOIN word_entry SWE ON SWE.word_id = SW.id " .
-		   " INNER JOIN entry SE ON SE.id = SWE.entry_id " .
-		   " WHERE SW.text = ";
+	if ($this->postFormat  &&  $this->details) {
+		return array(); // Work to be done later
+	} else {
+		$more = $this->maybeNot() . " EXISTS (SELECT 1 FROM words SW INNER JOIN word_entry SWE ON SWE.word_id = SW.id " .
+			   " INNER JOIN entry SE ON SE.id = SWE.entry_id " .
+			   " WHERE SW.text = " . $this->columnSyntax ();
+		$more = insertSql ($more, corpusInfo('SE', 'W', $dummy)) . ')'; // subword has to be in same corpus as main word
+		return $this->parseWhere ($more);
+	}
+} // end function
+
+function localFilterPostFormat ($subword) {
+	if ($this->details) {
+		if (isset($GLOBALS['isword'][$subword])) {
+			return $GLOBALS['isword'][$subword];
+		} else {
+			$sql = "SELECT count(1) AS counter FROM words PW INNER JOIN word_entry SWE ON SWE.word_id = PW.id
+				   INNER JOIN entry ON entry.id = SWE.entry_id
+				   WHERE PW.text = '$subword'";
+		  $sql = insertSql ($sql, corpusInfo('entry', 'W', $dummy)); // subword has to be in same corpus as main word
+			return SQLQuery (openConnection (false), $sql)->fetch(PDO::FETCH_ASSOC)['counter'] > 0;
+		}
+	} else {
+		return parent::localFilterPostFormat ($subword);
+	}
+}
+
+
+public static function isColumnSyntax () {
+	return true;
+}
+
+public function columnSyntax () {
 	$mode = '';
 	$substr = '';
 	$fromend = false;
@@ -30,8 +60,8 @@ class conssubword extends constraint {
 			}
 			$newmode = 'N';
 			if ($start != "") { // Is this the end of a range where a start was already established?
-				if (($here > 0 && $here < $start) ||
-					   ($start < 0 && $here < $start)) { // Backwards range, so swap start and end
+				if (($herecount > 0 && $herecount < $startcount) ||
+						 ($startcount < 0 && $herecount < $startcount)) { // Backwards range, so swap start and end
 					$swap = $here;
 					$here = $start;
 					$start = $swap;
@@ -44,10 +74,9 @@ class conssubword extends constraint {
 				// Figure the length, which depends on whether the string spans from a left-based spot to a right-based
 				// spot, or if both termini are on the same side.
 				if ($startcount * $herecount > 0) {
-				   $piece = $piece .
-						($herecount - $startcount + 1) . ')';
+					$piece .= ($herecount - $startcount + 1) . ')';
 				} else {
-					$piece = $piece . "$here - $startcount + 1)";
+					$piece .= "$here - $startcount + 1)";
 				}
 				if ($reverse) {
 					$piece = "reverse($piece)";
@@ -91,13 +120,14 @@ class conssubword extends constraint {
 			$mode = $newmode;
 		}
 	} // end while
-	$more = $more . ' concat(' . substr ($substr, 2) . ')'; // Combine all the pieces on the database side.
-	$more = insertSql ($more, corpusInfo('SE', 'W', $dummy)) . ')'; // subword has to be in same corpus as main word
-	return $this->parseWhere ($more);
-} // end function
-
+	return 'concat(' . substr ($substr, 2) . ')'; // Combine all the pieces on the database side.
+}
 	public static function getLabel () {
 		return 'subword';
+	}
+
+	function tableTitle ($nonUnique) {
+		return $nonUnique ? ('Sub' . $this->spec) : 'Subword';
 	}
 
 	public static function getValidateConstraintCode () {
@@ -113,6 +143,10 @@ class conssubword extends constraint {
 			of the word; two digits, in which case they must be separated by commas; or ranges, such as 3:-1 to indicate the all but the
 			first two letters of the word.  Out-of-order ranges indicate that the letter sequence will be reversed; again with ISCHEMIA,
 			the pattern 8:5D will represent AIMED.";
+	}
+
+	function slow () {
+		return $this->postFormat  &&  $this->details;
 	}
 } // end class conssubword
 ?>

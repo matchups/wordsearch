@@ -70,6 +70,10 @@ class corpus {
 		return $this->corpus;
 	}
 
+  public function likeCorpus () {
+		return $this->flagCorpus <> $this->corpus ? $this->flagCorpus : false;
+	}
+
 	public function allowed () {
 		if ($this->owner == '') {
 			return true;
@@ -140,7 +144,7 @@ class corpus {
 		$name = $this->name;
 		Echo "&nbsp;&nbsp;<button type='button' id='add$corpus' onclick='addOption$corpus();return false;'>More</button><BR>
 			<script>
-			function addOption$corpus() {
+			function addOption$corpus() {;
 			// add a new constraint when user presses that button
 			var theForm = document.getElementById('search');
 			var corpusOptionNumber = ++(theForm['$key'].value);
@@ -225,21 +229,6 @@ class corpus {
 	public function getValidateCorpusCode () {
 		return '';
 	}
-
-	public function getSpecialEntry (&$table) {
-		if ($this->flagCorpus <> $this->corpus) {
-			$table = $this->getEntryTable();
-			$int = "WE{$this->corpus}";
-			return " LEFT OUTER JOIN word_entry $int ON $int.word_id = PW.id " .
-				"LEFT OUTER JOIN entry $table ON $table.id = $int.entry_id AND $table.corpus_id = " . $this->flagCorpus;
-		}
-		return "";
-	}
-
-	public function getEntryTable () {
-		return ($this->flagCorpus <> $this->corpus) ? "ECP{$this->corpus}" : 'entry';
-	}
-
 } // end base corpus class
 
 class corpusConstraint extends constraint {
@@ -347,6 +336,7 @@ class corpusWikipedia extends corpus {
 	protected function formCatLookup() {
 		$corpus = $this -> corpus;
 		$flagCorpus = $this -> flagCorpus;
+		$type = $GLOBALS['type'];
 		echoUnique ("\n<script>
 			function categoryLookup (thisOption, thisCorpus) {
 				categoryOption = thisOption; // global
@@ -362,15 +352,24 @@ class corpusWikipedia extends corpus {
 				document.getElementById('catlookup').style.display = 'none';
 				document.getElementById('category' + currentCorpus).style.display = 'none';
 			}
-			</script>\n");
-		echo "<script>
-			$(document).ready(function() {
-				$('input.category$corpus').typeahead({
-					name: 'category$corpus',
-					remote: 'catsuggest{$_GET['type']}.php?query=%QUERY&corpus=$flagCorpus'
-				});
-			})
-			</script>\n";
+
+$.typeahead({
+    dynamic: true,
+		input: '.js-typeahead-category',
+    delay: 500,
+    source: {
+      ajax: {
+        url: 'catsuggest$type.php',
+        data: {
+           query: '{{query}}',
+           corpus: '2'
+       },
+       path: 'data'
+      }
+    }
+});
+</script>
+");
 	}
 } // end Wikipedia
 
@@ -397,13 +396,14 @@ class corpusWiktionary extends corpusWikipedia {
 
 	public function moreSQL ($table, $type, $value) {
 		// $type always 'cap' for now
+		$cap = strtolower ($value) == 'c';
 		if ($this->corpus == $this->flagCorpus) {
 			$corpusFilter = "<> {$this->corpus}";
+			$not = ($cap ? '' : 'NOT');
+			return array ('where' => " AND ($table.corpus_id $corpusFilter OR $table.flags $not LIKE '%C%') ");
 		} else {
-			$corpusFilter = "IS NULL";
+			return array ('cons' => new ccCorpusLikeFlags ('C', 0, $cap, $this));
 		}
-		$not = ($value == 'C' ? '' : 'NOT');
-		return (" AND ($table.corpus_id $corpusFilter OR $table.flags $not LIKE '%C%') ");
 	}
 
 	public function getValidateCorpusCode () {
@@ -468,7 +468,7 @@ class ccWikipediapattern extends ccWikipediaText {
 		$this -> regex = patternToRegex (expandSpecial ($this->spec), 'PU');
 	}
 
-	function localFilter($oneword, $entry, $entry_id) {
+	function localFilter($oneword, $entry) {
 		return (preg_match ($this->regex, $this->getText($entry))) XOR ($this -> not);
 	}
 }
@@ -484,7 +484,7 @@ class ccWikipediaregex extends ccWikipediaText {
 		$this -> regex = expandSpecial ($this->spec);
 	}
 
-	function localFilter($oneword, $entry, $entry_id) {
+	function localFilter($oneword, $entry) {
 		$ret = (preg_match ($this->regex, $this->getText($entry), $matches)) XOR ($this -> not);
 		if (count($matches) > 1) {
 			comment ("matched " . implode ('/', $matches));
@@ -495,7 +495,7 @@ class ccWikipediaregex extends ccWikipediaText {
 
 class ccWikipediacategory extends ccWikipediaText {
 	protected $categoryID;
-	protected $style; // D to do database filtering as part of initial query; A to use API afterward
+	protected $style; // D to do database filtering as part of initial query, A to use API afterward, C to do Contains afterward
 	protected $range;
 	protected $maxDepth = 5;
 
@@ -510,7 +510,9 @@ class ccWikipediacategory extends ccWikipediaText {
 	}
 
 	function init () {
-		$corpus = $this->corpusObject->getCorpusNum();
+		if (!$corpus = $this->corpusObject->likeCorpus()) {
+			$corpus = $this->corpusObject->getCorpusNum();
+		}
 		$this -> range = $_GET ["wc{$corpus}_type{$this->num}"];
 		if ($this->range != 'contains') {
 			$conn = openConnection (false);
@@ -524,15 +526,9 @@ class ccWikipediacategory extends ccWikipediaText {
 	}
 
 	function parse () {
-		$this -> style = 'D'; // by default, do things with database-side filtering
+		// We are always going to do it in a second pass because MySQL
 		if ($this->range == 'contains') {
-			$suffix = $this->corpusObject -> getCorpusNum() . "_{$this->num}";
-			$table = $this->corpusObject->getEntryTable();
-			$more ['pre'] = " INNER JOIN entry_cat EC$suffix ON EC$suffix.entry_id = $table.id
-			 		INNER JOIN category C$suffix ON C$suffix.id = EC$suffix.cat_id";
-			$spec = str_replace ("'", "\'", $this -> spec);
-			$more ['where'] = " AND C$suffix.title LIKE '%$spec%'";
-			return $more;
+			$this->style = 'C';
 		} else {
 			$conn = openConnection (false);
 			$catList [$buildCount = 0] = $this -> categoryID;
@@ -554,40 +550,56 @@ class ccWikipediacategory extends ccWikipediaText {
 						$catIndex [$cat] = true;
 					}
 				}
-				if ($buildCount > 20) {
-					$this -> style = 'A'; // Too many, do it on the client
-					return '';
-				}
-			}
-			if ($this -> style == 'D') {
-				if (count ($catList) == 1) {
-					$catRequire = "= $catList[0]";
-				} else {
-					$catRequire = 'IN (' . implode (',', $catList) . ')';
-				}
-				$table = "CAT{$this -> categoryID}";
-				return array ('pre' => " INNER JOIN entry_cat $table ON $table.entry_id = entry.id AND $table.cat_id $catRequire ");
+				$this -> style = 'A'; // Array
 			}
 		} // end not 'contains'
-	} // end arse
+		return '';
+	} // end parse
 
-	function localFilter($oneword, $entry, $entry_id) {
-		if ($this -> style == 'D') {return true;} // already dealt with on database side
-		$searchCount = 1;
-		$corpus = $this->corpusObject->getCorpusNum();
+	function localFilterArray ($row) {
+		/*
+		get word & indirect entry if C type
+		*/
 		$conn = openConnection (false);
-		$sql = "SELECT entry_cat.cat_id FROM entry_cat INNER JOIN category ON category.id = entry_cat.cat_id
+		if ($corpus = $this->corpusObject->likeCorpus()) {
+			$sql = "SELECT entry.id AS entry_id FROM word_entry INNER JOIN entry ON entry.id = word_entry.entry_id AND
+					entry.corpus_id = $corpus WHERE word_entry.word_id = {$row['pw_id']}";
+			$row = SQLQuery ($conn, $sql)->fetch(PDO::FETCH_ASSOC);
+		} else {
+			$corpus = $this->corpusObject->getCorpusNum();
+		}
+		if (!$entry_id = $row['entry_id']) {
+			return $false;
+		}
+		if ($this->style == 'A'){
+			$column = "entry_cat.cat_id";
+		} else {
+			$column = "category.title";
+		}
+		$sql = "SELECT $column FROM entry_cat INNER JOIN category ON category.id = entry_cat.cat_id
 		 		WHERE entry_cat.entry_id = $entry_id AND category.corpus_id = $corpus";
 		$result = SQLQuery ($conn, $sql);
 		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 			// Make a list to seed the tree walk
-			$catID = $row ["cat_id"];
-			if (!isset ($catIndex [$catID])) {
-				$catList [$buildCount++] = array ('id' => $catID, 'depth' => 0);
-				$catIndex [$catID] = true;
+			if ($this->style == 'A') {
+				$catID = $row ["cat_id"];
+				if (!isset ($catIndex [$catID])) {
+					$catList [$buildCount++] = array ('id' => $catID, 'depth' => 0);
+					$catIndex [$catID] = true;
+				}
+			} else { // C
+				if (strpos (strtolower ($row['title']), $this->spec)) {
+					return true;
+				}
 			}
 		}
+
+		if ($this->style == 'C') {
+			return false; // because we didn't find it in the WHILE loop
+		}
+
 		// Walk the tree of ancestors from the entry
+		$searchCount = 1;
 		while ($searchCount < $buildCount) {
 			$oneCat = $catList [$searchCount]['id'];
 			$depth = $catList [$searchCount]['depth'];
@@ -634,7 +646,7 @@ class ccWikipediasize extends ccWikipediaText {
 		$this->size = substr ($this->spec, 1);
 	}
 
-	function localFilter($oneword, $entry, $entry_id) {
+	function localFilter($oneword, $entry) {
 		foreach ($this->getAPI ($entry, 'query', 'titles', 'info')['query']['pages'] as $page) { // should be only one, but we don't know the ID
 			$size = $page['length'];
 		}
@@ -656,7 +668,7 @@ class ccWikipedialinks extends ccWikipediaText {
 		$this->count = substr ($this->spec, 1);
 	}
 
-	function localFilter($oneword, $entry, $entry_id) {
+	function localFilter($oneword, $entry) {
 		$count = 0;
 		$nonMainFactor = 3;  // if nonzero namespace (e.g., Talk, User), only counts a third
 		$target = $this->count * $nonMainFactor;
@@ -683,6 +695,47 @@ class ccWikipedialinks extends ccWikipediaText {
 	}
 }
 
+class ccCorpusLikeFlags extends corpusConstraint {
+	function init () {
+		$this->likeCorpus = $this->corpusObject->likeCorpus();
+	}
+
+	function rebuildForm($realNumber) {
+		return '';
+	}
+
+	function explain() {
+		return '';
+	}
+
+	function parse () {}
+
+	function localFilterArray ($row) {
+		$corpus = $row['corpus'];
+		$valid = true;
+		if ($corpus == $this->corpusObject->getCorpusNum()) {
+			$word_id = $row['pw_id'];
+			$sql = "SELECT DISTINCT entry.flags FROM word_entry INNER JOIN entry ON entry.id = word_entry.entry_id AND
+					entry.corpus_id = {$this->likeCorpus}
+					WHERE word_entry.word_id = $word_id";
+			$result = SQLQuery (openConnection(false), $sql);
+			// If all hits match, it's invalid, but if there are no hits or if one does not match, it's okay
+			while ($innerRow = $result->fetch(PDO::FETCH_ASSOC)) {
+				if (preg_match ("/[{$innerRow['flags']}]/i", $this->spec)) {
+					$valid = false;
+				} else {
+					$valid = true;
+					break;
+				}
+			}
+			$msg = "$valid XOR {$this->not}";
+			$valid = ($valid XOR $this->not); // Must be inside corpus-matching block
+		}
+		return $valid;
+	}
+
+}
+
 class corpusDev extends corpus {
 	public function allowed () {
 		return false;
@@ -691,4 +744,5 @@ class corpusDev extends corpus {
 
 class corpusUser extends corpus {
 } // end corpusUser
+
 ?>

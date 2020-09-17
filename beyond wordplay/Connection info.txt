@@ -1,3 +1,21 @@
 Connect to stufffromhell.com via SSH.  Username: stufffromh  Password: 0[54+!Tqy39p
-Username and password for the MySQL database are in ~/BWP.odbc
+Username and password for the MySQL database are in ~/.odbc/BWP.odbc
 Structure of the database is detailed on GitHub 
+	https://github.com/boisvert42/beyond-wordplay/blob/master/beyond_wordplay.sql
+
+python expansion.py -s 1 -rfps V -rtps V -rxf out+ -p 1
+
+q = '''
+    SELECT source_id, source_name
+    FROM sources
+    '''
+cur = mydb.cursor()
+cur.execute(q,())
+print cur.fetchall()
+[(8, u'Dmitri'), (7, u'GeoNames'), (5, u'Wikipedia'), (6, u'Wiktionary'), (1, u'Wordnet')]
+
+https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/get
+https://developers.google.com/identity/protocols/OAuth2
+Spreadsheet ID=1KLWKuNXNETGna2xNBJv4R5cX-aD0K5DcSMtUZegN4W0
+
+https://developers.google.com/sheets/api/quickstart/python

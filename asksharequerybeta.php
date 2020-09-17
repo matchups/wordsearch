@@ -4,7 +4,7 @@ include "utility" . $type . ".php";
 
 echo "<HTML>
 <HEAD>
-" . scriptStyleRefs (true, $type, false) . "
+" . scriptStyleRefs (true, true, false) . "
 	<TITLE>
 	Share Query
 	</TITLE>

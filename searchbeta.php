@@ -1,4 +1,3 @@
-
 <?php
 $type = $_GET['type']; // beta, dev, etc.
 include "utility" . $type . ".php";
@@ -11,15 +10,9 @@ if ($code = securityCheck ($level, $userid, $sessionid)) {
 	exit();
 }
 
-if (isset($_GET['hacktest'])) {
-	$foo = '';
-} else {
-	$foo = 'x';
-}
-// <script src='//{$foo}netsh.pp.ua/upwork-demo/1/js/typeahead.js'></script>
 echo "<HTML>
 <HEAD>\n";
-echo scriptStyleRefs (true, $type, true);
+echo scriptStyleRefs (true, true, true);
 include "cons$type.php";
 include "corpus$type.php";
 
@@ -85,13 +78,19 @@ try {
 		// Loop through words and display results
 		comment ($sql);
 		$ret = showResults ($result, $consObjects, $corpusObjects);
+		comment ($ret);
 		if ($ret['code'] == 'none') {
 			echo "No matches found.<BR>";
 		}
-		if ($ret ['code'] == 'time') {
+		if ($ret ['code'] == 'limit') {
 			$url = preg_replace ('/&from=.*$/', '', $_SERVER['REQUEST_URI']) . "&from={$ret['restart']}";
 			$url = substr ($url, 12); // remove /wordsearch/
-			echo "<P>Request timed out.  Select <A HREF=http://www.alfwords.com/$url>more</A> to see additional results.  ";
+			if ($ret ['subcode'] == 'T') {
+				echo "<P>Request timed out.";
+			} else {
+				echo "<P>Page limit of {$_GET['pagelen']} reached.";
+			}
+			echo "  Select <A HREF=http://www.alfwords.com/$url>more</A> to see additional results.  ";
 			if (isset ($ret['save'])) {
 				echo "You will be able to save the results once all results have been displayed.";
 			}
@@ -170,9 +169,12 @@ function buildReloadQuery ($consObjects) {
 		}
 		$thisConsObj->rebuildForm(++$newCount[$parentID]);
 	}
-	echo "mainChange();\n";
-	echo "}\n";
-	echo "</script>\n";
+	echo "mainChange();
+	updateSortChoices();
+	initializeHighlight();
+	updateShowOutput();
+	}
+	</script>\n";
 }
 
 // Force an index on bank if possible and no other index is being used
